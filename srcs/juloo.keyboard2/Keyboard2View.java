@@ -276,23 +276,22 @@ public class Keyboard2View extends View
   }
 
   private void showPopup(KeyValue key) {
-    key = modifyKey(key, _mods);
+    // The key is already modified by Pointers.java, so we just display it.
     if (key == null || key.getKind() != KeyValue.Kind.Char) {
       return;
     }
     popupText = key.getString();
     popupX = getWidth() / 2f;
 
-    // Position the bubble to pop up at the top of the keyboard
     float bubbleSize = _keyWidth * 4f; // 4x the key size
     float bubbleRadius = bubbleSize / 2f;
-    popupY = bubbleRadius;
+    popupY = bubbleRadius + (bubbleSize * 0.2f); // Position it lower
 
     if (popupAnimator != null && popupAnimator.isRunning()) {
       popupAnimator.cancel();
     }
     popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
-    popupAnimator.setDuration(500);
+    popupAnimator.setDuration(500); // User requested 500ms
     popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(1.5f));
     popupAnimator.addUpdateListener(animation -> invalidate());
     popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
@@ -427,7 +426,7 @@ public class Keyboard2View extends View
 
       // Squishy effect using the animator value (scale)
       float scale = animationValue;
-      float popupCurrentY = popupY - (bubbleSize * 0.7f * scale); // Animate upwards
+      float popupCurrentY = popupY - (bubbleSize * 0.2f * scale); // Animate upwards (less aggressive)
 
       // Draw shadow
       popupBubblePaint.setShadowLayer(12.0f, 0, 8.0f, 0x60000000);
