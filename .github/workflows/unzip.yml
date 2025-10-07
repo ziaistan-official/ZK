@@ -1,13 +1,13 @@
-name: Unzip ziaistan.zip to repo root
+name: Unzip ziaistan.zip (no commit)
 
 on:
-  workflow_dispatch: {}    # run manually from Actions → Workflows → Unzip ziaistan.zip
+  workflow_dispatch: {}
   push:
     paths:
-      - 'ziaistan.zip'    # optional: trigger when ziaistan.zip is pushed
+      - 'ziaistan.zip'
 
 jobs:
-  unzip-and-commit:
+  unzip-only:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -18,7 +18,7 @@ jobs:
       - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Confirm zip exists
+      - name: Verify zip exists
         run: |
           if [ ! -f "ziaistan.zip" ]; then
             echo "ziaistan.zip not found in repository root"
@@ -29,20 +29,5 @@ jobs:
       - name: Unzip into repo root (overwrite)
         run: unzip -o ziaistan.zip -d .
 
-      - name: Show extracted files
+      - name: List extracted files
         run: ls -la
-
-      - name: Commit and push extracted files
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Stage only new/changed files (avoid re-adding the zip unless desired)
-          git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git commit -m "Extract ziaistan.zip via workflow"
-          git push origin HEAD:${{ github.ref_name }}
