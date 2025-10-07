@@ -173,7 +173,10 @@ public class Keyboard2View extends View
       _config.handler.key_down(k, isSwipe);
       invalidate();
       vibrate();
+  }
 
+  @Override
+  public void onShowPopup(KeyValue k) {
       showPopup(k);
   }
 
@@ -184,6 +187,7 @@ public class Keyboard2View extends View
     _config.handler.key_up(k, mods);
     updateFlags();
     invalidate();
+    dismissPopup();
   }
 
   public void onPointerHold(KeyValue k, Pointers.Modifiers mods)
@@ -276,12 +280,11 @@ public class Keyboard2View extends View
     VibratorCompat.vibrate(this, _config);
   }
 
-  private void showPopup(KeyValue key) {
+  private String getKeyPopupText(KeyValue key) {
     if (key == null) {
-        return;
+        return null;
     }
 
-    String textToShow;
     switch (key.getKind()) {
         case ModifiedChar: {
             char baseChar = (char) key.getChar();
@@ -291,47 +294,66 @@ public class Keyboard2View extends View
             if ((meta & KeyEvent.META_ALT_ON) != 0) sb.append("Alt+");
             if ((meta & KeyEvent.META_SHIFT_ON) != 0) sb.append("Shift+");
 
-            if ((meta & KeyEvent.META_SHIFT_ON) != 0) {
-                sb.append(Character.toUpperCase(baseChar));
-            } else {
-                sb.append(baseChar);
-            }
-            textToShow = sb.toString();
-            break;
+            sb.append(Character.toUpperCase(baseChar));
+            return sb.toString();
         }
         case Char:
-            textToShow = String.valueOf((char) key.getChar());
-            break;
+            return String.valueOf((char) key.getChar());
         case String:
-            textToShow = key.getString();
-            break;
+            return key.getString();
         default:
-            return;
+            return null;
     }
-    popupText = textToShow;
+  }
 
-    popupX = getWidth() / 2f;
+  private void showPopup(KeyValue key) {
+      String textToShow = getKeyPopupText(key);
+      if (textToShow == null) {
+          if (popupText != null) {
+              dismissPopup();
+          }
+          return;
+      }
 
-    float bubbleSize = _keyWidth * 4f;
-    float bubbleRadius = bubbleSize / 2f;
-    popupY = bubbleRadius + (bubbleSize * 0.9f);
+      popupText = textToShow;
+      popupX = getWidth() / 2f;
 
-    if (popupAnimator != null && popupAnimator.isRunning()) {
-        popupAnimator.cancel();
-    }
-    popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
-    popupAnimator.setDuration(500);
-    popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(2.5f));
-    popupAnimator.addUpdateListener(animation -> invalidate());
-    popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(android.animation.Animator animation) {
-            popupText = null;
-            invalidate();
-        }
-    });
-    popupAnimator.start();
-}
+      if (popupAnimator != null) {
+          popupAnimator.cancel();
+      }
+      popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
+      popupAnimator.setDuration(500);
+      popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(1.2f));
+      popupAnimator.addUpdateListener(animation -> invalidate());
+      popupAnimator.start();
+  }
+
+  private void dismissPopup() {
+      if (popupText == null) {
+          return;
+      }
+      if (popupAnimator != null && popupAnimator.isRunning()) {
+          popupAnimator.cancel();
+      }
+
+      float startValue = 1f;
+      if (popupAnimator != null) {
+          startValue = (float) popupAnimator.getAnimatedValue();
+      }
+
+      popupAnimator = android.animation.ValueAnimator.ofFloat(startValue, 0f);
+      popupAnimator.setDuration((long)(500 * startValue));
+      popupAnimator.setInterpolator(new android.view.animation.AccelerateInterpolator());
+      popupAnimator.addUpdateListener(animation -> invalidate());
+      popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
+          @Override
+          public void onAnimationEnd(android.animation.Animator animation) {
+              popupText = null;
+              invalidate();
+          }
+      });
+      popupAnimator.start();
+  }
 
   @Override
   public void onMeasure(int wSpec, int hSpec)
@@ -437,44 +459,43 @@ public class Keyboard2View extends View
       y += row.height * _tc.row_height;
     }
     // --- START: Draw Popup Bubble ---
-    if (popupText != null && popupAnimator != null && popupAnimator.isRunning()) {
-      float animationValue = (float) popupAnimator.getAnimatedValue();
-      float bubbleSize = _keyWidth * 4f; // 4x the key size
-      float bubbleRadius = bubbleSize / 2f;
+    if (popupText != null && popupAnimator != null) {
+        float animationValue = (float) popupAnimator.getAnimatedValue();
+        if (animationValue <= 0) {
+            return;
+        }
+        float bubbleSize = _keyWidth * 4f;
+        float bubbleRadius = bubbleSize / 2f;
 
-      // Calculate alpha for fade-out effect in the last 25% of the animation
-      int alpha = 255;
-      long currentTime = popupAnimator.getCurrentPlayTime();
-      if (currentTime > 375) { // Start fade out at 75% of 500ms duration
-        alpha = (int) (255 * (1.0f - ((currentTime - 375) / 125.0f)));
-      }
+        // Positioning
+        popupY = bubbleRadius + (bubbleSize * 0.1f);
+        float popupCurrentY = popupY - (bubbleSize * (1 - animationValue));
 
-      // Theme-aware colors
-      int baseColor = _tc.key_activated.bg_paint.getColor();
-      int textColor = _theme.activatedColor;
+        // Alpha for fade in/out
+        int alpha = (int) (255 * animationValue);
 
-      // Squishy effect using the animator value (scale)
-      float scale = animationValue;
-      float popupCurrentY = popupY - (bubbleSize * 0.9f * scale); // Animate upwards
+        // Theme-aware colors
+        int baseColor = _tc.key_activated.bg_paint.getColor();
+        int textColor = _theme.activatedColor;
 
-      // Draw shadow
-      popupBubblePaint.setShadowLayer(12.0f, 0, 8.0f, 0x60000000);
-      // Draw bubble background with transparency
-      popupBubblePaint.setColor(baseColor);
-      popupBubblePaint.setAlpha((int)(200 * (alpha / 255.0f)));
-      canvas.drawCircle(popupX, popupCurrentY, bubbleRadius * scale, popupBubblePaint);
-      popupBubblePaint.clearShadowLayer();
+        // Draw shadow
+        popupBubblePaint.setShadowLayer(12.0f, 0, 8.0f, 0x60000000);
+        popupBubblePaint.setColor(baseColor);
+        popupBubblePaint.setAlpha(alpha);
+        canvas.drawCircle(popupX, popupCurrentY, bubbleRadius, popupBubblePaint);
+        popupBubblePaint.clearShadowLayer();
 
-      // Draw glass highlight
-      popupHighlightPaint.setShader(new android.graphics.RadialGradient(popupX, popupCurrentY - bubbleRadius * 0.4f, bubbleRadius, 0x90FFFFFF, 0x00FFFFFF, android.graphics.Shader.TileMode.CLAMP));
-      canvas.drawCircle(popupX, popupCurrentY, bubbleRadius * scale, popupHighlightPaint);
+        // Draw glass highlight
+        popupHighlightPaint.setShader(new android.graphics.RadialGradient(popupX, popupCurrentY - bubbleRadius * 0.4f, bubbleRadius, 0x90FFFFFF, 0x00FFFFFF, android.graphics.Shader.TileMode.CLAMP));
+        popupHighlightPaint.setAlpha(alpha);
+        canvas.drawCircle(popupX, popupCurrentY, bubbleRadius, popupHighlightPaint);
 
-      // Draw the character text
-      popupTextPaint.setColor(textColor);
-      popupTextPaint.setAlpha(alpha);
-      popupTextPaint.setTextSize(_mainLabelSize * 2.2f * scale);
-      float textY = popupCurrentY - ((popupTextPaint.descent() + popupTextPaint.ascent()) / 2);
-      canvas.drawText(popupText, popupX, textY, popupTextPaint);
+        // Draw the character text
+        popupTextPaint.setColor(textColor);
+        popupTextPaint.setAlpha(alpha);
+        popupTextPaint.setTextSize(_mainLabelSize * 2.2f);
+        float textY = popupCurrentY - ((popupTextPaint.descent() + popupTextPaint.ascent()) / 2);
+        canvas.drawText(popupText, popupX, textY, popupTextPaint);
     }
     // --- END: Draw Popup Bubble ---
   }

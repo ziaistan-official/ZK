@@ -214,6 +214,7 @@ public final class Pointers implements Handler.Callback
     _ptrs.add(ptr);
     startLongPress(ptr);
     _handler.onPointerDown(value, false, key, x, y);
+    _handler.onShowPopup(value);
   }
 
   static final int[] DIRECTION_TO_INDEX = new int[]{
@@ -287,6 +288,7 @@ public final class Pointers implements Handler.Callback
       // Gesture ended
       ptr.gesture.moved_to_center();
       ptr.value = apply_gesture(ptr, ptr.gesture.get_gesture());
+      _handler.onShowPopup(ptr.value);
       ptr.flags = 0;
 
     }
@@ -312,6 +314,7 @@ public final class Pointers implements Handler.Callback
           if (new_value.getKind() == KeyValue.Kind.Slider)
             startSliding(ptr, x, y, dx, dy, new_value);
           _handler.onPointerDown(new_value, true, ptr.key, x, y);
+          _handler.onShowPopup(new_value);
         }
 
       }
@@ -852,5 +855,8 @@ public final class Pointers implements Handler.Callback
 
     /** Key is repeating. */
     public void onPointerHold(KeyValue k, Modifiers mods);
+
+    /** A key popup should be displayed. */
+    public void onShowPopup(KeyValue k);
   }
 }
