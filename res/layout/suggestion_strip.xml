@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/suggestions_strip"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?attr/colorKeyboard"
+    android:visibility="gone">
+
+    <HorizontalScrollView
+        android:id="@+id/suggestions_strip_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <GridLayout
+            android:id="@+id/suggestions_grid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="100"
+            android:rowCount="2"
+            android:orientation="horizontal" />
+
+    </HorizontalScrollView>
+
+    <ImageView
+        android:id="@+id/suggestion_strip_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_drag_handle"
+        android:contentDescription="@string/drag_handle_content_description"
+        android:padding="8dp"/>
+</LinearLayout>

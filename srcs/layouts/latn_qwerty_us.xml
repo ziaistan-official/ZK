@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file defines the QWERTY (US) layout.
+
+A layout is made of keys arranged into rows. Each keys can be assigned several
+symbols.
+'key0' assigns the symbol on the middle of the key. 'nw', 'ne', etc.. assign
+symbols to the corners of a key, they are arranged following the cardinal
+directions:
+
+   nw   n   ne
+   w    c    e
+   sw   s   se
+
+Symbols prefixed with 'loc ' are not visible on the keyboard. They are used to
+specify a place for a key, if it needed to be added to the layout later.
+(for example, by the "Add keys to keyboard" option)
+
+Keys can be made bigger with the 'width' attribute and blank space can be added
+on the left of a key with the 'shift' attribute.
+
+You can define your own bottom row by simply adding another '<row>...<row/>' tag
+then disabling the built-in bottom row by adding 'bottom_row="false"' to the
+keyboard metadata.
+
+Useful links.
+
+- Web based editor that will simplify editing of this file.
+  https://unexpected-keyboard-layout-editor.lixquid.com
+
+- Full guide on how to edit the layout.
+  https://github.com/Julow/Unexpected-Keyboard/tree/master/doc/Custom-layouts.md
+
+- Current definition of the bottom row (for easy importing).
+  https://github.com/Julow/Unexpected-Keyboard/tree/master/res/xml/bottom_row.xml
+
+- Built-in layouts (for easy importing)
+  https://github.com/Julow/Unexpected-Keyboard/tree/master/srcs/layouts
+
+-->
+<keyboard name="QWERTY (US)" script="latin">
+
+
+  <modmap>
+
+    <!-- Fn Layer: Custom Function Rows (now with symbols) -->
+
+    <fn a="home" b="۔"/>
+
+    <fn a="up" b="،"/>
+
+    <fn a="end" b="؟"/>
+
+    <fn a="page_up" b="!"/>
+
+    <fn a="cut" b="("/>
+
+    <fn a="paste" b=")"/>
+
+    <fn a="delete" b="&quot;"/>
+
+    <fn a="esc" b="'"/>
+
+    <fn a="left" b="&lt;"/>
+
+    <fn a="down" b="&gt;"/>
+
+    <fn a="right" b="|"/>
+
+    <fn a="page_down" b="\\"/>
+
+    <fn a="copy" b="_"/>
+
+    <fn a="capslock" b="+"/>
+
+    <fn a="shift" b="-"/>
+
+    <fn a="backspace" b="="/>
+
+
+    <!-- Fn Layer: Main Typing Area (Symbols) -->
+
+    <fn a="q" b="~"/>
+
+    <fn a="w" b="`"/>
+
+    <fn a="e" b="|"/>
+
+    <fn a="r" b="√"/>
+
+    <fn a="t" b="•"/>
+
+    <fn a="y" b="π"/>
+
+    <fn a="u" b="€"/>
+
+    <fn a="i" b="£"/>
+
+    <fn a="o" b="¥"/>
+
+    <fn a="p" b="¢"/>
+
+    <fn a="a" b="“"/>
+
+    <fn a="s" b="°"/>
+
+    <fn a="d" b="{"/>
+
+    <fn a="f" b="}"/>
+
+    <fn a="g" b="©"/>
+
+    <fn a="h" b="®"/>
+
+    <fn a="j" b="™"/>
+
+    <fn a="k" b="["/>
+
+    <fn a="l" b="]"/>
+
+    <fn a="z" b="\n"/>
+
+    <fn a="x" b="\t"/>
+
+    <fn a="c" b="&lt;"/>
+
+    <fn a="v" b="&gt;"/>
+
+    <fn a="b" b=","/>
+
+    <fn a="n" b="."/>
+
+    <fn a="m" b="/"/>
+
+  </modmap>
+
+
+  <!-- Your Custom Function Rows (Unchanged) -->
+
+  <row height="0.7">
+
+    <key width="1.5" c="home" n="home"/>
+
+    <key width="1.5" c="up" n="cursor_up" nw="home" ne="page_up"/>
+
+    <key width="1.5" c="end" n="end"/>
+
+    <key width="1.5" c="page_up" n="switch_emoji"/>
+
+    <key width="1.5" c="cut" n="undo"/>
+
+    <key width="1.5" c="paste" n="selectAll"/>
+
+    <key width="2.5" c="delete" n="delete" s="forward_delete_word"/>
+
+    <key width="2.5" c="esc" n="config"/>
+
+  </row>
+
+  <row height="0.7">
+
+    <key width="1.5" c="left" w="cursor_left"/>
+
+    <key width="1.5" c="down" s="cursor_down" sw="end" se="page_down"/>
+
+    <key width="1.5" c="right" e="cursor_right"/>
+
+    <key width="1.5" c="page_down" n="switch_clipboard"/>
+
+    <key width="1.5" c="copy" n="redo"/>
+
+    <key width="1.5" c="capslock" n="fn"/>
+
+    <key width="1.9" c="shift" nw="ctrl" ne="alt" sw="meta" se="loc capslock" n="cursor_up" s="cursor_down" w="cursor_left" e="cursor_right"/>
+
+    <key width="2.5" c="backspace" n="backspace" s="delete_word"/>
+
+  </row>
+
+  
+
+  <!-- English QWERTY Typing Area -->
+
+  <row>
+
+    <key width="1.05" c="[" ne="{" />
+
+    <key width="1.05" c="]" ne="}" />
+
+    <key width="1.05" c="q" n="1" s="!" ne="Q" se="loc esc" />
+
+    <key width="1.05" c="w" n="2" s="\@" ne="W" />
+
+    <key width="1.05" c="e" n="3" s="\#" ne="E" />
+
+    <key width="1.05" c="r" n="4" s="$" ne="R" />
+
+    <key width="1.05" c="t" n="5" s="%" ne="T" />
+
+    <key width="1.05" c="y" n="6" s="^" ne="Y" />
+
+    <key width="1.05" c="u" n="7" s="&amp;" ne="U" />
+
+    <key width="1.05" c="i" n="8" s="*" ne="I" />
+
+    <key width="1.05" c="o" n="9" s="(" ne="O" />
+
+    <key width="1.05" c="p" n="0" s=")" ne="P" />
+
+    <key width="1.05" c="\\" ne="|" />
+
+  </row>
+
+  <row>
+
+    <key width="1.05" c="_" n="-" />
+
+    <key width="1.05" c="=" n="+" />
+
+    <key width="1.05" c="a" n="" ne="A" />
+
+    <key width="1.05" c="s" ne="S" />
+
+    <key width="1.05" c="d" ne="D" />
+
+    <key width="1.05" c="f" ne="F" />
+
+    <key width="1.05" c="g" ne="G" />
+
+    <key width="1.05" c="h" ne="H" />
+
+    <key width="1.05" c="j" ne="J" />
+
+    <key width="1.05" c="k" ne="K" />
+
+    <key width="1.05" c="l" ne="L" />
+
+    <key width="1.05" c=";" n=":" />
+
+    <key width="1.05" c="'" n="&quot;" />
+
+  </row>
+
+  <row>
+
+    <key width="1.05" c="`" n="~" />
+
+    <key width="1.05" c="?" />
+
+    <key width="1.05" c="&quot;" />
+
+    <key width="1.05" c="z" ne="Z" />
+
+    <key width="1.05" c="x" ne="X" />
+
+    <key width="1.05" c="c" ne="C" />
+
+    <key width="1.05" c="v" ne="V" />
+
+    <key width="1.05" c="b" ne="B" />
+
+    <key width="1.05" c="n" ne="N" />
+
+    <key width="1.05" c="m" ne="M" />
+
+    <key width="1.05" c="," n="&lt;" />
+
+    <key width="1.05" c="." n="&gt;" />
+
+    <key width="1.05" c="/" n="\?" />
+
+  </row>
+
+</keyboard>
+
