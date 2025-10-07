@@ -1,4 +1,4 @@
-name: Unzip ziaistan.zip (no commit)
+name: Unzip ziaistan.zip and commit
 
 on:
   workflow_dispatch: {}
@@ -7,7 +7,7 @@ on:
       - 'ziaistan.zip'
 
 jobs:
-  unzip-only:
+  unzip-and-commit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -18,16 +18,33 @@ jobs:
       - name: Install unzip
         run: sudo apt-get update && sudo apt-get install -y unzip
 
-      - name: Verify zip exists
+      - name: Ensure zip exists
         run: |
           if [ ! -f "ziaistan.zip" ]; then
-            echo "ziaistan.zip not found in repository root"
+            echo "ziaistan.zip not found"
             exit 1
           fi
-          ls -l ziaistan.zip
 
       - name: Unzip into repo root (overwrite)
         run: unzip -o ziaistan.zip -d .
 
-      - name: List extracted files
-        run: ls -la
+      - name: Remove any unwanted files (optional)
+        run: |
+          # Example: remove __MACOSX dir if present
+          rm -rf __MACOSX
+
+      - name: Commit and push only extracted changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Stage all changes except the zip itself
+          git add -A
+          git reset -- ziaistan.zip || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Extract ziaistan.zip"
+          git push origin HEAD:${{ github.ref_name }}
