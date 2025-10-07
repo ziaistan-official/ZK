@@ -11,6 +11,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -276,33 +277,61 @@ public class Keyboard2View extends View
   }
 
   private void showPopup(KeyValue key) {
-    if (key == null || key.getKind() != KeyValue.Kind.Char) {
-      return;
+    if (key == null) {
+        return;
     }
-    popupText = key.getString();
+
+    String textToShow;
+    switch (key.getKind()) {
+        case ModifiedChar: {
+            char baseChar = (char) key.getChar();
+            int meta = key.getMetaState();
+            StringBuilder sb = new StringBuilder();
+            if ((meta & KeyEvent.META_CTRL_ON) != 0) sb.append("Ctrl+");
+            if ((meta & KeyEvent.META_ALT_ON) != 0) sb.append("Alt+");
+            if ((meta & KeyEvent.META_SHIFT_ON) != 0) sb.append("Shift+");
+
+            if ((meta & KeyEvent.META_SHIFT_ON) != 0) {
+                sb.append(Character.toUpperCase(baseChar));
+            } else {
+                sb.append(baseChar);
+            }
+            textToShow = sb.toString();
+            break;
+        }
+        case Char:
+            textToShow = String.valueOf((char) key.getChar());
+            break;
+        case String:
+            textToShow = key.getString();
+            break;
+        default:
+            return;
+    }
+    popupText = textToShow;
+
     popupX = getWidth() / 2f;
 
-    // Position the bubble to pop up at the top of the keyboard
-    float bubbleSize = _keyWidth * 2.4f; // Double the size
+    float bubbleSize = _keyWidth * 4f;
     float bubbleRadius = bubbleSize / 2f;
-    popupY = bubbleRadius + (bubbleSize * 0.7f); // Start from just below the top edge
+    popupY = bubbleRadius + (bubbleSize * 0.9f);
 
     if (popupAnimator != null && popupAnimator.isRunning()) {
-      popupAnimator.cancel();
+        popupAnimator.cancel();
     }
     popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
     popupAnimator.setDuration(500);
     popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(2.5f));
     popupAnimator.addUpdateListener(animation -> invalidate());
     popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
-      @Override
-      public void onAnimationEnd(android.animation.Animator animation) {
-        popupText = null;
-        invalidate();
-      }
+        @Override
+        public void onAnimationEnd(android.animation.Animator animation) {
+            popupText = null;
+            invalidate();
+        }
     });
     popupAnimator.start();
-  }
+}
 
   @Override
   public void onMeasure(int wSpec, int hSpec)
@@ -410,7 +439,7 @@ public class Keyboard2View extends View
     // --- START: Draw Popup Bubble ---
     if (popupText != null && popupAnimator != null && popupAnimator.isRunning()) {
       float animationValue = (float) popupAnimator.getAnimatedValue();
-      float bubbleSize = _keyWidth * 2.4f; // Double the size
+      float bubbleSize = _keyWidth * 4f; // 4x the key size
       float bubbleRadius = bubbleSize / 2f;
 
       // Calculate alpha for fade-out effect in the last 25% of the animation
@@ -426,7 +455,7 @@ public class Keyboard2View extends View
 
       // Squishy effect using the animator value (scale)
       float scale = animationValue;
-      float popupCurrentY = popupY - (bubbleSize * 0.7f * scale); // Animate upwards
+      float popupCurrentY = popupY - (bubbleSize * 0.9f * scale); // Animate upwards
 
       // Draw shadow
       popupBubblePaint.setShadowLayer(12.0f, 0, 8.0f, 0x60000000);
