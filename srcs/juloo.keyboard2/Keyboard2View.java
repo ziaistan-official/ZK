@@ -276,6 +276,7 @@ public class Keyboard2View extends View
   }
 
   private void showPopup(KeyValue key) {
+    key = modifyKey(key, _mods);
     if (key == null || key.getKind() != KeyValue.Kind.Char) {
       return;
     }
@@ -283,16 +284,16 @@ public class Keyboard2View extends View
     popupX = getWidth() / 2f;
 
     // Position the bubble to pop up at the top of the keyboard
-    float bubbleSize = _keyWidth * 2.4f; // Double the size
+    float bubbleSize = _keyWidth * 4f; // 4x the key size
     float bubbleRadius = bubbleSize / 2f;
-    popupY = bubbleRadius + (bubbleSize * 0.7f); // Start from just below the top edge
+    popupY = bubbleRadius;
 
     if (popupAnimator != null && popupAnimator.isRunning()) {
       popupAnimator.cancel();
     }
     popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
     popupAnimator.setDuration(500);
-    popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(2.5f));
+    popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(1.5f));
     popupAnimator.addUpdateListener(animation -> invalidate());
     popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
       @Override
@@ -410,7 +411,7 @@ public class Keyboard2View extends View
     // --- START: Draw Popup Bubble ---
     if (popupText != null && popupAnimator != null && popupAnimator.isRunning()) {
       float animationValue = (float) popupAnimator.getAnimatedValue();
-      float bubbleSize = _keyWidth * 2.4f; // Double the size
+      float bubbleSize = _keyWidth * 4f; // 4x the key size
       float bubbleRadius = bubbleSize / 2f;
 
       // Calculate alpha for fade-out effect in the last 25% of the animation
