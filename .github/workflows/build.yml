@@ -1,4 +1,4 @@
-name: Make Apk CI
+name: Make Apkk CI
 
 on:
   workflow_dispatch:
