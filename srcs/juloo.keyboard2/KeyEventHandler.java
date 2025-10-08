@@ -447,6 +447,8 @@ public final class KeyEventHandler
       case DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
+      case MOVE_WORD_FORWARD: send_key_down_up(KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_WORD_BACKWARD: send_key_down_up(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
     }
   }
 

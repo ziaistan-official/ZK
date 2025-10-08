@@ -79,6 +79,8 @@ public final class KeyValue implements Comparable<KeyValue>
     DELETE_WORD,
     FORWARD_DELETE_WORD,
     SELECTION_CANCEL,
+    MOVE_WORD_FORWARD,
+    MOVE_WORD_BACKWARD,
   }
 
   public static enum Placeholder
@@ -717,6 +719,8 @@ public final class KeyValue implements Comparable<KeyValue>
       case "halfspace": return charKey(0xE018, '\u200C', 0); // zero-width non joiner
 
       /* Editing keys */
+      case "move_word_forward": return editingKey(">", Editing.MOVE_WORD_FORWARD);
+      case "move_word_backward": return editingKey("<", Editing.MOVE_WORD_BACKWARD);
       case "copy": return editingKey(0xE030, Editing.COPY);
       case "paste": return editingKey(0xE032, Editing.PASTE);
       case "cut": return editingKey(0xE031, Editing.CUT);
