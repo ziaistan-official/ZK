@@ -21,7 +21,7 @@ public class LayoutsPreference extends ListGroupPreference<LayoutsPreference.Lay
 {
   static final String KEY = "layouts";
   static final List<Layout> DEFAULT =
-    Collections.singletonList((Layout)new SystemLayout());
+    Arrays.asList(new NamedLayout("urdu_phonetic_ur"), new NamedLayout("latn_qwerty_us"));
   static final ListGroupPreference.Serializer<Layout> SERIALIZER =
     new Serializer();
 

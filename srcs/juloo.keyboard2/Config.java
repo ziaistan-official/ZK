@@ -141,7 +141,7 @@ public final class Config
     }
     layouts = LayoutsPreference.load_from_preferences(res, _prefs);
     inverse_numpad = _prefs.getString("numpad_layout", "default").equals("low_first");
-    String number_row = _prefs.getString("number_row", "no_number_row");
+    String number_row = _prefs.getString("number_row", "symbols");
     add_number_row = !number_row.equals("no_number_row");
     number_row_symbols = number_row.equals("symbols");
     // The baseline for the swipe distance correspond to approximately the
@@ -152,7 +152,7 @@ public final class Config
     float swipe_scaling = Math.min(dm.widthPixels, dm.heightPixels) / 10.f * dpi_ratio;
     float swipe_dist_value = Float.valueOf(_prefs.getString("swipe_dist", "15"));
     swipe_dist_px = swipe_dist_value / 25.f * swipe_scaling;
-    float slider_sensitivity = Float.valueOf(_prefs.getString("slider_sensitivity", "30")) / 100.f;
+    float slider_sensitivity = Float.valueOf(_prefs.getString("slider_sensitivity", "15")) / 100.f;
     slide_step_px = slider_sensitivity * swipe_scaling;
     vibrate_custom = _prefs.getBoolean("vibrate_custom", false);
     vibrate_duration = _prefs.getInt("vibrate_duration", 20);
@@ -175,14 +175,14 @@ public final class Config
     screenHeightPixels = dm.heightPixels;
     horizontal_margin =
       get_dip_pref_oriented(dm, "horizontal_margin", 15, 28);
-    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", false);
+    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", true);
     characterSize =
       _prefs.getFloat("character_size", 1.15f)
       * characterSizeScale;
     theme = getThemeId(res, _prefs.getString("theme", "galactic"));
     autocapitalisation = _prefs.getBoolean("autocapitalisation", true);
     enable_suggestions = _prefs.getBoolean("enable_suggestions", true);
-    suggestionStripOnTop = _prefs.getBoolean("suggestion_strip_on_top", false);
+    suggestionStripOnTop = _prefs.getBoolean("suggestion_strip_on_top", true);
     switch_input_immediate = _prefs.getBoolean("switch_input_immediate", false);
     extra_keys_param = ExtraKeysPreference.get_extra_keys(_prefs);
     extra_keys_custom = CustomExtraKeysPreference.get(_prefs);

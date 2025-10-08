@@ -270,99 +270,104 @@ public final class KeyEventHandler
         String newText = null;
         String originalText = selectedText.toString();
 
-        if (textStr.matches("\\d")) {
-            if (_pending_font_size_digit == null) {
-                _pending_font_size_digit = textStr;
-                return;
-            } else {
-                String sizeStr = _pending_font_size_digit + textStr;
-                _pending_font_size_digit = null;
-                int size = Integer.parseInt(sizeStr);
-                if (size >= 10 && size <= 99) {
-                    SpannableString sizedText = new SpannableString(originalText);
-                    sizedText.setSpan(new AbsoluteSizeSpan(size, true), 0, originalText.length(), 0);
-                    conn.commitText(sizedText, 1);
+        if (Config.globalConfig().case_conversion_and_formatting) {
+            if (textStr.matches("\\d")) {
+                if (_pending_font_size_digit == null) {
+                    _pending_font_size_digit = textStr;
                     return;
+                } else {
+                    String sizeStr = _pending_font_size_digit + textStr;
+                    _pending_font_size_digit = null;
+                    int size = Integer.parseInt(sizeStr);
+                    if (size >= 10 && size <= 99) {
+                        SpannableString sizedText = new SpannableString(originalText);
+                        sizedText.setSpan(new AbsoluteSizeSpan(size, true), 0, originalText.length(), 0);
+                        conn.commitText(sizedText, 1);
+                        return;
+                    }
                 }
+            } else {
+                _pending_font_size_digit = null;
             }
-        } else {
-            _pending_font_size_digit = null;
+            switch (textStr) {
+                case "b":
+                    SpannableString boldText = new SpannableString(originalText);
+                    boldText.setSpan(new StyleSpan(Typeface.BOLD), 0, originalText.length(), 0);
+                    conn.commitText(boldText, 1);
+                    return;
+                case "i":
+                    SpannableString italicText = new SpannableString(originalText);
+                    italicText.setSpan(new StyleSpan(Typeface.ITALIC), 0, originalText.length(), 0);
+                    conn.commitText(italicText, 1);
+                    return;
+                case "u":
+                    newText = originalText.toUpperCase();
+                    break;
+                case "l":
+                    newText = originalText.toLowerCase();
+                    break;
+                case "s":
+                    if (originalText.length() > 0) {
+                        newText = Character.toUpperCase(originalText.charAt(0)) + originalText.substring(1).toLowerCase();
+                    } else {
+                        newText = originalText;
+                    }
+                    break;
+            }
         }
-
-        switch (textStr) {
-            case "b":
-                SpannableString boldText = new SpannableString(originalText);
-                boldText.setSpan(new StyleSpan(Typeface.BOLD), 0, originalText.length(), 0);
-                conn.commitText(boldText, 1);
-                return;
-            case "i":
-                SpannableString italicText = new SpannableString(originalText);
-                italicText.setSpan(new StyleSpan(Typeface.ITALIC), 0, originalText.length(), 0);
-                conn.commitText(italicText, 1);
-                return;
-            case "u":
-                newText = originalText.toUpperCase();
-                break;
-            case "l":
-                newText = originalText.toLowerCase();
-                break;
-            case "s":
-                if (originalText.length() > 0) {
-                    newText = Character.toUpperCase(originalText.charAt(0)) + originalText.substring(1).toLowerCase();
-                } else {
-                    newText = originalText;
-                }
-                break;
-            case "t":
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.putExtra(Intent.EXTRA_TEXT, originalText);
-                intent.setType("text/plain");
-                intent.setComponent(new ComponentName("com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity"));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                PackageManager pm = _recv.getContext().getPackageManager();
-                if (intent.resolveActivity(pm) != null) {
-                    _recv.getContext().startActivity(intent);
-                } else {
-                    Toast.makeText(_recv.getContext(), "Google Translate app not found.", Toast.LENGTH_SHORT).show();
-                }
-                return;
-            case "k":
-                Intent keepIntent = new Intent(Intent.ACTION_SEND);
-                keepIntent.putExtra(Intent.EXTRA_TEXT, originalText);
-                keepIntent.setType("text/plain");
-                keepIntent.setComponent(new ComponentName("com.google.android.keep", "com.google.android.keep.activities.ShareReceiverActivity"));
-                keepIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                PackageManager keepPm = _recv.getContext().getPackageManager();
-                if (keepIntent.resolveActivity(keepPm) != null) {
-                    _recv.getContext().startActivity(keepIntent);
-                } else {
-                    Toast.makeText(_recv.getContext(), "Google Keep app not found.", Toast.LENGTH_SHORT).show();
-                }
-                return;
-            case "o":
-                Intent obsidianIntent = new Intent(Intent.ACTION_SEND);
-                obsidianIntent.putExtra(Intent.EXTRA_TEXT, originalText);
-                obsidianIntent.setType("text/plain");
-                obsidianIntent.setComponent(new ComponentName("md.obsidian", "md.obsidian.MainActivity"));
-                obsidianIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                PackageManager obsidianPm = _recv.getContext().getPackageManager();
-                if (obsidianIntent.resolveActivity(obsidianPm) != null) {
-                    _recv.getContext().startActivity(obsidianIntent);
-                } else {
-                    Toast.makeText(_recv.getContext(), "Obsidian app not found.", Toast.LENGTH_SHORT).show();
-                }
-                return;
-            case "c":
-                Intent searchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + Uri.encode(originalText)));
-                searchIntent.setComponent(new ComponentName("com.android.chrome", "com.google.android.apps.chrome.IntentDispatcher"));
-                searchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                PackageManager searchPm = _recv.getContext().getPackageManager();
-                if (searchIntent.resolveActivity(searchPm) != null) {
-                    _recv.getContext().startActivity(searchIntent);
-                } else {
-                    Toast.makeText(_recv.getContext(), "Google Chrome app not found.", Toast.LENGTH_SHORT).show();
-                }
-                return;
+        if (Config.globalConfig().application_integrations) {
+            switch (textStr) {
+                case "t":
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_TEXT, originalText);
+                    intent.setType("text/plain");
+                    intent.setComponent(new ComponentName("com.google.android.apps.translate", "com.google.android.apps.translate.TranslateActivity"));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PackageManager pm = _recv.getContext().getPackageManager();
+                    if (intent.resolveActivity(pm) != null) {
+                        _recv.getContext().startActivity(intent);
+                    } else {
+                        Toast.makeText(_recv.getContext(), "Google Translate app not found.", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                case "k":
+                    Intent keepIntent = new Intent(Intent.ACTION_SEND);
+                    keepIntent.putExtra(Intent.EXTRA_TEXT, originalText);
+                    keepIntent.setType("text/plain");
+                    keepIntent.setComponent(new ComponentName("com.google.android.keep", "com.google.android.keep.activities.ShareReceiverActivity"));
+                    keepIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PackageManager keepPm = _recv.getContext().getPackageManager();
+                    if (keepIntent.resolveActivity(keepPm) != null) {
+                        _recv.getContext().startActivity(keepIntent);
+                    } else {
+                        Toast.makeText(_recv.getContext(), "Google Keep app not found.", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                case "o":
+                    Intent obsidianIntent = new Intent(Intent.ACTION_SEND);
+                    obsidianIntent.putExtra(Intent.EXTRA_TEXT, originalText);
+                    obsidianIntent.setType("text/plain");
+                    obsidianIntent.setComponent(new ComponentName("md.obsidian", "md.obsidian.MainActivity"));
+                    obsidianIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PackageManager obsidianPm = _recv.getContext().getPackageManager();
+                    if (obsidianIntent.resolveActivity(obsidianPm) != null) {
+                        _recv.getContext().startActivity(obsidianIntent);
+                    } else {
+                        Toast.makeText(_recv.getContext(), "Obsidian app not found.", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                case "c":
+                    Intent searchIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + Uri.encode(originalText)));
+                    searchIntent.setComponent(new ComponentName("com.android.chrome", "com.google.android.apps.chrome.IntentDispatcher"));
+                    searchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    PackageManager searchPm = _recv.getContext().getPackageManager();
+                    if (searchIntent.resolveActivity(searchPm) != null) {
+                        _recv.getContext().startActivity(searchIntent);
+                    } else {
+                        Toast.makeText(_recv.getContext(), "Google Chrome app not found.", Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+            }
         }
 
         if (newText != null) {
@@ -376,28 +381,30 @@ public final class KeyEventHandler
 
         String open = null;
         String close = null;
-        switch (textStr) {
-            case "{": open = "{"; close = "}"; break;
-            case "}": open = "{"; close = "}"; break;
-            case "[": open = "["; close = "]"; break;
-            case "]": open = "["; close = "]"; break;
-            case "(": open = "("; close = ")"; break;
-            case ")": open = "("; close = ")"; break;
-            case "<": open = "<"; close = ">"; break;
-            case ">": open = "<"; close = ">"; break;
-            case "\"": open = "\""; close = "\""; break;
-            case "'": open = "'"; close = "'"; break;
-            case "/": open = "/"; close = "/"; break;
-            case "\\": open = "\\"; close = "\\"; break;
-        }
-        if (open != null) {
-            conn.commitText(open + selectedText + close, 1);
-            // Re-select the original text
-            ExtractedText et = get_cursor_pos(conn);
-            if (et != null) {
-                conn.setSelection(et.selectionStart - close.length() - selectedText.length(), et.selectionStart - close.length());
+        if (Config.globalConfig().encapsulation) {
+            switch (textStr) {
+                case "{": open = "{"; close = "}"; break;
+                case "}": open = "{"; close = "}"; break;
+                case "[": open = "["; close = "]"; break;
+                case "]": open = "["; close = "]"; break;
+                case "(": open = "("; close = ")"; break;
+                case ")": open = "("; close = ")"; break;
+                case "<": open = "<"; close = ">"; break;
+                case ">": open = "<"; close = ">"; break;
+                case "\"": open = "\""; close = "\""; break;
+                case "'": open = "'"; close = "'"; break;
+                case "/": open = "/"; close = "/"; break;
+                case "\\": open = "\\"; close = "\\"; break;
             }
-            return;
+            if (open != null) {
+                conn.commitText(open + selectedText + close, 1);
+                // Re-select the original text
+                ExtractedText et = get_cursor_pos(conn);
+                if (et != null) {
+                    conn.setSelection(et.selectionStart - close.length() - selectedText.length(), et.selectionStart - close.length());
+                }
+                return;
+            }
         }
     }
 

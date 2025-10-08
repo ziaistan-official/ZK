@@ -214,7 +214,9 @@ public final class Pointers implements Handler.Callback
     _ptrs.add(ptr);
     startLongPress(ptr);
     _handler.onPointerDown(value, false);
-    _handler.onShowPopup(value, key);
+    if (_config.popup_on_keypress) {
+      _handler.onShowPopup(value, key);
+    }
   }
 
   static final int[] DIRECTION_TO_INDEX = new int[]{
@@ -313,7 +315,9 @@ public final class Pointers implements Handler.Callback
           if (new_value.getKind() == KeyValue.Kind.Slider)
             startSliding(ptr, x, y, dx, dy, new_value);
           _handler.onPointerDown(new_value, true);
-          _handler.onShowPopup(new_value, ptr.key);
+          if (_config.popup_on_keypress) {
+            _handler.onShowPopup(new_value, ptr.key);
+          }
         }
 
       }
@@ -323,7 +327,7 @@ public final class Pointers implements Handler.Callback
         { // Gesture ended
           _handler.onPointerFlagsChanged(true);
         }
-        else
+        else if (_config.circle_gestures)
         {
           ptr.value = apply_gesture(ptr, ptr.gesture.get_gesture());
           restartLongPress(ptr);
@@ -450,7 +454,9 @@ public final class Pointers implements Handler.Callback
     {
       ptr.value = kv;
       _handler.onPointerDown(kv, true);
-      _handler.onShowPopup(kv, ptr.key);
+      if (_config.popup_on_keypress) {
+        _handler.onShowPopup(kv, ptr.key);
+      }
       return;
     }
     // Special keys
@@ -519,13 +525,17 @@ public final class Pointers implements Handler.Callback
               ptr,
               getNearestKeyAtDirection(ptr, ptr.gesture.current_direction()),
               KeyValue.Modifier.GESTURE);
-        _handler.onShowPopup(result, ptr.key);
+        if (_config.popup_on_keypress) {
+          _handler.onShowPopup(result, ptr.key);
+        }
         return result;
       case Circle:
         result =
           modify_key_with_extra_modifier(ptr, centralKey,
               KeyValue.Modifier.GESTURE);
-        _handler.onShowPopup(result, ptr.key);
+        if (_config.popup_on_keypress) {
+          _handler.onShowPopup(result, ptr.key);
+        }
         return result;
       case Anticircle:
         if (isApplicable) {
@@ -533,42 +543,54 @@ public final class Pointers implements Handler.Callback
         } else {
             result = centralKey;
         }
-        _handler.onShowPopup(result, ptr.key);
+        if (_config.popup_on_keypress) {
+          _handler.onShowPopup(result, ptr.key);
+        }
         return result;
 
       // Vowel gestures
       case CircleSW: // + a
           if (isApplicable) {
             result = KeyValue.makeStringKey(character + "a");
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case CircleNE: // + e
           if (isApplicable) {
             result = KeyValue.makeStringKey(character + "e");
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case CircleSE: // + i
           if (isApplicable) {
             result = KeyValue.makeStringKey(character + "i");
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case CircleNW: // + o
           if (isApplicable) {
             result = KeyValue.makeStringKey(character + "o");
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case AnticircleSW: // + u
           if (isApplicable) {
             result = KeyValue.makeStringKey(character + "u");
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
@@ -577,21 +599,27 @@ public final class Pointers implements Handler.Callback
       case AnticircleNE: // shift + character
           if (isApplicable) {
             result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_SHIFT_ON);
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case AnticircleSE: // ctrl + character
           if (isApplicable) {
             result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON);
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
       case AnticircleNW: // ctrl + shift + character
           if (isApplicable) {
             result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON);
-            _handler.onShowPopup(result, ptr.key);
+            if (_config.popup_on_keypress) {
+              _handler.onShowPopup(result, ptr.key);
+            }
             return result;
           }
           break;
@@ -599,7 +627,9 @@ public final class Pointers implements Handler.Callback
 
     // Fallback for corner gestures on non-applicable keys
     result = modify_key_with_extra_modifier(ptr, centralKey, KeyValue.Modifier.GESTURE);
-    _handler.onShowPopup(result, ptr.key);
+    if (_config.popup_on_keypress) {
+      _handler.onShowPopup(result, ptr.key);
+    }
     return result;
   }
 
