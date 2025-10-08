@@ -64,6 +64,19 @@ Quickly send selected text to other applications:
 
 ## Keyboard Layout and Behavior
 
+### Word Jumping with the Number Row
+
+The number row now includes a powerful new feature for rapid cursor navigation. You can now jump the cursor by one or more words at a time using simple swipe gestures on the number keys.
+
+**How to Use:**
+
+*   **Swipe Up (Backward):** Swipe up on any of the number keys from **1 to 5** to move the cursor backward by the corresponding number of words.
+    *   Example: Swiping up on the '3' key will move the cursor three words to the left.
+*   **Swipe Down (Forward):** Swipe down on any of the number keys from **1 to 5** to move the cursor forward by the corresponding number of words.
+    *   Example: Swiping down on the '3' key will move the cursor three words to the right.
+
+This feature is designed to make text editing faster and more efficient, allowing you to navigate through your document without having to repeatedly tap the arrow keys.
+
 
 
 ## Enhanced Circle Gestures Documentation
