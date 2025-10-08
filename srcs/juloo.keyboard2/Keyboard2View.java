@@ -181,7 +181,9 @@ public class Keyboard2View extends View
   public void onShowPopup(KeyValue kv, KeyboardData.Key key) {
     float keyStartX = 0;
     boolean found = false;
-    for (KeyboardData.Row row : _keyboard.rows) {
+    float rowY = _tc.margin_top;
+    for (int i = 0; i < _keyboard.rows.size(); i++) {
+        KeyboardData.Row row = _keyboard.rows.get(i);
         keyStartX = _marginLeft + _tc.margin_left;
         for (KeyboardData.Key currentKey : row.keys) {
             if (currentKey == key) {
@@ -190,11 +192,12 @@ public class Keyboard2View extends View
             }
             keyStartX += currentKey.width * _keyWidth;
         }
-        if(found) break;
-    }
-
-    if (found) {
-        showPopup(kv, key, keyStartX);
+        if(found) {
+            popupY = rowY;
+            showPopup(kv, key, keyStartX);
+            return;
+        }
+        rowY += row.height * _tc.row_height;
     }
   }
 
@@ -317,7 +320,6 @@ public class Keyboard2View extends View
         case Char:
             return String.valueOf((char) key.getChar());
         case String:
-            return key.getString();
         default:
             return key.getString();
     }
@@ -327,13 +329,6 @@ public class Keyboard2View extends View
     popupKeyValue = key;
     popupKeyData = keyData;
     popupX = keyStartX + (keyData.width * _keyWidth) / 2f;
-    // Calculate Y position based on the key's row
-    popupY = 0;
-    for(int i = 0; i < keyData.row; i++) {
-        popupY += _keyboard.rows.get(i).height * _tc.row_height;
-    }
-    popupY += _tc.margin_top;
-
 
     if (popupAnimator != null && popupAnimator.isRunning()) {
         popupAnimator.cancel();
