@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -57,10 +58,14 @@ public class Keyboard2View extends View
 
   private static RectF _tmpRect = new RectF();
 
-  private String popupText = null;
+  private KeyValue popupKeyValue = null;
   private float popupX = 0;
   private float popupY = 0;
-  private android.animation.ValueAnimator popupAnimator;
+  private final Handler popupHandler = new Handler();
+  private final Runnable dismissPopupRunnable = () -> {
+      popupKeyValue = null;
+      invalidate();
+  };
   private final Paint popupBubblePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final Paint popupHighlightPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final Paint popupTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -168,13 +173,17 @@ public class Keyboard2View extends View
   }
 
   @Override
-  public void onPointerDown(KeyValue k, boolean isSwipe, KeyboardData.Key key, float x, float y) {
-      updateFlags();
-      _config.handler.key_down(k, isSwipe);
-      invalidate();
-      vibrate();
+  public void onPointerDown(KeyValue k, boolean isSwipe)
+  {
+    updateFlags();
+    _config.handler.key_down(k, isSwipe);
+    invalidate();
+    vibrate();
+  }
 
-      showPopup(k);
+  @Override
+  public void onShowPopup(KeyValue kv, KeyboardData.Key key) {
+    showPopup(kv);
   }
 
   public void onPointerUp(KeyValue k, Pointers.Modifiers mods)
@@ -276,12 +285,8 @@ public class Keyboard2View extends View
     VibratorCompat.vibrate(this, _config);
   }
 
-  private void showPopup(KeyValue key) {
-    if (key == null) {
-        return;
-    }
-
-    String textToShow;
+  private String getKeyPopupText(KeyValue key) {
+    if (key == null) return null;
     switch (key.getKind()) {
         case ModifiedChar: {
             char baseChar = (char) key.getChar();
@@ -290,48 +295,30 @@ public class Keyboard2View extends View
             if ((meta & KeyEvent.META_CTRL_ON) != 0) sb.append("Ctrl+");
             if ((meta & KeyEvent.META_ALT_ON) != 0) sb.append("Alt+");
             if ((meta & KeyEvent.META_SHIFT_ON) != 0) sb.append("Shift+");
-
             if ((meta & KeyEvent.META_SHIFT_ON) != 0) {
                 sb.append(Character.toUpperCase(baseChar));
             } else {
                 sb.append(baseChar);
             }
-            textToShow = sb.toString();
-            break;
+            return sb.toString();
         }
         case Char:
-            textToShow = String.valueOf((char) key.getChar());
-            break;
+            return String.valueOf((char) key.getChar());
         case String:
-            textToShow = key.getString();
-            break;
         default:
-            return;
+            return key.getString();
     }
-    popupText = textToShow;
+  }
 
+  private void showPopup(KeyValue key) {
+    popupKeyValue = key;
     popupX = getWidth() / 2f;
+    popupY = _tc.row_height; // Position one row down from the top.
 
-    float bubbleSize = _keyWidth * 4f;
-    float bubbleRadius = bubbleSize / 2f;
-    popupY = bubbleRadius + (bubbleSize * 0.9f);
-
-    if (popupAnimator != null && popupAnimator.isRunning()) {
-        popupAnimator.cancel();
-    }
-    popupAnimator = android.animation.ValueAnimator.ofFloat(0f, 1f);
-    popupAnimator.setDuration(500);
-    popupAnimator.setInterpolator(new android.view.animation.OvershootInterpolator(2.5f));
-    popupAnimator.addUpdateListener(animation -> invalidate());
-    popupAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(android.animation.Animator animation) {
-            popupText = null;
-            invalidate();
-        }
-    });
-    popupAnimator.start();
-}
+    popupHandler.removeCallbacks(dismissPopupRunnable);
+    invalidate();
+    popupHandler.postDelayed(dismissPopupRunnable, 500);
+  }
 
   @Override
   public void onMeasure(int wSpec, int hSpec)
@@ -437,44 +424,32 @@ public class Keyboard2View extends View
       y += row.height * _tc.row_height;
     }
     // --- START: Draw Popup Bubble ---
-    if (popupText != null && popupAnimator != null && popupAnimator.isRunning()) {
-      float animationValue = (float) popupAnimator.getAnimatedValue();
-      float bubbleSize = _keyWidth * 4f; // 4x the key size
+    if (popupKeyValue != null) {
+      float bubbleSize = _keyWidth * 4f;
       float bubbleRadius = bubbleSize / 2f;
-
-      // Calculate alpha for fade-out effect in the last 25% of the animation
-      int alpha = 255;
-      long currentTime = popupAnimator.getCurrentPlayTime();
-      if (currentTime > 375) { // Start fade out at 75% of 500ms duration
-        alpha = (int) (255 * (1.0f - ((currentTime - 375) / 125.0f)));
-      }
 
       // Theme-aware colors
       int baseColor = _tc.key_activated.bg_paint.getColor();
-      int textColor = _theme.activatedColor;
-
-      // Squishy effect using the animator value (scale)
-      float scale = animationValue;
-      float popupCurrentY = popupY - (bubbleSize * 0.9f * scale); // Animate upwards
+      int textColor = labelColor(popupKeyValue, true, false);
 
       // Draw shadow
       popupBubblePaint.setShadowLayer(12.0f, 0, 8.0f, 0x60000000);
-      // Draw bubble background with transparency
       popupBubblePaint.setColor(baseColor);
-      popupBubblePaint.setAlpha((int)(200 * (alpha / 255.0f)));
-      canvas.drawCircle(popupX, popupCurrentY, bubbleRadius * scale, popupBubblePaint);
+      canvas.drawCircle(popupX, popupY, bubbleRadius, popupBubblePaint);
       popupBubblePaint.clearShadowLayer();
 
       // Draw glass highlight
-      popupHighlightPaint.setShader(new android.graphics.RadialGradient(popupX, popupCurrentY - bubbleRadius * 0.4f, bubbleRadius, 0x90FFFFFF, 0x00FFFFFF, android.graphics.Shader.TileMode.CLAMP));
-      canvas.drawCircle(popupX, popupCurrentY, bubbleRadius * scale, popupHighlightPaint);
+      popupHighlightPaint.setShader(new android.graphics.RadialGradient(popupX, popupY - bubbleRadius * 0.4f, bubbleRadius, 0x90FFFFFF, 0x00FFFFFF, android.graphics.Shader.TileMode.CLAMP));
+      canvas.drawCircle(popupX, popupY, bubbleRadius, popupHighlightPaint);
 
       // Draw the character text
       popupTextPaint.setColor(textColor);
-      popupTextPaint.setAlpha(alpha);
-      popupTextPaint.setTextSize(_mainLabelSize * 2.2f * scale);
-      float textY = popupCurrentY - ((popupTextPaint.descent() + popupTextPaint.ascent()) / 2);
-      canvas.drawText(popupText, popupX, textY, popupTextPaint);
+      popupTextPaint.setTextSize(_mainLabelSize * 2.2f);
+      String textToDraw = getKeyPopupText(popupKeyValue);
+      float textY = popupY - ((popupTextPaint.descent() + popupTextPaint.ascent()) / 2);
+      if (textToDraw != null) {
+          canvas.drawText(textToDraw, popupX, textY, popupTextPaint);
+      }
     }
     // --- END: Draw Popup Bubble ---
   }
@@ -483,6 +458,7 @@ public class Keyboard2View extends View
   public void onDetachedFromWindow()
   {
     super.onDetachedFromWindow();
+    popupHandler.removeCallbacks(dismissPopupRunnable);
   }
 
   /** Draw borders and background of the key. */

@@ -213,7 +213,8 @@ public final class Pointers implements Handler.Callback
     Pointer ptr = make_pointer(pointerId, key, value, x, y, mods);
     _ptrs.add(ptr);
     startLongPress(ptr);
-    _handler.onPointerDown(value, false, key, x, y);
+    _handler.onPointerDown(value, false);
+    _handler.onShowPopup(value, key);
   }
 
   static final int[] DIRECTION_TO_INDEX = new int[]{
@@ -311,7 +312,8 @@ public final class Pointers implements Handler.Callback
           // Start sliding mode
           if (new_value.getKind() == KeyValue.Kind.Slider)
             startSliding(ptr, x, y, dx, dy, new_value);
-          _handler.onPointerDown(new_value, true, ptr.key, x, y);
+          _handler.onPointerDown(new_value, true);
+          _handler.onShowPopup(new_value, ptr.key);
         }
 
       }
@@ -447,7 +449,8 @@ public final class Pointers implements Handler.Callback
     if (!kv.equals(ptr.value))
     {
       ptr.value = kv;
-      _handler.onPointerDown(kv, true, ptr.key, ptr.downX, ptr.downY);
+      _handler.onPointerDown(kv, true);
+      _handler.onShowPopup(kv, ptr.key);
       return;
     }
     // Special keys
@@ -503,6 +506,7 @@ public final class Pointers implements Handler.Callback
         && centralKey.getKind() == KeyValue.Kind.Char
         && (character = centralKey.getString()).length() == 1
         && Character.isLetter(character.charAt(0));
+    KeyValue result;
 
     switch (gesture)
     {
@@ -510,53 +514,93 @@ public final class Pointers implements Handler.Callback
       case Swipe:
         return ptr.value;
       case Roundtrip:
-        return
+        result =
           modify_key_with_extra_modifier(
               ptr,
               getNearestKeyAtDirection(ptr, ptr.gesture.current_direction()),
               KeyValue.Modifier.GESTURE);
+        _handler.onShowPopup(result, ptr.key);
+        return result;
       case Circle:
-        return
+        result =
           modify_key_with_extra_modifier(ptr, centralKey,
               KeyValue.Modifier.GESTURE);
+        _handler.onShowPopup(result, ptr.key);
+        return result;
       case Anticircle:
         if (isApplicable) {
-            return KeyValue.makeStringKey(character + character);
+            result = KeyValue.makeStringKey(character + character);
         } else {
-            return centralKey;
+            result = centralKey;
         }
+        _handler.onShowPopup(result, ptr.key);
+        return result;
 
       // Vowel gestures
       case CircleSW: // + a
-          if (isApplicable) return KeyValue.makeStringKey(character + "a");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "a");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleNE: // + e
-          if (isApplicable) return KeyValue.makeStringKey(character + "e");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "e");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleSE: // + i
-          if (isApplicable) return KeyValue.makeStringKey(character + "i");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "i");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleNW: // + o
-          if (isApplicable) return KeyValue.makeStringKey(character + "o");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "o");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleSW: // + u
-          if (isApplicable) return KeyValue.makeStringKey(character + "u");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "u");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
 
       // Other gestures
       case AnticircleNE: // shift + character
-          if (isApplicable) return KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_SHIFT_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_SHIFT_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleSE: // ctrl + character
-          if (isApplicable) return KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleNW: // ctrl + shift + character
-          if (isApplicable) return KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
     }
 
     // Fallback for corner gestures on non-applicable keys
-    return modify_key_with_extra_modifier(ptr, centralKey, KeyValue.Modifier.GESTURE);
+    result = modify_key_with_extra_modifier(ptr, centralKey, KeyValue.Modifier.GESTURE);
+    _handler.onShowPopup(result, ptr.key);
+    return result;
   }
 
   KeyValue modify_key_with_extra_modifier(Pointer ptr, KeyValue kv,
@@ -841,7 +885,8 @@ public final class Pointers implements Handler.Callback
     /** A key is pressed. [getModifiers()] is uptodate. Might be called after a
         press or a swipe to a different value. Down events are not paired with
         up events. */
-    public void onPointerDown(KeyValue k, boolean isSwipe, KeyboardData.Key key, float x, float y);
+    public void onPointerDown(KeyValue k, boolean isSwipe);
+    public void onShowPopup(KeyValue kv, KeyboardData.Key key);
 
     /** Key is released. [k] is the key that was returned by
         [modifySelectedKey] or [modifySelectedKey]. */
