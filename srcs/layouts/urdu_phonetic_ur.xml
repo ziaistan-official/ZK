@@ -73,7 +73,7 @@
     <key width="1.5" c="page_up" n="switch_emoji"/>
     <key width="1.5" c="cut" n="undo"/>
     <key width="1.5" c="paste" n="selectAll"/>
-    <key width="2.5" c="delete" n="delete" s="forward_delete_word"/>
+    <key width="2.5" c="delete" n="forward_delete_word"/>
     <key width="2.5" c="esc" n="config"/>
   </row>
   <row height="0.7">
@@ -84,7 +84,7 @@
     <key width="1.5" c="copy" n="redo"/>
     <key width="1.5" c="capslock" n="fn"/>
     <key width="1.9" c="shift" nw="ctrl" ne="alt" sw="meta" se="loc capslock" n="cursor_up" s="cursor_down" w="cursor_left" e="cursor_right"/>
-    <key width="2.5" c="backspace" n="backspace" s="delete_word"/>
+    <key width="2.5" c="backspace" n="delete_word"/>
   </row>
   
   <!-- Urdu Typing Area (Grouped and Condensed) -->
