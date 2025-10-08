@@ -73,6 +73,11 @@ public final class Config
   public int circle_sensitivity;
   public boolean clipboard_history_enabled;
   public int clipboard_history_duration;
+  public boolean popup_on_keypress;
+  public boolean circle_gestures;
+  public boolean application_integrations;
+  public boolean encapsulation;
+  public boolean case_conversion_and_formatting;
 
   // Dynamically set
   public boolean shouldOfferVoiceTyping;
@@ -174,7 +179,7 @@ public final class Config
     characterSize =
       _prefs.getFloat("character_size", 1.15f)
       * characterSizeScale;
-    theme = getThemeId(res, _prefs.getString("theme", "pine"));
+    theme = getThemeId(res, _prefs.getString("theme", "galactic"));
     autocapitalisation = _prefs.getBoolean("autocapitalisation", true);
     enable_suggestions = _prefs.getBoolean("enable_suggestions", true);
     suggestionStripOnTop = _prefs.getBoolean("suggestion_strip_on_top", false);
@@ -187,6 +192,11 @@ public final class Config
     circle_sensitivity = Integer.valueOf(_prefs.getString("circle_sensitivity", "2"));
     clipboard_history_enabled = _prefs.getBoolean("clipboard_history_enabled", false);
     clipboard_history_duration = Integer.parseInt(_prefs.getString("clipboard_history_duration", "5"));
+    popup_on_keypress = _prefs.getBoolean("popup_on_keypress", true);
+    circle_gestures = _prefs.getBoolean("circle_gestures", true);
+    application_integrations = _prefs.getBoolean("application_integrations", true);
+    encapsulation = _prefs.getBoolean("encapsulation", true);
+    case_conversion_and_formatting = _prefs.getBoolean("case_conversion_and_formatting", true);
 
     float screen_width_dp = dm.widthPixels / dm.density;
     wide_screen = screen_width_dp >= WIDE_DEVICE_THRESHOLD;
@@ -327,8 +337,8 @@ public final class Config
         // Primary, secondary and custom layout options are merged into the new
         // Layouts option. This also sets the default value.
         List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
-        l.add(migrate_layout(prefs.getString("layout", "system")));
-        String snd_layout = prefs.getString("second_layout", "none");
+        l.add(migrate_layout(prefs.getString("layout", "urdu_phonetic_ur")));
+        String snd_layout = prefs.getString("second_layout", "latn_qwerty_us");
         if (snd_layout != null && !snd_layout.equals("none"))
           l.add(migrate_layout(snd_layout));
         String custom_layout = prefs.getString("custom_layout", "");

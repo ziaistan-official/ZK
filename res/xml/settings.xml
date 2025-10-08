@@ -22,6 +22,11 @@
     <CheckBoxPreference android:key="lock_double_tap" android:title="@string/pref_lock_double_tap_title" android:summary="@string/pref_lock_double_tap_summary" android:defaultValue="false"/>
   </PreferenceCategory>
   <PreferenceCategory android:title="@string/pref_category_behavior">
+    <SwitchPreference android:key="popup_on_keypress" android:title="Popup on keypress" android:summary="Show a popup on keypress" android:defaultValue="true"/>
+    <SwitchPreference android:key="circle_gestures" android:title="Circle Gestures" android:summary="Enable circle gestures" android:defaultValue="true"/>
+    <SwitchPreference android:key="application_integrations" android:title="Application Integrations" android:summary="Enable application integrations" android:defaultValue="true"/>
+    <SwitchPreference android:key="encapsulation" android:title="Encapsulation" android:summary="Enable encapsulation" android:defaultValue="true"/>
+    <SwitchPreference android:key="case_conversion_and_formatting" android:title="Case Conversion and Formatting" android:summary="Enable case conversion and formatting" android:defaultValue="true"/>
     <CheckBoxPreference android:key="autocapitalisation" android:title="@string/pref_autocapitalisation_title" android:summary="@string/pref_autocapitalisation_summary" android:defaultValue="true"/>
     <CheckBoxPreference android:key="enable_suggestions" android:title="@string/pref_enable_suggestions_title" android:summary="@string/pref_enable_suggestions_summary" android:defaultValue="true"/>
     <CheckBoxPreference android:key="suggestion_strip_on_top" android:title="@string/pref_suggestion_strip_on_top_title" android:summary="@string/pref_suggestion_strip_on_top_summary" android:defaultValue="false" android:dependency="enable_suggestions"/>
