@@ -327,6 +327,7 @@ public final class Pointers implements Handler.Callback
         else
         {
           ptr.value = apply_gesture(ptr, ptr.gesture.get_gesture());
+          _handler.onShowPopup(ptr.value);
           restartLongPress(ptr);
           ptr.flags = 0; // Special behaviors are ignored during a gesture.
           _handler.onPointerFlagsChanged(true); // Vibrate
