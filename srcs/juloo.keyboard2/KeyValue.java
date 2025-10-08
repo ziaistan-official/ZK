@@ -80,6 +80,16 @@ public final class KeyValue implements Comparable<KeyValue>
     FORWARD_DELETE_WORD,
     SELECTION_CANCEL,
     ADD_TO_DICTIONARY,
+    MOVE_WORD_BACKWARD_1,
+    MOVE_WORD_FORWARD_1,
+    MOVE_WORD_BACKWARD_2,
+    MOVE_WORD_FORWARD_2,
+    MOVE_WORD_BACKWARD_3,
+    MOVE_WORD_FORWARD_3,
+    MOVE_WORD_BACKWARD_4,
+    MOVE_WORD_FORWARD_4,
+    MOVE_WORD_BACKWARD_5,
+    MOVE_WORD_FORWARD_5,
   }
 
   public static enum Placeholder
@@ -736,6 +746,16 @@ public final class KeyValue implements Comparable<KeyValue>
       case "selection_cancel": return editingKey("Esc", Editing.SELECTION_CANCEL, FLAG_SMALLER_FONT);
       case "selection_cursor_left": return sliderKey(Slider.Selection_cursor_left, -1); // Move the left side of the selection
       case "selection_cursor_right": return sliderKey(Slider.Selection_cursor_right, 1);
+      case "move_word_backward_1": return editingKey("<<", Editing.MOVE_WORD_BACKWARD_1);
+      case "move_word_forward_1": return editingKey(">>", Editing.MOVE_WORD_FORWARD_1);
+      case "move_word_backward_2": return editingKey("<<", Editing.MOVE_WORD_BACKWARD_2);
+      case "move_word_forward_2": return editingKey(">>", Editing.MOVE_WORD_FORWARD_2);
+      case "move_word_backward_3": return editingKey("<<", Editing.MOVE_WORD_BACKWARD_3);
+      case "move_word_forward_3": return editingKey(">>", Editing.MOVE_WORD_FORWARD_3);
+      case "move_word_backward_4": return editingKey("<<", Editing.MOVE_WORD_BACKWARD_4);
+      case "move_word_forward_4": return editingKey(">>", Editing.MOVE_WORD_FORWARD_4);
+      case "move_word_backward_5": return editingKey("<<", Editing.MOVE_WORD_BACKWARD_5);
+      case "move_word_forward_5": return editingKey(">>", Editing.MOVE_WORD_FORWARD_5);
       // These keys are not used
       case "replaceText": return editingKey("repl", Editing.REPLACE);
       case "textAssist": return editingKey(0xE038, Editing.ASSIST);
