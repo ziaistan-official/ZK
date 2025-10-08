@@ -347,8 +347,11 @@ public final class Config
         LayoutsPreference.save_to_preferences(e, l);
         // Fallthrough
       case 1:
-        boolean add_number_row = prefs.getBoolean("number_row", false);
-        e.putString("number_row", add_number_row ? "no_symbols" : "no_number_row");
+        Object numberRowPref = prefs.getAll().get("number_row");
+        if (numberRowPref instanceof Boolean) {
+            boolean add_number_row = (Boolean) numberRowPref;
+            e.putString("number_row", add_number_row ? "no_symbols" : "no_number_row");
+        }
         // Fallthrough
       case 2:
         if (!prefs.contains("number_entry_layout")) {
