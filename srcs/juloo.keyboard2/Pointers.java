@@ -506,7 +506,7 @@ public final class Pointers implements Handler.Callback
         && centralKey.getKind() == KeyValue.Kind.Char
         && (character = centralKey.getString()).length() == 1
         && Character.isLetter(character.charAt(0));
-    KeyValue result = null;
+    KeyValue result;
 
     switch (gesture)
     {
@@ -519,54 +519,86 @@ public final class Pointers implements Handler.Callback
               ptr,
               getNearestKeyAtDirection(ptr, ptr.gesture.current_direction()),
               KeyValue.Modifier.GESTURE);
-        break;
+        _handler.onShowPopup(result, ptr.key);
+        return result;
       case Circle:
         result =
           modify_key_with_extra_modifier(ptr, centralKey,
               KeyValue.Modifier.GESTURE);
-        break;
+        _handler.onShowPopup(result, ptr.key);
+        return result;
       case Anticircle:
         if (isApplicable) {
             result = KeyValue.makeStringKey(character + character);
         } else {
             result = centralKey;
         }
-        break;
+        _handler.onShowPopup(result, ptr.key);
+        return result;
 
       // Vowel gestures
       case CircleSW: // + a
-          if (isApplicable) result = KeyValue.makeStringKey(character + "a");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "a");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleNE: // + e
-          if (isApplicable) result = KeyValue.makeStringKey(character + "e");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "e");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleSE: // + i
-          if (isApplicable) result = KeyValue.makeStringKey(character + "i");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "i");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case CircleNW: // + o
-          if (isApplicable) result = KeyValue.makeStringKey(character + "o");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "o");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleSW: // + u
-          if (isApplicable) result = KeyValue.makeStringKey(character + "u");
+          if (isApplicable) {
+            result = KeyValue.makeStringKey(character + "u");
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
 
       // Other gestures
       case AnticircleNE: // shift + character
-          if (isApplicable) result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_SHIFT_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_SHIFT_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleSE: // ctrl + character
-          if (isApplicable) result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
       case AnticircleNW: // ctrl + shift + character
-          if (isApplicable) result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON);
+          if (isApplicable) {
+            result = KeyValue.makeModifiedCharKey(character.charAt(0), KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON);
+            _handler.onShowPopup(result, ptr.key);
+            return result;
+          }
           break;
     }
 
-    if (result == null) {
-        // Fallback for corner gestures on non-applicable keys
-        result = modify_key_with_extra_modifier(ptr, centralKey, KeyValue.Modifier.GESTURE);
-    }
-
+    // Fallback for corner gestures on non-applicable keys
+    result = modify_key_with_extra_modifier(ptr, centralKey, KeyValue.Modifier.GESTURE);
     _handler.onShowPopup(result, ptr.key);
     return result;
   }

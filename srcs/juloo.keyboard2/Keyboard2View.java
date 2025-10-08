@@ -177,19 +177,24 @@ public class Keyboard2View extends View
     vibrate();
   }
 
-  // New method to handle popup triggers safely
   @Override
   public void onShowPopup(KeyValue kv, KeyboardData.Key key) {
-    // Find the key's starting x-position to center the popup
+    float keyStartX = 0;
+    boolean found = false;
     for (KeyboardData.Row row : _keyboard.rows) {
-        float keyStartX = _marginLeft + _tc.margin_left;
+        keyStartX = _marginLeft + _tc.margin_left;
         for (KeyboardData.Key currentKey : row.keys) {
             if (currentKey == key) {
-                showPopup(kv, key, keyStartX);
-                return; // Found it
+                found = true;
+                break;
             }
             keyStartX += currentKey.width * _keyWidth;
         }
+        if(found) break;
+    }
+
+    if (found) {
+        showPopup(kv, key, keyStartX);
     }
   }
 
@@ -292,10 +297,43 @@ public class Keyboard2View extends View
     VibratorCompat.vibrate(this, _config);
   }
 
+  private String getKeyPopupText(KeyValue key) {
+    if (key == null) return null;
+    switch (key.getKind()) {
+        case ModifiedChar: {
+            char baseChar = (char) key.getChar();
+            int meta = key.getMetaState();
+            StringBuilder sb = new StringBuilder();
+            if ((meta & KeyEvent.META_CTRL_ON) != 0) sb.append("Ctrl+");
+            if ((meta & KeyEvent.META_ALT_ON) != 0) sb.append("Alt+");
+            if ((meta & KeyEvent.META_SHIFT_ON) != 0) sb.append("Shift+");
+            if ((meta & KeyEvent.META_SHIFT_ON) != 0) {
+                sb.append(Character.toUpperCase(baseChar));
+            } else {
+                sb.append(baseChar);
+            }
+            return sb.toString();
+        }
+        case Char:
+            return String.valueOf((char) key.getChar());
+        case String:
+            return key.getString();
+        default:
+            return key.getString();
+    }
+  }
+
   private void showPopup(KeyValue key, KeyboardData.Key keyData, float keyStartX) {
     popupKeyValue = key;
     popupKeyData = keyData;
     popupX = keyStartX + (keyData.width * _keyWidth) / 2f;
+    // Calculate Y position based on the key's row
+    popupY = 0;
+    for(int i = 0; i < keyData.row; i++) {
+        popupY += _keyboard.rows.get(i).height * _tc.row_height;
+    }
+    popupY += _tc.margin_top;
+
 
     if (popupAnimator != null && popupAnimator.isRunning()) {
         popupAnimator.cancel();
@@ -456,8 +494,11 @@ public class Keyboard2View extends View
       popupTextPaint.setColor(textColor);
       popupTextPaint.setAlpha(alpha);
       popupTextPaint.setTextSize(_mainLabelSize * 2.2f * scale);
+      String textToDraw = getKeyPopupText(popupKeyValue);
       float textY = popupCurrentY - ((popupTextPaint.descent() + popupTextPaint.ascent()) / 2);
-      canvas.drawText(popupKeyValue.getString(), popupX, textY, popupTextPaint);
+      if (textToDraw != null) {
+          canvas.drawText(textToDraw, popupX, textY, popupTextPaint);
+      }
     }
     // --- END: Draw Popup Bubble ---
   }
