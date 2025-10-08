@@ -2,6 +2,9 @@ package juloo.keyboard2;
 
 import android.content.Context;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,33 +14,58 @@ import java.util.Map;
 public class SuggestionProvider {
 
     private static final int MAX_SUGGESTIONS = 20;
+    private static final String CUSTOM_DICTIONARY_FILE = "custom.txt";
 
     private static class TrieNode {
         Map<Character, TrieNode> children = new HashMap<>();
         boolean isEndOfWord;
     }
 
+    private final TrieNode customRoot;
     private final TrieNode commonRoot;
     private final TrieNode wordlistRoot;
     private final Context context;
 
     public SuggestionProvider(Context context) {
         this.context = context;
+        customRoot = new TrieNode();
         commonRoot = new TrieNode();
         wordlistRoot = new TrieNode();
+        loadCustomDictionary(customRoot);
         loadDictionary(R.raw.common, commonRoot);
         loadDictionary(R.raw.wordlist, wordlistRoot);
     }
 
-    private void loadDictionary(int resourceId, TrieNode root) {
-        try {
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(context.getResources().openRawResource(resourceId)));
+    public void reloadCustomDictionary() {
+        synchronized (customRoot) {
+            customRoot.children.clear();
+            customRoot.isEndOfWord = false;
+            loadCustomDictionary(customRoot);
+        }
+    }
+
+    private void loadCustomDictionary(TrieNode root) {
+        File customDictFile = new File(context.getFilesDir(), CUSTOM_DICTIONARY_FILE);
+        if (!customDictFile.exists()) {
+            return;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(customDictFile))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 insert(line.trim(), root);
             }
-            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadDictionary(int resourceId, TrieNode root) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(context.getResources().openRawResource(resourceId)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                insert(line.trim(), root);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,13 +85,21 @@ public class SuggestionProvider {
             return suggestions;
         }
 
-        // Find suggestions from common words first
-        TrieNode commonPrefixNode = findPrefixNode(prefix, commonRoot);
-        if (commonPrefixNode != null) {
-            findAllWords(commonPrefixNode, prefix, suggestions);
+        // Find suggestions from custom dictionary first
+        TrieNode customPrefixNode = findPrefixNode(prefix, customRoot);
+        if (customPrefixNode != null) {
+            findAllWords(customPrefixNode, prefix, suggestions);
         }
 
-        // Then, find suggestions from the wordlist
+        // Then from common words
+        if (suggestions.size() < MAX_SUGGESTIONS) {
+            TrieNode commonPrefixNode = findPrefixNode(prefix, commonRoot);
+            if (commonPrefixNode != null) {
+                findAllWords(commonPrefixNode, prefix, suggestions);
+            }
+        }
+
+        // Finally from the wordlist
         if (suggestions.size() < MAX_SUGGESTIONS) {
             TrieNode wordlistPrefixNode = findPrefixNode(prefix, wordlistRoot);
             if (wordlistPrefixNode != null) {

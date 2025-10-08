@@ -79,6 +79,7 @@ public final class KeyValue implements Comparable<KeyValue>
     DELETE_WORD,
     FORWARD_DELETE_WORD,
     SELECTION_CANCEL,
+    ADD_TO_DICTIONARY,
   }
 
   public static enum Placeholder
@@ -717,6 +718,7 @@ public final class KeyValue implements Comparable<KeyValue>
       case "halfspace": return charKey(0xE018, '\u200C', 0); // zero-width non joiner
 
       /* Editing keys */
+      case "add_to_dictionary": return editingKey("+", Editing.ADD_TO_DICTIONARY);
       case "copy": return editingKey(0xE030, Editing.COPY);
       case "paste": return editingKey(0xE032, Editing.PASTE);
       case "cut": return editingKey(0xE031, Editing.CUT);
