@@ -447,8 +447,16 @@ public final class KeyEventHandler
       case DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
-      case MOVE_WORD_FORWARD: send_key_down_up(KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
-      case MOVE_WORD_BACKWARD: send_key_down_up(KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_1_WORD_FORWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 1, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_1_WORD_BACKWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 1, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_2_WORDS_FORWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 2, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_2_WORDS_BACKWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 2, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_3_WORDS_FORWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 3, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_3_WORDS_BACKWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 3, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_4_WORDS_FORWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 4, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_4_WORDS_BACKWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 4, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_5_WORDS_FORWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 5, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
+      case MOVE_5_WORDS_BACKWARD: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 5, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
     }
   }
 
@@ -652,6 +660,13 @@ public final class KeyEventHandler
   {
     while (repeat-- > 0)
       send_key_down_up(event_code);
+  }
+
+  /** Repeat calls to [send_key_down_up] with a specific meta state. */
+  void send_key_down_up_repeat(int event_code, int repeat, int metaState)
+  {
+    while (repeat-- > 0)
+      send_key_down_up(event_code, metaState);
   }
 
   void cancel_selection()

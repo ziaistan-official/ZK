@@ -79,8 +79,16 @@ public final class KeyValue implements Comparable<KeyValue>
     DELETE_WORD,
     FORWARD_DELETE_WORD,
     SELECTION_CANCEL,
-    MOVE_WORD_FORWARD,
-    MOVE_WORD_BACKWARD,
+    MOVE_1_WORD_FORWARD,
+    MOVE_1_WORD_BACKWARD,
+    MOVE_2_WORDS_FORWARD,
+    MOVE_2_WORDS_BACKWARD,
+    MOVE_3_WORDS_FORWARD,
+    MOVE_3_WORDS_BACKWARD,
+    MOVE_4_WORDS_FORWARD,
+    MOVE_4_WORDS_BACKWARD,
+    MOVE_5_WORDS_FORWARD,
+    MOVE_5_WORDS_BACKWARD,
   }
 
   public static enum Placeholder
@@ -719,8 +727,16 @@ public final class KeyValue implements Comparable<KeyValue>
       case "halfspace": return charKey(0xE018, '\u200C', 0); // zero-width non joiner
 
       /* Editing keys */
-      case "move_word_forward": return editingKey(">", Editing.MOVE_WORD_FORWARD);
-      case "move_word_backward": return editingKey("<", Editing.MOVE_WORD_BACKWARD);
+      case "move_1_word_forward": return editingKey(">", Editing.MOVE_1_WORD_FORWARD);
+      case "move_1_word_backward": return editingKey("<", Editing.MOVE_1_WORD_BACKWARD);
+      case "move_2_words_forward": return editingKey(">>", Editing.MOVE_2_WORDS_FORWARD);
+      case "move_2_words_backward": return editingKey("<<", Editing.MOVE_2_WORDS_BACKWARD);
+      case "move_3_words_forward": return editingKey(">>>", Editing.MOVE_3_WORDS_FORWARD);
+      case "move_3_words_backward": return editingKey("<<<", Editing.MOVE_3_WORDS_BACKWARD);
+      case "move_4_words_forward": return editingKey(">>>>", Editing.MOVE_4_WORDS_FORWARD);
+      case "move_4_words_backward": return editingKey("<<<<", Editing.MOVE_4_WORDS_BACKWARD);
+      case "move_5_words_forward": return editingKey(">>>>>", Editing.MOVE_5_WORDS_FORWARD);
+      case "move_5_words_backward": return editingKey("<<<<<", Editing.MOVE_5_WORDS_BACKWARD);
       case "copy": return editingKey(0xE030, Editing.COPY);
       case "paste": return editingKey(0xE032, Editing.PASTE);
       case "cut": return editingKey(0xE031, Editing.CUT);
