@@ -317,7 +317,7 @@ public class Keyboard2View extends View
 
     popupHandler.removeCallbacks(dismissPopupRunnable);
     invalidate();
-    popupHandler.postDelayed(dismissPopupRunnable, 500);
+    popupHandler.postDelayed(dismissPopupRunnable, 200);
   }
 
   @Override
@@ -425,7 +425,7 @@ public class Keyboard2View extends View
     }
     // --- START: Draw Popup Bubble ---
     if (popupKeyValue != null) {
-      float bubbleSize = _keyWidth * 4f;
+      float bubbleSize = _keyWidth * 2.5f;
       float bubbleRadius = bubbleSize / 2f;
 
       // Theme-aware colors
