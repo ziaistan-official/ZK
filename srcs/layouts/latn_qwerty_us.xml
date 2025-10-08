@@ -179,37 +179,21 @@ Useful links.
   
 
   <!-- English QWERTY Typing Area -->
-
   <row>
-
     <key width="1.05" c="[" ne="{" />
-
     <key width="1.05" c="]" ne="}" />
-
-    <key width="1.05" c="q" n="1" s="!" ne="Q" se="loc esc" />
-
-    <key width="1.05" c="w" n="2" s="\@" ne="W" />
-
-    <key width="1.05" c="e" n="3" s="\#" ne="E" />
-
-    <key width="1.05" c="r" n="4" s="$" ne="R" />
-
-    <key width="1.05" c="t" n="5" s="%" ne="T" />
-
+    <key width="1.05" c="q" n="1" s="!" ne="Q" se="loc esc" key1="move_word_backward_1" key3="move_word_forward_1"/>
+    <key width="1.05" c="w" n="2" s="\@" ne="W" key1="move_word_forward_2" key3="move_word_backward_2"/>
+    <key width="1.05" c="e" n="3" s="\#" ne="E" key1="move_word_forward_3" key3="move_word_backward_3"/>
+    <key width="1.05" c="r" n="4" s="$" ne="R" key1="move_word_forward_4" key3="move_word_backward_4"/>
+    <key width="1.05" c="t" n="5" s="%" ne="T" key1="move_word_forward_5" key3="move_word_backward_5"/>
     <key width="1.05" c="y" n="6" s="^" ne="Y" />
-
     <key width="1.05" c="u" n="7" s="&amp;" ne="U" />
-
     <key width="1.05" c="i" n="8" s="*" ne="I" />
-
     <key width="1.05" c="o" n="9" s="(" ne="O" />
-
     <key width="1.05" c="p" n="0" s=")" ne="P" />
-
     <key width="1.05" c="\\" ne="|" />
-
   </row>
-
   <row>
 
     <key width="1.05" c="_" n="-" />
@@ -271,4 +255,3 @@ Useful links.
   </row>
 
 </keyboard>
-

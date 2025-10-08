@@ -490,6 +490,16 @@ public final class KeyEventHandler
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
       case ADD_TO_DICTIONARY: addSelectedTextToDictionary(); break;
+      case MOVE_WORD_BACKWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 1, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_FORWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 1, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_BACKWARD_2: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 2, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_FORWARD_2: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 2, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_BACKWARD_3: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 3, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_FORWARD_3: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 3, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_BACKWARD_4: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 4, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_FORWARD_4: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 4, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_BACKWARD_5: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 5, KeyEvent.META_CTRL_ON); break;
+      case MOVE_WORD_FORWARD_5: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 5, KeyEvent.META_CTRL_ON); break;
     }
   }
 
@@ -693,6 +703,13 @@ public final class KeyEventHandler
   {
     while (repeat-- > 0)
       send_key_down_up(event_code);
+  }
+
+  /** Repeat calls to [send_key_down_up] with a specific meta state. */
+  void send_key_down_up_repeat(int event_code, int repeat, int metaState)
+  {
+    while (repeat-- > 0)
+      send_key_down_up(event_code, metaState);
   }
 
   void cancel_selection()
