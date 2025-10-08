@@ -3,6 +3,7 @@ package juloo.keyboard2;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
@@ -20,6 +21,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Iterator;
 
 public final class KeyEventHandler
@@ -258,6 +264,37 @@ public final class KeyEventHandler
       _autocap.event_sent(eventCode, metaState);
   }
 
+  private void addSelectedTextToDictionary() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) return;
+
+      CharSequence selectedText = conn.getSelectedText(0);
+      if (selectedText == null || selectedText.length() == 0) {
+          Toast.makeText(_recv.getContext(), "No text selected.", Toast.LENGTH_SHORT).show();
+          return;
+      }
+
+      String originalText = selectedText.toString();
+      String[] words = originalText.trim().split("\\s+");
+      if (words.length >= 1 && words.length <= 5) {
+          String newWord = originalText.trim().toLowerCase();
+          if (isWordInDictionary(newWord)) {
+              Toast.makeText(_recv.getContext(), "Word already in dictionary.", Toast.LENGTH_SHORT).show();
+          } else {
+              try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
+                  fos.write((newWord + "\n").getBytes());
+                  Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
+                  _recv.reloadCustomDictionary();
+              } catch (IOException e) {
+                  e.printStackTrace();
+                  Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
+              }
+          }
+      } else {
+          Toast.makeText(_recv.getContext(), "Select 1 to 5 words to add to the dictionary", Toast.LENGTH_SHORT).show();
+      }
+  }
+
   void send_text(CharSequence text)
   {
     InputConnection conn = _recv.getCurrentInputConnection();
@@ -269,6 +306,11 @@ public final class KeyEventHandler
         String textStr = text.toString();
         String newText = null;
         String originalText = selectedText.toString();
+
+        if ("d".equals(textStr)) {
+            addSelectedTextToDictionary();
+            return;
+        }
 
         if (Config.globalConfig().case_conversion_and_formatting) {
             if (textStr.matches("\\d")) {
@@ -447,6 +489,7 @@ public final class KeyEventHandler
       case DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
+      case ADD_TO_DICTIONARY: addSelectedTextToDictionary(); break;
     }
   }
 
@@ -713,6 +756,24 @@ public final class KeyEventHandler
       }
   }
 
+  private boolean isWordInDictionary(String word) {
+      File customDictFile = new File(_recv.getContext().getFilesDir(), "custom.txt");
+      if (!customDictFile.exists()) {
+          return false;
+      }
+      try (BufferedReader reader = new BufferedReader(new FileReader(customDictFile))) {
+          String line;
+          while ((line = reader.readLine()) != null) {
+              if (line.trim().equalsIgnoreCase(word)) {
+                  return true;
+              }
+          }
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+      return false;
+  }
+
   public void replaceCurrentWord(String suggestion) {
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
@@ -742,6 +803,7 @@ public final class KeyEventHandler
     public void set_compose_pending(boolean pending);
     public void selection_state_changed(boolean selection_is_ongoing);
     void updateSuggestions(String prefix);
+    void reloadCustomDictionary();
     public InputConnection getCurrentInputConnection();
     public Handler getHandler();
     public android.content.Context getContext();

@@ -1,8 +1,10 @@
 package juloo.keyboard2;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
@@ -118,6 +120,17 @@ public class Keyboard2 extends InputMethodService
         current_layout_unmodified());
   }
 
+  private BroadcastReceiver mDictionaryReloadReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+          if (intent.getAction().equals(CustomDictionarySettingsActivity.RELOAD_CUSTOM_DICTIONARY_ACTION)) {
+              if (_suggestionProvider != null) {
+                  _suggestionProvider.reloadCustomDictionary();
+              }
+          }
+      }
+  };
+
   @Override
   public void onCreate()
   {
@@ -137,12 +150,15 @@ public class Keyboard2 extends InputMethodService
     Logs.set_debug_logs(getResources().getBoolean(R.bool.debug_logs));
     ClipboardHistoryService.on_startup(this, _keyeventhandler);
     _foldStateTracker.setChangedCallback(() -> { refresh_config(); });
+
+    IntentFilter filter = new IntentFilter(CustomDictionarySettingsActivity.RELOAD_CUSTOM_DICTIONARY_ACTION);
+    registerReceiver(mDictionaryReloadReceiver, filter);
   }
 
   @Override
   public void onDestroy() {
     super.onDestroy();
-
+    unregisterReceiver(mDictionaryReloadReceiver);
     _foldStateTracker.close();
   }
 
@@ -605,6 +621,13 @@ public class Keyboard2 extends InputMethodService
     @Override
     public void updateSuggestions(String prefix) {
       Keyboard2.this.updateSuggestions(prefix);
+    }
+
+    @Override
+    public void reloadCustomDictionary() {
+        if (_suggestionProvider != null) {
+            _suggestionProvider.reloadCustomDictionary();
+        }
     }
 
     public InputConnection getCurrentInputConnection()

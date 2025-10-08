@@ -23,6 +23,13 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+
+    <activity android:name="juloo.keyboard2.CustomDictionarySettingsActivity" android:icon="@mipmap/ic_launcher" android:label="Custom Dictionary" android:theme="@style/settingsTheme" android:exported="true" android:directBootAware="true">
+      <intent-filter>
+        <action android:name="juloo.keyboard2.CUSTOM_DICTIONARY_SETTINGS"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+      </intent-filter>
+    </activity>
   </application>
 
   <!-- To query enabled input methods for voice IME detection -->

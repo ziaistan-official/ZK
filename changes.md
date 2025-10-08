@@ -2,6 +2,40 @@
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
 
+## Custom Dictionary
+
+This feature allows you to create and manage a personal dictionary for word suggestions. Words from your custom dictionary will be prioritized over the standard suggestions.
+
+### Managing Your Dictionary
+
+You can manage your dictionary from the settings screen:
+
+1.  Go to **Settings** > **Behavior** > **Custom Dictionary**.
+2.  From here, you can:
+    *   **Import**: Import a `custom.txt` file to add words to your dictionary. The import function will append new words and ignore any duplicates.
+    *   **Export**: Export your current custom dictionary to a `custom.txt` file.
+
+### Adding Words While Typing
+
+You can quickly add words or short phrases (up to 5 words) to your dictionary directly from the keyboard:
+
+1.  Select the text you want to add.
+2.  Do one of the following:
+    *   Press the **'d'** key.
+    *   Press the new **"add to dictionary"** button (+).
+
+The word(s) will be converted to lowercase and added to your custom dictionary. The keyboard will notify you if the word already exists.
+
+### Adding the "Add to Dictionary" Button to Your Layout
+
+You can add a dedicated "add to dictionary" button to any keyboard layout. To do this, edit the desired layout XML file (e.g., `res/xml/latn_qwerty_us.xml`) and add the following key definition:
+
+```xml
+<key key0="add_to_dictionary"/>
+```
+
+You can adjust the `width` attribute as needed to fit your layout.
+
 ## Text Manipulation on Selection
 
 When a portion of text is selected, you can now use the following single-key commands to manipulate it:
