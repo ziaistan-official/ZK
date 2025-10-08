@@ -312,7 +312,7 @@ public class Keyboard2View extends View
 
   private void showPopup(KeyValue key) {
     popupKeyValue = key;
-    popupX = getWidth() / 2f;
+    popupX = getWidth() / 4f;
     popupY = _tc.row_height; // Position one row down from the top.
 
     popupHandler.removeCallbacks(dismissPopupRunnable);
