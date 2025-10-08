@@ -317,7 +317,7 @@ public class Keyboard2View extends View
 
     popupHandler.removeCallbacks(dismissPopupRunnable);
     invalidate();
-    popupHandler.postDelayed(dismissPopupRunnable, 500);
+    popupHandler.postDelayed(dismissPopupRunnable, 200);
   }
 
   @Override
