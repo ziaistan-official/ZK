@@ -425,7 +425,7 @@ public class Keyboard2View extends View
     }
     // --- START: Draw Popup Bubble ---
     if (popupKeyValue != null) {
-      float bubbleSize = _keyWidth * 1f;
+      float bubbleSize = _keyWidth * 2.5f;
       float bubbleRadius = bubbleSize / 2f;
 
       // Theme-aware colors
