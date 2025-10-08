@@ -173,3 +173,28 @@ The Urdu Phonetic layout has been customized to provide a more intuitive and eff
 
 
 These modifications are designed to make the keyboard more powerful, versatile, and user-friendly for both English and Urdu typists.
+
+## New Settings and Defaults
+
+This update introduces several new settings to provide more control over the keyboard's behavior and sets more convenient defaults for a better out-of-the-box experience.
+
+### New Toggleable Features
+
+The following features can now be enabled or disabled from the settings menu:
+
+*   **Popup on keypress**: Show a popup with the selected character when a key is pressed.
+*   **Circle Gestures**: Enable or disable the corner-based circle gestures for quick access to vowels and other functions.
+*   **Application Integrations**: Enable or disable sending selected text to other applications (Google Translate, Keep, Obsidian, Chrome).
+*   **Encapsulation**: Enable or disable automatically wrapping selected text with symbols like `()`, `{}`, `[]`, etc.
+*   **Case Conversion and Formatting**: Enable or disable text manipulation features for selected text, such as changing case or applying bold/italic styles.
+
+### Updated Default Settings
+
+The following settings have been updated to new defaults:
+
+*   **Default Theme**: The default theme is now **Galactic**.
+*   **Default Keyboard Layouts**: The default layouts for new installations are now **Urdu Phonetic** and **English QWERTY**.
+*   **Suggestion Strip on Top**: The suggestion strip is now shown at the top of the keyboard by default.
+*   **Double Tap for Caps Lock**: Double-tapping the shift key to enable caps lock is now on by default.
+*   **Number Row**: The number row is now shown with symbols by default.
+*   **Spacebar Slider Sensitivity**: The sensitivity of the spacebar slider for cursor movement is now set to **fast** by default.

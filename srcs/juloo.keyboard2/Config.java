@@ -73,6 +73,11 @@ public final class Config
   public int circle_sensitivity;
   public boolean clipboard_history_enabled;
   public int clipboard_history_duration;
+  public boolean popup_on_keypress;
+  public boolean circle_gestures;
+  public boolean application_integrations;
+  public boolean encapsulation;
+  public boolean case_conversion_and_formatting;
 
   // Dynamically set
   public boolean shouldOfferVoiceTyping;
@@ -136,7 +141,7 @@ public final class Config
     }
     layouts = LayoutsPreference.load_from_preferences(res, _prefs);
     inverse_numpad = _prefs.getString("numpad_layout", "default").equals("low_first");
-    String number_row = _prefs.getString("number_row", "no_number_row");
+    String number_row = _prefs.getString("number_row", "symbols");
     add_number_row = !number_row.equals("no_number_row");
     number_row_symbols = number_row.equals("symbols");
     // The baseline for the swipe distance correspond to approximately the
@@ -147,7 +152,7 @@ public final class Config
     float swipe_scaling = Math.min(dm.widthPixels, dm.heightPixels) / 10.f * dpi_ratio;
     float swipe_dist_value = Float.valueOf(_prefs.getString("swipe_dist", "15"));
     swipe_dist_px = swipe_dist_value / 25.f * swipe_scaling;
-    float slider_sensitivity = Float.valueOf(_prefs.getString("slider_sensitivity", "30")) / 100.f;
+    float slider_sensitivity = Float.valueOf(_prefs.getString("slider_sensitivity", "15")) / 100.f;
     slide_step_px = slider_sensitivity * swipe_scaling;
     vibrate_custom = _prefs.getBoolean("vibrate_custom", false);
     vibrate_duration = _prefs.getInt("vibrate_duration", 20);
@@ -170,14 +175,14 @@ public final class Config
     screenHeightPixels = dm.heightPixels;
     horizontal_margin =
       get_dip_pref_oriented(dm, "horizontal_margin", 15, 28);
-    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", false);
+    double_tap_lock_shift = _prefs.getBoolean("lock_double_tap", true);
     characterSize =
       _prefs.getFloat("character_size", 1.15f)
       * characterSizeScale;
-    theme = getThemeId(res, _prefs.getString("theme", "pine"));
+    theme = getThemeId(res, _prefs.getString("theme", "galactic"));
     autocapitalisation = _prefs.getBoolean("autocapitalisation", true);
     enable_suggestions = _prefs.getBoolean("enable_suggestions", true);
-    suggestionStripOnTop = _prefs.getBoolean("suggestion_strip_on_top", false);
+    suggestionStripOnTop = _prefs.getBoolean("suggestion_strip_on_top", true);
     switch_input_immediate = _prefs.getBoolean("switch_input_immediate", false);
     extra_keys_param = ExtraKeysPreference.get_extra_keys(_prefs);
     extra_keys_custom = CustomExtraKeysPreference.get(_prefs);
@@ -187,6 +192,11 @@ public final class Config
     circle_sensitivity = Integer.valueOf(_prefs.getString("circle_sensitivity", "2"));
     clipboard_history_enabled = _prefs.getBoolean("clipboard_history_enabled", false);
     clipboard_history_duration = Integer.parseInt(_prefs.getString("clipboard_history_duration", "5"));
+    popup_on_keypress = _prefs.getBoolean("popup_on_keypress", true);
+    circle_gestures = _prefs.getBoolean("circle_gestures", true);
+    application_integrations = _prefs.getBoolean("application_integrations", true);
+    encapsulation = _prefs.getBoolean("encapsulation", true);
+    case_conversion_and_formatting = _prefs.getBoolean("case_conversion_and_formatting", true);
 
     float screen_width_dp = dm.widthPixels / dm.density;
     wide_screen = screen_width_dp >= WIDE_DEVICE_THRESHOLD;
@@ -327,8 +337,8 @@ public final class Config
         // Primary, secondary and custom layout options are merged into the new
         // Layouts option. This also sets the default value.
         List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
-        l.add(migrate_layout(prefs.getString("layout", "system")));
-        String snd_layout = prefs.getString("second_layout", "none");
+        l.add(migrate_layout(prefs.getString("layout", "urdu_phonetic_ur")));
+        String snd_layout = prefs.getString("second_layout", "latn_qwerty_us");
         if (snd_layout != null && !snd_layout.equals("none"))
           l.add(migrate_layout(snd_layout));
         String custom_layout = prefs.getString("custom_layout", "");
@@ -337,8 +347,11 @@ public final class Config
         LayoutsPreference.save_to_preferences(e, l);
         // Fallthrough
       case 1:
-        boolean add_number_row = prefs.getBoolean("number_row", false);
-        e.putString("number_row", add_number_row ? "no_symbols" : "no_number_row");
+        Object numberRowPref = prefs.getAll().get("number_row");
+        if (numberRowPref instanceof Boolean) {
+            boolean add_number_row = (Boolean) numberRowPref;
+            e.putString("number_row", add_number_row ? "no_symbols" : "no_number_row");
+        }
         // Fallthrough
       case 2:
         if (!prefs.contains("number_entry_layout")) {
