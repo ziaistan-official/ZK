@@ -161,4 +161,15 @@ The Urdu Phonetic layout has been customized to provide a more intuitive and eff
 *   **Consistent User Experience:** Like the English layout, the Urdu layout also includes two dedicated function rows with the same set of actions, ensuring a consistent and predictable experience when switching between languages.
 *   **Enhanced Modifier Keys:** The `shift` key has the same multi-modifier and cursor control functionality as the English layout.
 
+
+## Implemented Feature: Key-press Pop-up Enhancements
+
+### Key Features:
+- **Correct Character Display:** Shows the final character for taps, swipes, gestures, and modifier combos (e.g., Ctrl+Shift).
+- **Theme-Aware Text Color:** Dynamically adjusts text color based on key's label and theme state.
+- **Consistent Size and Position:** Pop-up is centered and visible above the keyboard with fixed size (4x key width).
+- **Reliable Display for Rapid Typing:** Managed by a Handler with a consistent 500ms display duration.
+- **No-Animation Display:** Instant appearance/disappearance for quick feedback.
+
+
 These modifications are designed to make the keyboard more powerful, versatile, and user-friendly for both English and Urdu typists.
