@@ -467,6 +467,11 @@ public final class KeyEventHandler
     }
 
     if (" ".equals(text.toString())) {
+        // This block handles auto-correction on space press.
+        // We copy the reverted words list and then clear it, to ensure any "pardon" only lasts for one word.
+        java.util.Set<String> previouslyReverted = new java.util.HashSet<>(revertedWords);
+        revertedWords.clear();
+
         CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
         if (textBeforeCursor != null && textBeforeCursor.length() > 0) {
             int i = textBeforeCursor.length();
@@ -476,7 +481,7 @@ public final class KeyEventHandler
             String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
             String lowerCaseWord = word.toLowerCase();
 
-            if (word.length() > 0 && !revertedWords.contains(lowerCaseWord)) {
+            if (word.length() > 0 && !previouslyReverted.contains(lowerCaseWord)) {
                 java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
                 if (!corrections.isEmpty()) {
                     String bestCorrection = corrections.get(0);
@@ -844,22 +849,35 @@ public final class KeyEventHandler
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
-      CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
-      if (textBeforeCursor == null) return;
-
-      int i = textBeforeCursor.length();
-      while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
-          i--;
-      }
-
-      int wordLength = textBeforeCursor.length() - i;
-      if (wordLength > 0) {
-          conn.deleteSurroundingText(wordLength, 0);
+      conn.beginBatchEdit();
+      if (justAutoCorrected && correctedWord != null) {
+          // An auto-correction just happened. We need to replace the auto-corrected word.
+          conn.deleteSurroundingText(correctedWord.length() + 1, 0); // +1 for the space
+      } else {
+          // Standard suggestion replacement logic.
+          CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+          if (textBeforeCursor != null) {
+              int i = textBeforeCursor.length();
+              while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+                  i--;
+              }
+              int wordLength = textBeforeCursor.length() - i;
+              if (wordLength > 0) {
+                  conn.deleteSurroundingText(wordLength, 0);
+              }
+          }
       }
 
       conn.commitText(suggestion + " ", 1);
+      conn.endBatchEdit();
+
       _autocap.typed(" ");
-      _recv.updateSuggestionsFromPrefix(null);
+      _recv.updateSuggestionsFromPrefix(null); // Clear suggestions after selection
+
+      // Reset the correction state
+      justAutoCorrected = false;
+      originalWord = null;
+      correctedWord = null;
   }
 
   private void revertAutoCorrection() {
