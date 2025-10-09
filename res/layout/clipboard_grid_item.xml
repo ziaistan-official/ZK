@@ -21,7 +21,8 @@
             android:layout_weight="1"
             android:maxLines="4"
             android:ellipsize="end"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="?attr/colorLabel" />
 
         <ImageView
             android:id="@+id/clipboard_item_pin_icon"
