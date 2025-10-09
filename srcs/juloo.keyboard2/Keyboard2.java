@@ -550,6 +550,14 @@ public class Keyboard2 extends InputMethodService
           if (_clipboard_pane == null) {
             _clipboard_pane = (ClipboardView) inflate_view(R.layout.clipboard_pane);
           }
+          // Ensure the clipboard pane has the same height as the keyboard view
+          ViewGroup.LayoutParams lp = _clipboard_pane.getLayoutParams();
+          if (lp == null) {
+              lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, _keyboardView.getHeight());
+          } else {
+              lp.height = _keyboardView.getHeight();
+          }
+          _clipboard_pane.setLayoutParams(lp);
           setInputView(_clipboard_pane);
           break;
 

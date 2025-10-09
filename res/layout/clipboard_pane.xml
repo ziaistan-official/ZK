@@ -11,29 +11,6 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="?android:attr/buttonBarStyle"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
-
-        <Button
-            android:id="@+id/clipboard_import_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/clipboard_import"/>
-
-        <Button
-            android:id="@+id/clipboard_export_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="?android:attr/buttonBarButtonStyle"
-            android:text="@string/clipboard_export"/>
-    </LinearLayout>
+    <include layout="@layout/clipboard_action_row" />
 
 </juloo.keyboard2.ClipboardView>

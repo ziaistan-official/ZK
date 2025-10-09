@@ -56,6 +56,14 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             getContext().startActivity(intent);
         });
+
+        Button backButton = findViewById(R.id.clipboard_back_button);
+        backButton.setOnClickListener(v -> {
+            KeyEventHandler handler = (KeyEventHandler) Config.globalConfig().handler;
+            if (handler != null) {
+                handler.key_up(new KeyValue(KeyValue.Event.SWITCH_BACK_CLIPBOARD), Pointers.Modifiers.EMPTY);
+            }
+        });
     }
 
     @Override
@@ -125,6 +133,12 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
         public boolean isLongPressDragEnabled() {
             return false;
         }
+
+        @Override
+        public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
+            // Lower the threshold to make vertical swipes easier to trigger.
+            return 0.25f;
+        }
     }
 
     private class ClipboardAdapter extends RecyclerView.Adapter<ClipboardAdapter.ViewHolder> {
@@ -155,6 +169,12 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
             ClipboardItem item = items.get(position);
             holder.textView.setText(item.getText());
             holder.pinIcon.setVisibility(item.isPinned() ? View.VISIBLE : View.GONE);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (service != null) {
+                    ClipboardHistoryService.paste(item.getText());
+                }
+            });
 
             holder.itemView.setOnLongClickListener(v -> {
                 if (service != null) {
