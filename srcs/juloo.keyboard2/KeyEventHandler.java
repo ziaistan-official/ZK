@@ -816,9 +816,9 @@ public final class KeyEventHandler
       String prefix = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
 
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
-          _recv.updateSuggestions(null);
+          _recv.updateSuggestionsFromPrefix(null);
       } else {
-          _recv.updateSuggestions(prefix.toLowerCase());
+          _recv.updateSuggestionsFromPrefix(prefix.toLowerCase());
       }
   }
 
@@ -859,7 +859,7 @@ public final class KeyEventHandler
 
       conn.commitText(suggestion + " ", 1);
       _autocap.typed(" ");
-      _recv.updateSuggestions(null);
+      _recv.updateSuggestionsFromPrefix(null);
   }
 
   private void revertAutoCorrection() {
@@ -883,7 +883,7 @@ public final class KeyEventHandler
       correctedWord = null;
 
       // Update suggestions for the reverted word
-      updateSuggestions();
+      updateSuggestionsFromPrefix();
   }
 
   public static interface IReceiver
