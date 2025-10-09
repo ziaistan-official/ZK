@@ -46,10 +46,12 @@ public final class KeyEventHandler
   boolean _move_cursor_force_fallback = false;
   boolean mSuggestionsEnabledForThisInput = false;
   private String _pending_font_size_digit = null;
+  private final AutoCorrectionProvider _autoCorrectionProvider;
 
-  public KeyEventHandler(IReceiver recv)
+  public KeyEventHandler(IReceiver recv, AutoCorrectionProvider autoCorrectionProvider)
   {
     _recv = recv;
+    _autoCorrectionProvider = autoCorrectionProvider;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
     _mods = Pointers.Modifiers.EMPTY;
@@ -446,6 +448,29 @@ public final class KeyEventHandler
                     conn.setSelection(et.selectionStart - close.length() - selectedText.length(), et.selectionStart - close.length());
                 }
                 return;
+            }
+        }
+    }
+
+    if (" ".equals(text.toString())) {
+        CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+        if (textBeforeCursor != null && textBeforeCursor.length() > 0) {
+            int i = textBeforeCursor.length();
+            while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+                i--;
+            }
+            String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
+            if (word.length() > 0) {
+                String correction = _autoCorrectionProvider.getCorrection(word.toLowerCase());
+                if (correction != null) {
+                    conn.deleteSurroundingText(word.length(), 0);
+                    conn.commitText(correction + " ", 1);
+                    _autocap.typed(" ");
+                    if (mSuggestionsEnabledForThisInput) {
+                        _recv.updateSuggestions(null);
+                    }
+                    return;
+                }
             }
         }
     }

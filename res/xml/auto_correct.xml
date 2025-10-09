@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<corrections>
+    <c from="teh" to="the" />
+    <c from="adn" to="and" />
+    <c from="wrok" to="work" />
+    <c from="keybaord" to="keyboard" />
+</corrections>
