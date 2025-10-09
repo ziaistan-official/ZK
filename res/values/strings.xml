@@ -153,6 +153,9 @@
     <string name="clipboard_pin_heading">Pinned</string>
     <string name="clipboard_remove_confirm">Remove this clipboard item?</string>
     <string name="clipboard_remove_confirmed">Yes</string>
+    <string name="clipboard_import">Import</string>
+    <string name="clipboard_export">Export</string>
+    <string name="clipboard_pinned_item_desc">Pinned item</string>
     <string name="toast_no_voice_input">No voice typing app installed</string>
     <string name="pref_category_clipboard">Clipboard</string>
     <string name="pref_clipboard_history_duration">Clipboard memory duration</string>

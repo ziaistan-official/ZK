@@ -51,7 +51,7 @@ public class Keyboard2 extends InputMethodService
   /** Layout associated with the currently selected locale. Not 'null'. */
   private KeyboardData _localeTextLayout;
   private ViewGroup _emojiPane = null;
-  private ViewGroup _clipboard_pane = null;
+  private ClipboardView _clipboard_pane = null;
   public int actionId; // Action performed by the Action key.
   private Handler _handler;
 
@@ -547,8 +547,9 @@ public class Keyboard2 extends InputMethodService
           break;
 
         case SWITCH_CLIPBOARD:
-          if (_clipboard_pane == null)
-            _clipboard_pane = (ViewGroup)inflate_view(R.layout.clipboard_pane);
+          if (_clipboard_pane == null) {
+            _clipboard_pane = (ClipboardView) inflate_view(R.layout.clipboard_pane);
+          }
           setInputView(_clipboard_pane);
           break;
 

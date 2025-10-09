@@ -30,6 +30,17 @@
         <category android:name="android.intent.category.DEFAULT"/>
       </intent-filter>
     </activity>
+
+    <activity
+        android:name="juloo.keyboard2.ImportClipboardActivity"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:exported="false"
+        android:label="@string/clipboard_import"/>
+    <activity
+        android:name="juloo.keyboard2.ExportClipboardActivity"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:exported="false"
+        android:label="@string/clipboard_export"/>
   </application>
 
   <!-- To query enabled input methods for voice IME detection -->
