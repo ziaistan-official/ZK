@@ -147,4 +147,40 @@ public class SuggestionProvider {
             }
         }
     }
+
+    /**
+     * Checks if a given word exists in any of the loaded dictionaries.
+     * This check is case-insensitive.
+     * @param word The word to validate.
+     * @return {@code true} if the word is found, {@code false} otherwise.
+     */
+    public boolean isValidWord(String word) {
+        if (word == null || word.isEmpty()) {
+            return false;
+        }
+
+        // Check custom dictionary
+        TrieNode customNode = findPrefixNode(word, customRoot);
+        if (customNode != null && customNode.isEndOfWord) {
+            return true;
+        }
+
+        // Check common dictionary
+        if (commonLoaded) {
+            TrieNode commonNode = findPrefixNode(word, commonRoot);
+            if (commonNode != null && commonNode.isEndOfWord) {
+                return true;
+            }
+        }
+
+        // Check wordlist dictionary
+        if (wordlistLoaded) {
+            TrieNode wordlistNode = findPrefixNode(word, wordlistRoot);
+            if (wordlistNode != null && wordlistNode.isEndOfWord) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

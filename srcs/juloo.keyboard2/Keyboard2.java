@@ -153,13 +153,13 @@ public class Keyboard2 extends InputMethodService
     super.onCreate();
     SharedPreferences prefs = DirectBootAwarePreferences.get_shared_preferences(this);
     _handler = new Handler(getMainLooper());
-    _autoCorrectionProvider = new LayoutBasedAutoCorrectionProvider(this);
+    _suggestionProvider = new SuggestionProvider(this);
+    _autoCorrectionProvider = new LayoutBasedAutoCorrectionProvider(_suggestionProvider);
     _keyeventhandler = new KeyEventHandler(this.new Receiver(), _autoCorrectionProvider);
     _foldStateTracker = new FoldStateTracker(this);
     Config.initGlobalConfig(prefs, getResources(), _keyeventhandler, _foldStateTracker.isUnfolded());
     prefs.registerOnSharedPreferenceChangeListener(this);
     _config = Config.globalConfig();
-    _suggestionProvider = new SuggestionProvider(this);
     _tutorials = getResources().getStringArray(R.array.tutorials);
     _inputView = inflate_view(R.layout.keyboard);
     _keyboardView = _inputView.findViewById(R.id.keyboard_view);
