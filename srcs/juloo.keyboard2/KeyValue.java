@@ -653,12 +653,12 @@ public final class KeyValue implements Comparable<KeyValue>
       case "voice_typing": return eventKey(0xE015, Event.SWITCH_VOICE_TYPING, FLAG_SMALLER_FONT);
       case "voice_typing_chooser": return eventKey(0xE015, Event.SWITCH_VOICE_TYPING_CHOOSER, FLAG_SMALLER_FONT);
       case "cycle_theme": return eventKey("👕", Event.CYCLE_THEME, 0);
-      case "set_theme_galactic": return eventKey("Galactic", Event.SET_THEME_GALACTIC, FLAG_SMALLER_FONT);
-      case "set_theme_golden_pearl": return eventKey("Golden Pearl", Event.SET_THEME_GOLDEN_PEARL, FLAG_SMALLER_FONT);
-      case "set_theme_neon_punk": return eventKey("Neon Punk", Event.SET_THEME_NEON_PUNK, FLAG_SMALLER_FONT);
-      case "set_theme_everforest_light": return eventKey("Everforest L.", Event.SET_THEME_EVERFOREST_LIGHT, FLAG_SMALLER_FONT);
-      case "set_theme_cobalt": return eventKey("Cobalt", Event.SET_THEME_COBALT, FLAG_SMALLER_FONT);
-      case "set_theme_epaper": return eventKey("ePaper", Event.SET_THEME_EPAPER, FLAG_SMALLER_FONT);
+      case "set_theme_galactic": return eventKey("▪️", Event.SET_THEME_GALACTIC, FLAG_SMALLER_FONT);
+      case "set_theme_golden_pearl": return eventKey("▫️", Event.SET_THEME_GOLDEN_PEARL, FLAG_SMALLER_FONT);
+      case "set_theme_neon_punk": return eventKey("▪️", Event.SET_THEME_NEON_PUNK, FLAG_SMALLER_FONT);
+      case "set_theme_everforest_light": return eventKey("▫️", Event.SET_THEME_EVERFOREST_LIGHT, FLAG_SMALLER_FONT);
+      case "set_theme_cobalt": return eventKey("▪️", Event.SET_THEME_COBALT, FLAG_SMALLER_FONT);
+      case "set_theme_epaper": return eventKey("▫️", Event.SET_THEME_EPAPER, FLAG_SMALLER_FONT);
 
       /* Key events */
       case "esc": return keyeventKey("Esc", KeyEvent.KEYCODE_ESCAPE, FLAG_SMALLER_FONT);
