@@ -46,10 +46,16 @@ public final class KeyEventHandler
   boolean _move_cursor_force_fallback = false;
   boolean mSuggestionsEnabledForThisInput = false;
   private String _pending_font_size_digit = null;
+  private final LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
+  private String originalWord = null;
+  private String correctedWord = null;
+  private boolean justAutoCorrected = false;
+  private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
 
-  public KeyEventHandler(IReceiver recv)
+  public KeyEventHandler(IReceiver recv, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
   {
     _recv = recv;
+    _autoCorrectionProvider = autoCorrectionProvider;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
     _mods = Pointers.Modifiers.EMPTY;
@@ -85,7 +91,7 @@ public final class KeyEventHandler
     } else {
         mSuggestionsEnabledForThisInput = false;
     }
-    _recv.updateSuggestions(null);
+    _recv.updateSuggestionsFromPrefix(null);
   }
 
   /** Selection has been updated. */
@@ -93,7 +99,7 @@ public final class KeyEventHandler
   {
     _autocap.selection_updated(oldSelStart, newSelStart);
     if (mSuggestionsEnabledForThisInput) {
-        updateSuggestions();
+        updateSuggestionsFromPrefix();
     }
   }
 
@@ -135,6 +141,16 @@ public final class KeyEventHandler
   {
     if (key == null)
       return;
+
+    if (justAutoCorrected) {
+        if (key.getKind() == KeyValue.Kind.Keyevent && key.getKeyevent() == KeyEvent.KEYCODE_DEL) {
+            revertAutoCorrection();
+            return; // Intercept the backspace
+        }
+        // Any other key press commits the correction, so we reset the flag.
+        justAutoCorrected = false;
+    }
+
     Pointers.Modifiers old_mods = _mods;
     update_meta_state(mods);
     switch (key.getKind())
@@ -450,13 +466,50 @@ public final class KeyEventHandler
         }
     }
 
+    if (" ".equals(text.toString())) {
+        CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+        if (textBeforeCursor != null && textBeforeCursor.length() > 0) {
+            int i = textBeforeCursor.length();
+            while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+                i--;
+            }
+            String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
+            String lowerCaseWord = word.toLowerCase();
+
+            // Check if the word was just reverted, and then clear the list for the next cycle.
+            boolean wasReverted = revertedWords.contains(lowerCaseWord);
+            revertedWords.clear();
+
+            if (word.length() > 0 && !wasReverted) {
+                java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
+                if (!corrections.isEmpty()) {
+                    String bestCorrection = corrections.get(0);
+                    conn.deleteSurroundingText(word.length(), 0);
+                    conn.commitText(bestCorrection + " ", 1);
+
+                    // Set state for potential revert
+                    originalWord = word;
+                    correctedWord = bestCorrection;
+                    justAutoCorrected = true;
+
+                    _autocap.typed(" ");
+                    _recv.showSuggestions(corrections); // Show all original correction candidates
+                    return;
+                }
+            }
+        }
+    }
+
+    // Any other key press invalidates the revert state
+    justAutoCorrected = false;
+
     conn.commitText(text, 1);
     _autocap.typed(text);
     if (mSuggestionsEnabledForThisInput) {
         if (" ".equals(text.toString())) {
-            _recv.updateSuggestions(null);
+            _recv.updateSuggestionsFromPrefix(null);
         } else {
-            updateSuggestions();
+            updateSuggestionsFromPrefix();
         }
     }
   }
@@ -743,19 +796,19 @@ public final class KeyEventHandler
     return info.packageName.startsWith("org.godotengine.editor");
   }
 
-  private void updateSuggestions() {
+  private void updateSuggestionsFromPrefix() {
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
       ExtractedText et = get_cursor_pos(conn);
       if (et != null && et.selectionStart != et.selectionEnd) {
-          _recv.updateSuggestions(null);
+          _recv.updateSuggestionsFromPrefix(null);
           return;
       }
 
       CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
       if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
-          _recv.updateSuggestions(null);
+          _recv.updateSuggestionsFromPrefix(null);
           return;
       }
 
@@ -767,9 +820,9 @@ public final class KeyEventHandler
       String prefix = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
 
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
-          _recv.updateSuggestions(null);
+          _recv.updateSuggestionsFromPrefix(null);
       } else {
-          _recv.updateSuggestions(prefix.toLowerCase());
+          _recv.updateSuggestionsFromPrefix(prefix.toLowerCase());
       }
   }
 
@@ -795,22 +848,59 @@ public final class KeyEventHandler
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
-      CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
-      if (textBeforeCursor == null) return;
-
-      int i = textBeforeCursor.length();
-      while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
-          i--;
-      }
-
-      int wordLength = textBeforeCursor.length() - i;
-      if (wordLength > 0) {
-          conn.deleteSurroundingText(wordLength, 0);
+      conn.beginBatchEdit();
+      if (justAutoCorrected && correctedWord != null) {
+          // An auto-correction just happened. We need to replace the auto-corrected word.
+          conn.deleteSurroundingText(correctedWord.length() + 1, 0); // +1 for the space
+      } else {
+          // Standard suggestion replacement logic.
+          CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+          if (textBeforeCursor != null) {
+              int i = textBeforeCursor.length();
+              while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+                  i--;
+              }
+              int wordLength = textBeforeCursor.length() - i;
+              if (wordLength > 0) {
+                  conn.deleteSurroundingText(wordLength, 0);
+              }
+          }
       }
 
       conn.commitText(suggestion + " ", 1);
+      conn.endBatchEdit();
+
       _autocap.typed(" ");
-      _recv.updateSuggestions(null);
+      _recv.updateSuggestionsFromPrefix(null); // Clear suggestions after selection
+
+      // Reset the correction state
+      justAutoCorrected = false;
+      originalWord = null;
+      correctedWord = null;
+  }
+
+  private void revertAutoCorrection() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null || correctedWord == null || originalWord == null) {
+          return;
+      }
+
+      conn.beginBatchEdit();
+      // Delete the corrected word and the space that was added after it.
+      conn.deleteSurroundingText(correctedWord.length() + 1, 0);
+      conn.commitText(originalWord, 1);
+      conn.endBatchEdit();
+
+      // Prevent this word from being auto-corrected again in this session.
+      revertedWords.add(originalWord);
+
+      // Reset state
+      justAutoCorrected = false;
+      originalWord = null;
+      correctedWord = null;
+
+      // Update suggestions for the reverted word
+      updateSuggestionsFromPrefix();
   }
 
   public static interface IReceiver
@@ -819,7 +909,8 @@ public final class KeyEventHandler
     public void set_shift_state(boolean state, boolean lock);
     public void set_compose_pending(boolean pending);
     public void selection_state_changed(boolean selection_is_ongoing);
-    void updateSuggestions(String prefix);
+  void updateSuggestionsFromPrefix(String prefix);
+  void showSuggestions(java.util.List<String> suggestions);
     void reloadCustomDictionary();
     public InputConnection getCurrentInputConnection();
     public Handler getHandler();

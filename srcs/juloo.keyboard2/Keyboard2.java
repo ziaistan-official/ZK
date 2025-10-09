@@ -44,6 +44,7 @@ public class Keyboard2 extends InputMethodService
   private Keyboard2View _keyboardView;
   private KeyEventHandler _keyeventhandler;
   private SuggestionProvider _suggestionProvider;
+  private LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
   private HorizontalScrollView _suggestionStripScroll;
   private View _suggestionStrip;
   private GridLayout _suggestionsGrid;
@@ -98,7 +99,11 @@ public class Keyboard2 extends InputMethodService
   {
     _config.set_current_layout(l);
     _currentSpecialLayout = null;
-    _keyboardView.setKeyboard(current_layout());
+    final KeyboardData newLayout = current_layout();
+    _keyboardView.setKeyboard(newLayout);
+    if (_autoCorrectionProvider != null) {
+        _autoCorrectionProvider.updateLayout(newLayout);
+    }
   }
 
   void incrTextLayout(int delta)
@@ -148,12 +153,13 @@ public class Keyboard2 extends InputMethodService
     super.onCreate();
     SharedPreferences prefs = DirectBootAwarePreferences.get_shared_preferences(this);
     _handler = new Handler(getMainLooper());
-    _keyeventhandler = new KeyEventHandler(this.new Receiver());
+    _suggestionProvider = new SuggestionProvider(this);
+    _autoCorrectionProvider = new LayoutBasedAutoCorrectionProvider(_suggestionProvider);
+    _keyeventhandler = new KeyEventHandler(this.new Receiver(), _autoCorrectionProvider);
     _foldStateTracker = new FoldStateTracker(this);
     Config.initGlobalConfig(prefs, getResources(), _keyeventhandler, _foldStateTracker.isUnfolded());
     prefs.registerOnSharedPreferenceChangeListener(this);
     _config = Config.globalConfig();
-    _suggestionProvider = new SuggestionProvider(this);
     _tutorials = getResources().getStringArray(R.array.tutorials);
     _inputView = inflate_view(R.layout.keyboard);
     _keyboardView = _inputView.findViewById(R.id.keyboard_view);
@@ -243,6 +249,9 @@ public class Keyboard2 extends InputMethodService
     if (default_layout == null)
       default_layout = loadLayout(R.xml.latn_qwerty_us);
     _localeTextLayout = default_layout;
+    if (_autoCorrectionProvider != null) {
+        _autoCorrectionProvider.updateLayout(_localeTextLayout);
+    }
   }
 
   private String actionLabel_of_imeAction(int action)
@@ -329,7 +338,7 @@ public class Keyboard2 extends InputMethodService
     _keyboardView.setKeyboard(current_layout());
     _keyeventhandler.started(info);
     setInputView(_inputView);
-    updateSuggestions(""); // Ensure tutorials are shown on start
+    updateSuggestionsFromPrefix(""); // Ensure tutorials are shown on start
     Logs.debug_startup_input_view(info, _config);
   }
 
@@ -554,24 +563,17 @@ public class Keyboard2 extends InputMethodService
     return false;
   }
 
-  private void updateSuggestions(String prefix) {
-    if (_suggestionProvider == null || _suggestionStrip == null || _suggestionsGrid == null) {
-      return;
+  private void populateSuggestions(List<String> suggestions) {
+    if (_suggestionStrip == null || _suggestionsGrid == null) {
+        return;
     }
 
     _suggestionStrip.setVisibility(View.VISIBLE);
     _ziaistanOfficialText.setVisibility(View.VISIBLE);
     _suggestionsGrid.removeAllViews();
 
-    final List<String> suggestions;
-    if (prefix != null && !prefix.isEmpty()) {
-        suggestions = _suggestionProvider.getSuggestions(prefix);
-    } else {
-        suggestions = new ArrayList<>();
-    }
-
     if (suggestions.isEmpty()) {
-        // Show tutorial view
+        // Show tutorial view if no suggestions are provided
         _suggestionStripScroll.setVisibility(View.GONE);
         _tutorialFlipper.setVisibility(View.VISIBLE);
         _tutorialHandler.removeCallbacks(_tutorialRunnable); // Ensure no duplicates
@@ -599,6 +601,25 @@ public class Keyboard2 extends InputMethodService
             _suggestionsGrid.addView(suggestionView);
         }
     }
+  }
+
+  private void updateSuggestionsFromPrefix(String prefix) {
+    if (_suggestionProvider == null) {
+        populateSuggestions(new ArrayList<>());
+        return;
+    }
+
+    final List<String> suggestions;
+    if (prefix != null && !prefix.isEmpty()) {
+        suggestions = _suggestionProvider.getSuggestions(prefix);
+    } else {
+        suggestions = new ArrayList<>();
+    }
+    populateSuggestions(suggestions);
+  }
+
+  private void showSuggestions(List<String> suggestions) {
+      populateSuggestions(suggestions);
   }
 
   /** Not static */
@@ -750,8 +771,13 @@ public class Keyboard2 extends InputMethodService
     }
 
     @Override
-    public void updateSuggestions(String prefix) {
-      Keyboard2.this.updateSuggestions(prefix);
+    public void updateSuggestionsFromPrefix(String prefix) {
+      Keyboard2.this.updateSuggestionsFromPrefix(prefix);
+    }
+
+    @Override
+    public void showSuggestions(List<String> suggestions) {
+        Keyboard2.this.showSuggestions(suggestions);
     }
 
     @Override
