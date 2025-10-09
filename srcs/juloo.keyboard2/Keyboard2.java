@@ -51,7 +51,7 @@ public class Keyboard2 extends InputMethodService
   /** Layout associated with the currently selected locale. Not 'null'. */
   private KeyboardData _localeTextLayout;
   private ViewGroup _emojiPane = null;
-  private ViewGroup _clipboard_pane = null;
+  private ClipboardView _clipboard_pane = null;
   public int actionId; // Action performed by the Action key.
   private Handler _handler;
 
@@ -424,6 +424,15 @@ public class Keyboard2 extends InputMethodService
     }
   }
 
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+      if (keyCode == KeyEvent.KEYCODE_BACK && _clipboard_pane != null && _clipboard_pane.isShown()) {
+          _keyeventhandler.key_up(KeyValue.getSpecialKeyByName("switch_back_clipboard"), Pointers.Modifiers.EMPTY);
+          return true; // Consume the event
+      }
+      return super.onKeyDown(keyCode, event);
+  }
+
   private void setupSuggestionStrip() {
     _suggestionStripScroll = _inputView.findViewById(R.id.suggestions_strip_scroll);
     _suggestionStrip = _inputView.findViewById(R.id.suggestions_strip);
@@ -547,8 +556,17 @@ public class Keyboard2 extends InputMethodService
           break;
 
         case SWITCH_CLIPBOARD:
-          if (_clipboard_pane == null)
-            _clipboard_pane = (ViewGroup)inflate_view(R.layout.clipboard_pane);
+          if (_clipboard_pane == null) {
+            _clipboard_pane = (ClipboardView) inflate_view(R.layout.clipboard_pane);
+          }
+          // Ensure the clipboard pane has the same height as the keyboard view
+          ViewGroup.LayoutParams lp = _clipboard_pane.getLayoutParams();
+          if (lp == null) {
+              lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, _keyboardView.getHeight());
+          } else {
+              lp.height = _keyboardView.getHeight();
+          }
+          _clipboard_pane.setLayoutParams(lp);
           setInputView(_clipboard_pane);
           break;
 

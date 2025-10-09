@@ -3,188 +3,330 @@ package juloo.keyboard2;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build.VERSION;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
-public final class ClipboardHistoryService
-{
-  /** Start the service on startup and start listening to clipboard changes. */
-  public static void on_startup(Context ctx, ClipboardPasteCallback cb)
-  {
-    get_service(ctx);
-    _paste_callback = cb;
-  }
+public final class ClipboardHistoryService {
+    private static final String TAG = "ClipboardHistoryService";
+    private static final String PERSIST_FILE_NAME = "clipboard_history.json";
+    private static final int MAX_UNPINNED_HISTORY_SIZE = 20;
 
-  /** Start the service if it hasn't been started before. Returns [null] if the
-      feature is unsupported. */
-  public static ClipboardHistoryService get_service(Context ctx)
-  {
-    if (VERSION.SDK_INT <= 11)
-      return null;
-    if (_service == null)
-      _service = new ClipboardHistoryService(ctx);
-    return _service;
-  }
+    private static ClipboardHistoryService _service = null;
+    private static ClipboardPasteCallback _paste_callback = null;
 
-  public static void set_history_enabled(boolean e)
-  {
-    Config.globalConfig().set_clipboard_history_enabled(e);
-    if (_service == null)
-      return;
-    if (e)
-      _service.add_current_clip();
-    else
-      _service.clear_history();
-  }
+    private final Context context;
+    private final ClipboardManager clipboardManager;
+    private final List<ClipboardItem> items;
+    private OnClipboardHistoryChange listener = null;
 
-  /** Send the given string to the editor. */
-  public static void paste(String clip)
-  {
-    if (_paste_callback != null)
-      _paste_callback.paste_from_clipboard_pane(clip);
-  }
-
-  /** The maximum size limits the amount of user data stored in memory but also
-      gives a sense to the user that the history is not persisted and can be
-      forgotten as soon as the app stops. */
-  public static final int MAX_HISTORY_SIZE = 6;
-
-  static ClipboardHistoryService _service = null;
-  static ClipboardPasteCallback _paste_callback = null;
-
-  ClipboardManager _cm;
-  List<HistoryEntry> _history;
-  OnClipboardHistoryChange _listener = null;
-
-  ClipboardHistoryService(Context ctx)
-  {
-    _history = new ArrayList<HistoryEntry>();
-    _cm = (ClipboardManager)ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-    _cm.addPrimaryClipChangedListener(this.new SystemListener());
-  }
-
-  public List<String> clear_expired_and_get_history()
-  {
-    long now_ms = System.currentTimeMillis();
-    List<String> dst = new ArrayList<String>();
-    Iterator<HistoryEntry> it = _history.iterator();
-    while (it.hasNext())
-    {
-      HistoryEntry ent = it.next();
-      if (ent.expiry_timestamp <= now_ms)
-        it.remove();
-      else
-        dst.add(ent.content);
+    public static void on_startup(Context ctx, ClipboardPasteCallback cb) {
+        get_service(ctx);
+        _paste_callback = cb;
     }
-    return dst;
-  }
 
-  /** This will call [on_clipboard_history_change]. */
-  public void remove_history_entry(String clip)
-  {
-    int last_pos = _history.size() - 1;
-    for (int pos = last_pos; pos >= 0; pos--)
-    {
-      if (!_history.get(pos).content.equals(clip))
-        continue;
-      // Removing the current clipboard, clear the system clipboard.
-      if (pos == last_pos)
-      {
-        if (VERSION.SDK_INT >= 28)
-          _cm.clearPrimaryClip();
-        else
-          _cm.setText("");
-      }
-      _history.remove(pos);
-      if (_listener != null)
-        _listener.on_clipboard_history_change();
+    public static ClipboardHistoryService get_service(Context ctx) {
+        if (_service == null) {
+            _service = new ClipboardHistoryService(ctx.getApplicationContext());
+        }
+        return _service;
     }
-  }
 
-  /** Add clipboard entries to the history, skipping consecutive duplicates and
-      empty strings. */
-  public void add_clip(String clip)
-  {
-    if (!Config.globalConfig().clipboard_history_enabled)
-      return;
-    int size = _history.size();
-    if (clip.equals("") || (size > 0 && _history.get(size - 1).content.equals(clip)))
-      return;
-    if (size >= MAX_HISTORY_SIZE)
-      _history.remove(0);
-    _history.add(new HistoryEntry(clip));
-    if (_listener != null)
-      _listener.on_clipboard_history_change();
-  }
-
-  public void clear_history()
-  {
-    _history.clear();
-    if (_listener != null)
-      _listener.on_clipboard_history_change();
-  }
-
-  public void set_on_clipboard_history_change(OnClipboardHistoryChange l) { _listener = l; }
-
-  public static interface OnClipboardHistoryChange
-  {
-    public void on_clipboard_history_change();
-  }
-
-  /** Add what is currently in the system clipboard into the history. */
-  void add_current_clip()
-  {
-    ClipData clip = _cm.getPrimaryClip();
-    if (clip == null)
-      return;
-    int count = clip.getItemCount();
-    for (int i = 0; i < count; i++)
-    {
-      CharSequence text = clip.getItemAt(i).getText();
-      if (text != null)
-        add_clip(text.toString());
-    }
-  }
-
-  int get_history_ttl_minutes() {
-    return Config.globalConfig().clipboard_history_duration;
-  }
-
-  final class SystemListener implements ClipboardManager.OnPrimaryClipChangedListener
-  {
-    public SystemListener() {}
-
-    @Override
-    public void onPrimaryClipChanged()
-    {
-      add_current_clip();
-    }
-  }
-
-  static final class HistoryEntry
-  {
-    public final String content;
-
-    /** Time at which the entry expires. */
-    public final long expiry_timestamp;
-
-    public HistoryEntry(String c)
-    {
-      content = c;
-        final int historyTtlMinutes = _service.get_history_ttl_minutes();
-        if (historyTtlMinutes >= 0) {
-            expiry_timestamp = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(historyTtlMinutes);
+    public static void set_history_enabled(boolean e) {
+        Config.globalConfig().set_clipboard_history_enabled(e);
+        if (_service == null) return;
+        if (e) {
+            _service.addCurrentClip();
         } else {
-            expiry_timestamp = Long.MAX_VALUE;
+            _service.clearHistory();
         }
     }
-  }
 
-  public interface ClipboardPasteCallback
-  {
-    public void paste_from_clipboard_pane(String content);
-  }
+    public static void paste(String clip) {
+        if (_paste_callback != null) {
+            _paste_callback.paste_from_clipboard_pane(clip);
+        }
+    }
+
+    private ClipboardHistoryService(Context ctx) {
+        this.context = ctx;
+        this.items = new ArrayList<>();
+        this.clipboardManager = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+        this.clipboardManager.addPrimaryClipChangedListener(new SystemListener());
+        loadItems();
+    }
+
+    public List<ClipboardItem> getItems() {
+        return new ArrayList<>(items);
+    }
+
+    public void addClip(String clip) {
+        if (!Config.globalConfig().clipboard_history_enabled || clip == null || clip.trim().isEmpty()) {
+            return;
+        }
+
+        ClipboardItem newItem = new ClipboardItem(clip, System.currentTimeMillis(), false);
+
+        // Remove existing item to update its timestamp and move it to the top
+        items.remove(newItem);
+        items.add(newItem);
+
+        // Trim unpinned items if necessary
+        trimHistory();
+        sortItems();
+        persistItems();
+        notifyHistoryChange();
+    }
+
+    public void removeItem(ClipboardItem item) {
+        if (items.remove(item)) {
+            // If the removed item was the most recent one, clear the system clipboard
+            if (isSystemClipboard(item.getText())) {
+                if (VERSION.SDK_INT >= 28) {
+                    clipboardManager.clearPrimaryClip();
+                } else {
+                    clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""));
+                }
+            }
+            persistItems();
+            notifyHistoryChange();
+        }
+    }
+
+    public void togglePin(ClipboardItem item) {
+        int index = items.indexOf(item);
+        if (index != -1) {
+            ClipboardItem currentItem = items.get(index);
+            currentItem.setPinned(!currentItem.isPinned());
+            currentItem.setTimestamp(System.currentTimeMillis()); // Update timestamp for sorting
+            sortItems();
+            persistItems();
+            notifyHistoryChange();
+        }
+    }
+
+    public void clearHistory() {
+        items.clear();
+        persistItems();
+        notifyHistoryChange();
+    }
+
+    public void setOnClipboardHistoryChange(OnClipboardHistoryChange l) {
+        listener = l;
+    }
+
+    private void sortItems() {
+        Collections.sort(items, new Comparator<ClipboardItem>() {
+            @Override
+            public int compare(ClipboardItem o1, ClipboardItem o2) {
+                if (o1.isPinned() == o2.isPinned()) {
+                    // Both pinned or both unpinned, sort by timestamp
+                    // Unpinned: newest first (desc)
+                    // Pinned: by pinned time (asc)
+                    return o1.isPinned() ? Long.compare(o1.getTimestamp(), o2.getTimestamp())
+                                         : Long.compare(o2.getTimestamp(), o1.getTimestamp());
+                }
+                // Pinned items go to the bottom
+                return o1.isPinned() ? 1 : -1;
+            }
+        });
+    }
+
+    private void trimHistory() {
+        List<ClipboardItem> unpinnedItems = new ArrayList<>();
+        for (ClipboardItem item : items) {
+            if (!item.isPinned()) {
+                unpinnedItems.add(item);
+            }
+        }
+
+        if (unpinnedItems.size() > MAX_UNPINNED_HISTORY_SIZE) {
+            int toRemove = unpinnedItems.size() - MAX_UNPINNED_HISTORY_SIZE;
+            for (int i = 0; i < toRemove; i++) {
+                items.remove(unpinnedItems.get(i));
+            }
+        }
+    }
+
+    private void notifyHistoryChange() {
+        if (listener != null) {
+            listener.on_clipboard_history_change();
+        }
+    }
+
+    private void addCurrentClip() {
+        ClipData clip = clipboardManager.getPrimaryClip();
+        if (clip == null) return;
+        int count = clip.getItemCount();
+        for (int i = 0; i < count; i++) {
+            CharSequence text = clip.getItemAt(i).getText();
+            if (text != null) {
+                addClip(text.toString());
+            }
+        }
+    }
+
+    private boolean isSystemClipboard(String text) {
+        ClipData clip = clipboardManager.getPrimaryClip();
+        if (clip != null && clip.getItemCount() > 0) {
+            CharSequence clipText = clip.getItemAt(0).getText();
+            return clipText != null && clipText.toString().equals(text);
+        }
+        return false;
+    }
+
+    private void loadItems() {
+        File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
+        if (!file.exists()) {
+            migrateFromPrefs();
+            return;
+        }
+
+        try (FileInputStream fis = new FileInputStream(file);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(fis, StandardCharsets.UTF_8))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            JSONArray jsonArray = new JSONArray(sb.toString());
+            items.clear();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                items.add(ClipboardItem.fromJSON(jsonArray.getJSONObject(i)));
+            }
+            sortItems();
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Failed to load clipboard history", e);
+        }
+    }
+
+    private void persistItems() {
+        JSONArray jsonArray = new JSONArray();
+        for (ClipboardItem item : items) {
+            try {
+                jsonArray.put(item.toJSON());
+            } catch (JSONException e) {
+                Log.e(TAG, "Failed to convert item to JSON", e);
+            }
+        }
+
+        File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
+        try (FileOutputStream fos = new FileOutputStream(file);
+             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+            writer.write(jsonArray.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to persist clipboard history", e);
+        }
+    }
+
+    private void migrateFromPrefs() {
+        SharedPreferences store = context.getSharedPreferences("pinned_clipboards", Context.MODE_PRIVATE);
+        String arr_s = store.getString("pinned", null);
+        if (arr_s == null) return;
+
+        try {
+            JSONArray arr = new JSONArray(arr_s);
+            long currentTime = System.currentTimeMillis();
+            for (int i = 0; i < arr.length(); i++) {
+                String text = arr.getString(i);
+                // Assign a slightly different timestamp to maintain order
+                items.add(new ClipboardItem(text, currentTime + i, true));
+            }
+            sortItems();
+            persistItems();
+            // Clear the old prefs
+            store.edit().clear().apply();
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to migrate pinned clips", e);
+        }
+    }
+
+    public void importFromUri(Uri uri) {
+        StringBuilder sb = new StringBuilder();
+        try (InputStream is = context.getContentResolver().openInputStream(uri);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read import file", e);
+            return;
+        }
+
+        try {
+            JSONArray jsonArray = new JSONArray(sb.toString());
+            Set<ClipboardItem> existingItems = new HashSet<>(items);
+            int importedCount = 0;
+            for (int i = 0; i < jsonArray.length(); i++) {
+                ClipboardItem newItem = ClipboardItem.fromJSON(jsonArray.getJSONObject(i));
+                if (!existingItems.contains(newItem)) {
+                    items.add(newItem);
+                    importedCount++;
+                }
+            }
+            if (importedCount > 0) {
+                sortItems();
+                persistItems();
+                notifyHistoryChange();
+            }
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to parse import file", e);
+        }
+    }
+
+    public void exportToUri(Uri uri) {
+        JSONArray jsonArray = new JSONArray();
+        for (ClipboardItem item : items) {
+            try {
+                jsonArray.put(item.toJSON());
+            } catch (JSONException e) {
+                Log.e(TAG, "Failed to convert item to JSON for export", e);
+            }
+        }
+
+        try (OutputStream os = context.getContentResolver().openOutputStream(uri);
+             OutputStreamWriter writer = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+            writer.write(jsonArray.toString(2)); // Indent for readability
+        } catch (IOException | JSONException e) {
+            Log.e(TAG, "Failed to export clipboard history", e);
+        }
+    }
+
+    public interface OnClipboardHistoryChange {
+        void on_clipboard_history_change();
+    }
+
+    public interface ClipboardPasteCallback {
+        void paste_from_clipboard_pane(String content);
+    }
+
+    private final class SystemListener implements ClipboardManager.OnPrimaryClipChangedListener {
+        @Override
+        public void onPrimaryClipChanged() {
+            addCurrentClip();
+        }
+    }
 }
