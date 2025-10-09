@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<corrections>
+    <c from="teh" to="the" />
+    <c from="tje" to="the" />
+    <c from="tge" to="the" />
+    <c from="thw" to="the" />
+    <c from="thd" to="the" />
+    <c from="adn" to="and" />
+    <c from="nad" to="and" />
+    <c from="wrok" to="work" />
+    <c from="owrk" to="work" />
+    <c from="keybaord" to="keyboard" />
+    <c from="keyabord" to="keyboard" />
+    <c from="hte" to="the" />
+    <c from="waht" to="what" />
+    <c from="whata" to="what" />
+    <c from="taht" to="that" />
+    <c from="thta" to="that" />
+    <c from="iwth" to="with" />
+    <c from="wiht" to="with" />
+    <c from="don;t" to="don't" />
+    <c from="is'nt" to="isn't" />
+    <c from="isnt" to="isn't" />
+    <c from="don't" to="don't" />
+</corrections>

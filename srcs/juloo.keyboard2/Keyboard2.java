@@ -36,6 +36,7 @@ import java.util.Random;
 import java.util.Set;
 import juloo.keyboard2.prefs.LayoutsPreference;
 import juloo.keyboard2.SuggestionProvider;
+import juloo.keyboard2.AutoCorrectionProvider;
 
 public class Keyboard2 extends InputMethodService
   implements SharedPreferences.OnSharedPreferenceChangeListener
@@ -44,6 +45,7 @@ public class Keyboard2 extends InputMethodService
   private Keyboard2View _keyboardView;
   private KeyEventHandler _keyeventhandler;
   private SuggestionProvider _suggestionProvider;
+  private AutoCorrectionProvider _autoCorrectionProvider;
   private HorizontalScrollView _suggestionStripScroll;
   private View _suggestionStrip;
   private GridLayout _suggestionsGrid;
@@ -148,12 +150,14 @@ public class Keyboard2 extends InputMethodService
     super.onCreate();
     SharedPreferences prefs = DirectBootAwarePreferences.get_shared_preferences(this);
     _handler = new Handler(getMainLooper());
-    _keyeventhandler = new KeyEventHandler(this.new Receiver());
+    _autoCorrectionProvider = new AutoCorrectionProvider(this);
+    _keyeventhandler = new KeyEventHandler(this.new Receiver(), _autoCorrectionProvider);
     _foldStateTracker = new FoldStateTracker(this);
     Config.initGlobalConfig(prefs, getResources(), _keyeventhandler, _foldStateTracker.isUnfolded());
     prefs.registerOnSharedPreferenceChangeListener(this);
     _config = Config.globalConfig();
     _suggestionProvider = new SuggestionProvider(this);
+    _autoCorrectionProvider = new AutoCorrectionProvider(this);
     _tutorials = getResources().getStringArray(R.array.tutorials);
     _inputView = inflate_view(R.layout.keyboard);
     _keyboardView = _inputView.findViewById(R.id.keyboard_view);

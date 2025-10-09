@@ -26,14 +26,23 @@ public class SuggestionProvider {
     private final TrieNode wordlistRoot;
     private final Context context;
 
+    private volatile boolean commonLoaded = false;
+    private volatile boolean wordlistLoaded = false;
+
     public SuggestionProvider(Context context) {
         this.context = context;
         customRoot = new TrieNode();
         commonRoot = new TrieNode();
         wordlistRoot = new TrieNode();
         loadCustomDictionary(customRoot);
-        loadDictionary(R.raw.common, commonRoot);
-        loadDictionary(R.raw.wordlist, wordlistRoot);
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            loadDictionary(R.raw.common, commonRoot);
+            commonLoaded = true;
+        });
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            loadDictionary(R.raw.wordlist, wordlistRoot);
+            wordlistLoaded = true;
+        });
     }
 
     public void reloadCustomDictionary() {
@@ -92,7 +101,7 @@ public class SuggestionProvider {
         }
 
         // Then from common words
-        if (suggestions.size() < MAX_SUGGESTIONS) {
+        if (commonLoaded && suggestions.size() < MAX_SUGGESTIONS) {
             TrieNode commonPrefixNode = findPrefixNode(prefix, commonRoot);
             if (commonPrefixNode != null) {
                 findAllWords(commonPrefixNode, prefix, suggestions);
@@ -100,7 +109,7 @@ public class SuggestionProvider {
         }
 
         // Finally from the wordlist
-        if (suggestions.size() < MAX_SUGGESTIONS) {
+        if (wordlistLoaded && suggestions.size() < MAX_SUGGESTIONS) {
             TrieNode wordlistPrefixNode = findPrefixNode(prefix, wordlistRoot);
             if (wordlistPrefixNode != null) {
                 findAllWords(wordlistPrefixNode, prefix, suggestions);
