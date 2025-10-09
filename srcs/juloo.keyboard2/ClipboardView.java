@@ -61,7 +61,8 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
         backButton.setOnClickListener(v -> {
             KeyEventHandler handler = (KeyEventHandler) Config.globalConfig().handler;
             if (handler != null) {
-                handler.key_up(new KeyValue(KeyValue.Event.SWITCH_BACK_CLIPBOARD), Pointers.Modifiers.EMPTY);
+                // Use the static factory method to ensure correct constructor usage
+                handler.key_up(KeyValue.getSpecialKeyByName("switch_back_clipboard"), Pointers.Modifiers.EMPTY);
             }
         });
     }
@@ -96,7 +97,8 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
 
     private class GestureCallback extends ItemTouchHelper.SimpleCallback {
         GestureCallback() {
-            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT | ItemTouchHelper.UP | ItemTouchHelper.DOWN);
+            // Only allow horizontal swipes for deletion, to enable vertical scrolling.
+            super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         }
 
         @Override
@@ -110,34 +112,15 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
             ClipboardItem item = adapter.getItem(position);
             if (item == null) return;
 
-            switch (direction) {
-                case ItemTouchHelper.LEFT:
-                case ItemTouchHelper.RIGHT:
-                    service.removeItem(item);
-                    break;
-                case ItemTouchHelper.UP:
-                    ClipboardHistoryService.paste(item.getText());
-                    adapter.notifyItemChanged(position); // Snap back
-                    break;
-                case ItemTouchHelper.DOWN:
-                    if (!item.isPinned()) {
-                        service.togglePin(item);
-                    }
-                    // Snap back even if already pinned and no action was taken
-                    adapter.notifyItemChanged(position);
-                    break;
+            // Swipe left or right to delete
+            if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT) {
+                service.removeItem(item);
             }
         }
 
         @Override
         public boolean isLongPressDragEnabled() {
             return false;
-        }
-
-        @Override
-        public float getSwipeThreshold(@NonNull RecyclerView.ViewHolder viewHolder) {
-            // Lower the threshold to make vertical swipes easier to trigger.
-            return 0.25f;
         }
     }
 
