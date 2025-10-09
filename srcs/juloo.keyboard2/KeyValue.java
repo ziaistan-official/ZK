@@ -23,6 +23,13 @@ public final class KeyValue implements Comparable<KeyValue>
     CAPS_LOCK,
     SWITCH_VOICE_TYPING,
     SWITCH_VOICE_TYPING_CHOOSER,
+    CYCLE_THEME,
+    SET_THEME_GALACTIC,
+    SET_THEME_GOLDEN_PEARL,
+    SET_THEME_NEON_PUNK,
+    SET_THEME_EVERFOREST_LIGHT,
+    SET_THEME_COBALT,
+    SET_THEME_EPAPER,
   }
 
   // Must be evaluated in the reverse order of their values.
@@ -645,6 +652,13 @@ public final class KeyValue implements Comparable<KeyValue>
       case "capslock": return eventKey(0xE012, Event.CAPS_LOCK, 0);
       case "voice_typing": return eventKey(0xE015, Event.SWITCH_VOICE_TYPING, FLAG_SMALLER_FONT);
       case "voice_typing_chooser": return eventKey(0xE015, Event.SWITCH_VOICE_TYPING_CHOOSER, FLAG_SMALLER_FONT);
+      case "cycle_theme": return eventKey("👕", Event.CYCLE_THEME, 0);
+      case "set_theme_galactic": return eventKey("▪️", Event.SET_THEME_GALACTIC, FLAG_SMALLER_FONT);
+      case "set_theme_golden_pearl": return eventKey("▫️", Event.SET_THEME_GOLDEN_PEARL, FLAG_SMALLER_FONT);
+      case "set_theme_neon_punk": return eventKey("▪️", Event.SET_THEME_NEON_PUNK, FLAG_SMALLER_FONT);
+      case "set_theme_everforest_light": return eventKey("▫️", Event.SET_THEME_EVERFOREST_LIGHT, FLAG_SMALLER_FONT);
+      case "set_theme_cobalt": return eventKey("▪️", Event.SET_THEME_COBALT, FLAG_SMALLER_FONT);
+      case "set_theme_epaper": return eventKey("▫️", Event.SET_THEME_EPAPER, FLAG_SMALLER_FONT);
 
       /* Key events */
       case "esc": return keyeventKey("Esc", KeyEvent.KEYCODE_ESCAPE, FLAG_SMALLER_FONT);

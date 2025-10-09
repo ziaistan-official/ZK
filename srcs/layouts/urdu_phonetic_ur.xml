@@ -65,28 +65,28 @@
     <fn a="ق" b="&quot;"/>
   </modmap>
 
-  <!-- Your Custom Function Rows (Unchanged) -->
+  <!-- Your Custom Function Rows (Unchanged) -->
   <row height="0.7">
-    <key width="1.5" c="home" n="home"/>
-    <key width="1.5" c="up" n="cursor_up" nw="home" ne="page_up"/>
-    <key width="1.5" c="end" n="end"/>
-    <key width="1.5" c="page_up" n="switch_emoji"/>
-    <key width="1.5" c="cut" n="undo"/>
-    <key width="1.5" c="paste" n="selectAll"/>
-    <key width="2.5" c="delete" n="forward_delete_word"/>
-    <key width="2.5" c="esc" n="config"/>
-  </row>
+    <key width="1.5" c="home"/>
+    <key width="1.5" c="up"/>
+    <key width="1.5" c="end"/>
+    <key width="1.5" c="page_up" ne="switch_emoji"/>
+    <key width="1.5" c="cut"/>
+    <key width="1.5" c="paste" ne="selectAll"/>
+    <key width="2.5" c="delete" ne="forward_delete_word"/>
+    <key width="2.5" c="esc" n="config"/>
+  </row>
   <row height="0.7">
-    <key width="1.5" c="left" w="cursor_left"/>
-    <key width="1.5" c="down" s="cursor_down" sw="end" se="page_down"/>
-    <key width="1.5" c="right" e="cursor_right"/>
-    <key width="1.5" c="page_down" n="switch_clipboard"/>
-    <key width="1.5" c="copy" n="redo"/>
-    <key width="1.5" c="capslock" n="fn"/>
-    <key width="1.9" c="shift" nw="ctrl" ne="alt" sw="meta" se="loc capslock" n="cursor_up" s="cursor_down" w="cursor_left" e="cursor_right"/>
-    <key width="2.5" c="backspace" n="delete_word"/>
-  </row>
-  
+    <key width="1.5" c="left"/>
+    <key width="1.5" c="down"/>
+    <key width="1.5" c="right"/>
+    <key width="1.5" c="page_down" ne="switch_clipboard"/>
+    <key width="1.5" c="copy" nw="undo" ne="redo"/>
+    <key width="1.5" c="capslock" nw="meta" ne="fn"/>
+    <key width="1.9" c="shift" nw="ctrl" ne="alt" se="loc capslock" n="cursor_up" s="cursor_down" w="cursor_left" e="cursor_right"/>
+    <key width="2.5" c="backspace" nw="delete_word"/>
+  </row>
+
   <!-- Urdu Typing Area (Grouped and Condensed) -->
   <row>
     <key width="1.05" c="ذ" ne="ذَ" nw="ذِ" se="ذٌ" sw="ذّ"/>
