@@ -692,7 +692,46 @@ public class Keyboard2 extends InputMethodService
           VoiceImeSwitcher.choose_voice_ime(Keyboard2.this, get_imm(),
               Config.globalPrefs());
           break;
+
+        case CYCLE_THEME: {
+          SharedPreferences prefs = Config.globalPrefs();
+          String currentTheme = prefs.getString("theme", "galactic");
+          List<String> themeCycle = Arrays.asList(
+              "galactic", "goldenpearl", "neonpunk",
+              "everforestlight", "cobalt", "epaper"
+          );
+          int currentIndex = themeCycle.indexOf(currentTheme);
+          int nextIndex = (currentIndex + 1) % themeCycle.size();
+          String nextTheme = themeCycle.get(nextIndex);
+          setTheme(nextTheme);
+          break;
+        }
+        case SET_THEME_GALACTIC:
+          setTheme("galactic");
+          break;
+        case SET_THEME_GOLDEN_PEARL:
+          setTheme("goldenpearl");
+          break;
+        case SET_THEME_NEON_PUNK:
+          setTheme("neonpunk");
+          break;
+        case SET_THEME_EVERFOREST_LIGHT:
+          setTheme("everforestlight");
+          break;
+        case SET_THEME_COBALT:
+          setTheme("cobalt");
+          break;
+        case SET_THEME_EPAPER:
+          setTheme("epaper");
+          break;
       }
+    }
+
+    private void setTheme(String themeName) {
+        Config.globalPrefs().edit().putString("theme", themeName).apply();
+        refresh_config();
+        updateSuggestionStripPosition();
+        _keyboardView.setKeyboard(current_layout());
     }
 
     public void set_shift_state(boolean state, boolean lock)
