@@ -138,4 +138,88 @@
         <item>30</item>
         <item>-1</item>
     </string-array>
+    <string-array name="tutorials">
+        <item>Clipboard Tip: Quickly paste any item from your history by simply tapping on it.</item>
+        <item>Clipboard Tip: Keep important items from being deleted by long-pressing to pin them. Pinned items stay at the bottom.</item>
+        <item>Clipboard Tip: Clean up your history by swiping any unpinned item left or right to delete it.</item>
+        <item>Clipboard Tip: Pinned items are sorted by when you pinned them, with the oldest at the top of the pinned section.</item>
+        <item>Clipboard Tip: Unpinned items are sorted by time, with the newest item always appearing at the top.</item>
+        <item>Clipboard Tip: Access the clipboard by pressing the clipboard key on the main keyboard.</item>
+        <item>Clipboard Tip: Use the \'Back\' button on the clipboard\'s bottom row to return to the main keyboard.</item>
+        <item>Clipboard Tip: The system navigation back button also closes the clipboard pane.</item>
+        <item>Clipboard Tip: You can back up your clipboard! Use the \'Export\' button to save your history to a file.</item>
+        <item>Clipboard Tip: Restore your clipboard from a backup file using the \'Import\' button. Duplicates are automatically skipped.</item>
+        <item>Clipboard Tip: The clipboard is enabled by default. You can disable it in Settings > Clipboard.</item>
+        <item>Gesture Pro-Tip: Unleash 8 powerful actions on each key with circle gestures starting from the key\'s corners.</item>
+        <item>Gesture Pro-Tip: The action depends on the starting corner (NE, SE, SW, NW) and direction (Clockwise/Anti-Clockwise).</item>
+        <item>Gesture Pro-Tip: Circle gestures on letter keys can add vowels or apply modifiers like Shift and Ctrl.</item>
+        <item>Gesture Pro-Tip: Master circle gestures to type faster without lifting your finger to press modifier keys.</item>
+        <item>Gesture Pro-Tip: Don\'t like circle gestures? You can disable them entirely in Settings > Behavior.</item>
+        <item>Circle Gesture (Vowel \'a\'): Start from the South-West (SW) corner of a letter and draw a clockwise circle to add \'a\'. (e.g., k -> ka)</item>
+        <item>Circle Gesture (Vowel \'e\'): Start from the North-East (NE) corner of a letter and draw a clockwise circle to add \'e\'. (e.g., k -> ke)</item>
+        <item>Circle Gesture (Vowel \'i\'): Start from the South-East (SE) corner of a letter and draw a clockwise circle to add \'i\'. (e.g., k -> ki)</item>
+        <item>Circle Gesture (Vowel \'o\'): Start from the North-West (NW) corner of a letter and draw a clockwise circle to add \'o\'. (e.g., k -> ko)</item>
+        <item>Circle Gesture (Vowel \'u\'): Start from the South-West (SW) corner of a letter and draw an anti-clockwise circle to add \'u\'. (e.g., k -> ku)</item>
+        <item>Circle Gesture (Urdu \'a\'): On Urdu keys, a clockwise circle from the SW corner adds the \'Alif\' character.</item>
+        <item>Circle Gesture (Urdu \'o\'): On Urdu keys, a clockwise circle from the NW corner adds the \'vav\' character.</item>
+        <item>Circle Gesture (Urdu \'e\'/\'i\'): On Urdu keys, a clockwise circle from NE/SE corners adds \'bari ye\'/\'choti ye\'.</item>
+        <item>Circle Gesture (Shift): Capitalize a letter by starting from its North-East (NE) corner and drawing an anti-clockwise circle. (e.g., k -> K)</item>
+        <item>Circle Gesture (Ctrl): Apply Ctrl to a letter by starting from its South-East (SE) corner and drawing an anti-clockwise circle. (e.g., k -> Ctrl+k)</item>
+        <item>Circle Gesture (Ctrl+Shift): Apply Ctrl+Shift to a letter by starting from its North-West (NW) corner and drawing an anti-clockwise circle. (e.g., k -> Ctrl+Shift+k)</item>
+        <item>Shift Key Gesture (Ctrl): Swipe from the bottom-left of the Shift key to temporarily activate Ctrl.</item>
+        <item>Shift Key Gesture (Alt): Swipe from the bottom-right of the Shift key to temporarily activate Alt.</item>
+        <item>Shift Key Gesture (Meta): Swipe from the top-right of the Shift key to temporarily activate Meta/Win.</item>
+        <item>Pro-Tip: Combine a Shift key gesture (like Ctrl) with a regular key press for quick shortcuts like Ctrl+C.</item>
+        <item>Pro-Tip: The main Shift key has corner gestures for Ctrl, Alt, and Meta, turning it into a powerful modifier hub.</item>
+        <item>Cursor Tip (Forward 1 Word): Swipe down on the \'1\' key in the number row to jump the cursor one word forward.</item>
+        <item>Cursor Tip (Forward 2 Words): Swipe down on the \'2\' key in the number row to jump two words forward.</item>
+        <item>Cursor Tip (Forward 3 Words): Swipe down on the \'3\' key in the number row to jump three words forward.</item>
+        <item>Cursor Tip (Forward 4 Words): Swipe down on the \'4\' key in the number row to jump four words forward.</item>
+        <item>Cursor Tip (Forward 5 Words): Swipe down on the \'5\' key in the number row to jump five words forward.</item>
+        <item>Cursor Tip (Backward 1 Word): Swipe up on the \'1\' key in the number row to jump the cursor one word backward.</item>
+        <item>Cursor Tip (Backward 2 Words): Swipe up on the \'2\' key in the number row to jump two words backward.</item>
+        <item>Cursor Tip (Backward 3 Words): Swipe up on the \'3\' key in the number row to jump three words backward.</item>
+        <item>Cursor Tip (Backward 4 Words): Swipe up on the \'4\' key in the number row to jump four words backward.</item>
+        <item>Cursor Tip (Backward 5 Words): Swipe up on the \'5\' key in the number row to jump five words backward.</item>
+        <item>Selection Tip (Bold): Select some text and press the \'b\' key to make it **bold**.</item>
+        <item>Selection Tip (Italic): Select some text and press the \'i\' key to make it *italic*.</item>
+        <item>Selection Tip (Uppercase): Select some text and press the \'u\' key to make it UPPERCASE.</item>
+        <item>Selection Tip (Lowercase): Select some text and press the \'l\' key to make it lowercase.</item>
+        <item>Selection Tip (Sentence case): Select some text and press the \'s\' key to make it Sentence case.</item>
+        <item>Selection Tip (Wrap in Parens): Select text and press \'(\' to wrap it in parentheses, like (this).</item>
+        <item>Selection Tip (Wrap in Brackets): Select text and press \'[\' to wrap it in square brackets, like [this].</item>
+        <item>Selection Tip (Wrap in Braces): Select text and press \'{\' to wrap it in curly braces, like {this}.</item>
+        <item>Selection Tip (Wrap in Quotes): Select text and press \'\"\' to wrap it in double quotes, like \"this\".</item>
+        <item>Selection Tip (Wrap in Single Quotes): Select text and press \'\\\'\' to wrap it in single quotes, like \'this\'.</item>
+        <item>Selection Tip (Wrap in Slashes): Select text and press \'/\' to wrap it in forward slashes, like /this/.</item>
+        <item>Selection Tip (Change Font Size): Select text and type a two-digit number (e.g., 24) to change the font size.</item>
+        <item>Pro-Tip: You can disable text manipulation features in Settings > Behavior.</item>
+        <item>Pro-Tip: Encapsulation (wrapping text) can be toggled separately in Settings > Behavior.</item>
+        <item>Selection Tip (Add to Dictionary): Select a word and press the dedicated \'+\' key to add it to your custom dictionary.</item>
+        <item>App Integration (Translate): Select text and press the \'t\' key to send it directly to the Google Translate app.</item>
+        <item>App Integration (Keep Notes): Select text and press the \'k\' key to create a new note in Google Keep.</item>
+        <item>App Integration (Obsidian): Select text and press the \'o\' key to create a new note in Obsidian.</item>
+        <item>App Integration (Chrome): Select text and press the \'c\' key to search for it in Google Chrome.</item>
+        <item>Pro-Tip: App integrations can be disabled in Settings > Behavior if you don\'t use them.</item>
+        <item>Dictionary Tip: Add words to your personal dictionary via Settings > Behavior > Custom Dictionary.</item>
+        <item>Dictionary Tip: Import a list of words from a `custom.txt` file in the dictionary settings.</item>
+        <item>Dictionary Tip: Export your personal dictionary to a `custom.txt` file for backup.</item>
+        <item>Dictionary Tip: Words in your custom dictionary are given higher priority in suggestions.</item>
+        <item>Dictionary Tip: When you add a word, it\'s converted to lowercase to ensure it\'s suggested regardless of case.</item>
+        <item>UI Tip: Move the suggestion strip to the top or bottom of the keyboard by dragging the handle on the right.</item>
+        <item>UI Tip: You can also set the default position of the suggestion strip in Settings > Behavior.</item>
+        <item>UI Tip: The key-press pop-up shows the exact character you typed, including from swipes and gestures.</item>
+        <item>UI Tip: The pop-up\'s color is theme-aware, ensuring it\'s always readable.</item>
+        <item>UI Tip: Don\'t like the key-press pop-up? You can disable it in Settings > Look &amp; Feel.</item>
+        <item>Layout Tip: The English QWERTY layout has two function rows at the top for actions like cut, copy, paste, and undo.</item>
+        <item>Layout Tip (Fn Key): Press the \'Fn\' key to access a wide range of symbols, including currency and math symbols.</item>
+        <item>Layout Tip (Urdu): The Urdu Phonetic layout provides quick access to diacritics (zer, zabar) on every letter key via corner swipes.</item>
+        <item>Pro-Tip: Enable Caps Lock by double-tapping the Shift key. This can be toggled in settings.</item>
+        <item>Pro-Tip: The spacebar acts as a trackpad! Slide your finger left or right on it to move the cursor.</item>
+        <item>Spacebar Slider: Adjust the sensitivity of the spacebar cursor movement in Settings > Behavior > Slider Sensitivity.</item>
+        <item>Pro-Tip: Switch between your enabled languages/layouts by swiping left or right on the spacebar.</item>
+        <item>Pro-Tip: Long-press the language switch key (globe icon) to see a list of all your layouts.</item>
+        <item>Voice Typing: Press the microphone key to switch to your system\'s voice input method.</item>
+        <item>Pro-Tip: If the microphone key doesn\'t work, you can select your preferred voice IME in Settings > Behavior > Voice input.</item>
+    </string-array>
 </resources>

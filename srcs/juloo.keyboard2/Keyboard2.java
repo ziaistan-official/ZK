@@ -25,11 +25,14 @@ import android.widget.GridLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
+import android.view.animation.AnimationUtils;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import juloo.keyboard2.prefs.LayoutsPreference;
 import juloo.keyboard2.SuggestionProvider;
@@ -46,6 +49,14 @@ public class Keyboard2 extends InputMethodService
   private GridLayout _suggestionsGrid;
   private FrameLayout _suggestionStripContainerTop;
   private FrameLayout _suggestionStripContainerBottom;
+  private ViewFlipper _tutorialFlipper;
+  private TextView _ziaistanOfficialText;
+  private String[] _tutorials;
+  private float _lastX;
+  private final Handler _tutorialHandler = new Handler();
+  private Runnable _tutorialRunnable;
+  private final Random _random = new Random();
+  private static final int TUTORIAL_TRANSITION_DELAY = 5000; // 5 seconds
   /** If not 'null', the layout to use instead of [_config.current_layout]. */
   private KeyboardData _currentSpecialLayout;
   /** Layout associated with the currently selected locale. Not 'null'. */
@@ -143,6 +154,7 @@ public class Keyboard2 extends InputMethodService
     prefs.registerOnSharedPreferenceChangeListener(this);
     _config = Config.globalConfig();
     _suggestionProvider = new SuggestionProvider(this);
+    _tutorials = getResources().getStringArray(R.array.tutorials);
     _inputView = inflate_view(R.layout.keyboard);
     _keyboardView = _inputView.findViewById(R.id.keyboard_view);
     setupSuggestionStrip();
@@ -317,6 +329,7 @@ public class Keyboard2 extends InputMethodService
     _keyboardView.setKeyboard(current_layout());
     _keyeventhandler.started(info);
     setInputView(_inputView);
+    updateSuggestions(""); // Ensure tutorials are shown on start
     Logs.debug_startup_input_view(info, _config);
   }
 
@@ -416,6 +429,7 @@ public class Keyboard2 extends InputMethodService
   public void onFinishInputView(boolean finishingInput)
   {
     super.onFinishInputView(finishingInput);
+    _tutorialHandler.removeCallbacks(_tutorialRunnable); // Stop timer on finish
     if (_suggestionStrip != null) {
       _suggestionStrip.setVisibility(View.GONE);
     }
@@ -439,6 +453,60 @@ public class Keyboard2 extends InputMethodService
     _suggestionsGrid = _inputView.findViewById(R.id.suggestions_grid);
     _suggestionStripContainerTop = _inputView.findViewById(R.id.suggestion_strip_container_top);
     _suggestionStripContainerBottom = _inputView.findViewById(R.id.suggestion_strip_container_bottom);
+    _tutorialFlipper = _inputView.findViewById(R.id.tutorial_flipper);
+    _ziaistanOfficialText = _inputView.findViewById(R.id.ziaistan_official_text);
+
+    // Populate the ViewFlipper with TextViews for each tutorial
+    Context themedContext = new ContextThemeWrapper(this, _config.theme);
+    LayoutInflater inflater = LayoutInflater.from(themedContext);
+    for (String tutorial : _tutorials) {
+        TextView textView = (TextView) inflater.inflate(R.layout.suggestion_item, _tutorialFlipper, false);
+        textView.setText(tutorial);
+        textView.setTextSize(12); // Smaller text size for tips
+        _tutorialFlipper.addView(textView);
+    }
+
+    _tutorialRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (_tutorialFlipper != null && _tutorials.length > 0) {
+                int next = _random.nextInt(_tutorials.length);
+                while (next == _tutorialFlipper.getDisplayedChild()) {
+                    next = _random.nextInt(_tutorials.length);
+                }
+                _tutorialFlipper.setInAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_in_right));
+                _tutorialFlipper.setOutAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_out_left));
+                _tutorialFlipper.setDisplayedChild(next);
+                _tutorialHandler.postDelayed(this, TUTORIAL_TRANSITION_DELAY);
+            }
+        }
+    };
+
+    // Set up swipe gesture listener
+    _tutorialFlipper.setOnTouchListener((v, event) -> {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                _lastX = event.getX();
+                return true;
+            case MotionEvent.ACTION_UP:
+                _tutorialHandler.removeCallbacks(_tutorialRunnable); // Reset timer on manual interaction
+                float currentX = event.getX();
+                if (_lastX < currentX) { // Swiped right
+                    _tutorialFlipper.setInAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_in_left));
+                    _tutorialFlipper.setOutAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_out_right));
+                    _tutorialFlipper.showPrevious();
+                }
+                if (_lastX > currentX) { // Swiped left
+                    _tutorialFlipper.setInAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_in_right));
+                    _tutorialFlipper.setOutAnimation(AnimationUtils.loadAnimation(Keyboard2.this, R.anim.slide_out_left));
+                    _tutorialFlipper.showNext();
+                }
+                _tutorialHandler.postDelayed(_tutorialRunnable, TUTORIAL_TRANSITION_DELAY); // Restart timer
+                break;
+        }
+        return false;
+    });
+
     _inputView.findViewById(R.id.suggestion_strip_handle).setOnClickListener(v -> {
         _config.suggestionStripOnTop = !_config.suggestionStripOnTop;
         SharedPreferences.Editor editor = Config.globalPrefs().edit();
@@ -492,6 +560,7 @@ public class Keyboard2 extends InputMethodService
     }
 
     _suggestionStrip.setVisibility(View.VISIBLE);
+    _ziaistanOfficialText.setVisibility(View.VISIBLE);
     _suggestionsGrid.removeAllViews();
 
     final List<String> suggestions;
@@ -501,29 +570,34 @@ public class Keyboard2 extends InputMethodService
         suggestions = new ArrayList<>();
     }
 
-    Context themedContext = new ContextThemeWrapper(this, _config.theme);
-    LayoutInflater inflater = LayoutInflater.from(themedContext);
-
     if (suggestions.isEmpty()) {
-      TextView suggestionView = (TextView) inflater.inflate(R.layout.suggestion_item, _suggestionsGrid, false);
-      suggestionView.setText("@ziaistan_official");
-      suggestionView.setClickable(false);
-      _suggestionsGrid.addView(suggestionView);
+        // Show tutorial view
+        _suggestionStripScroll.setVisibility(View.GONE);
+        _tutorialFlipper.setVisibility(View.VISIBLE);
+        _tutorialHandler.removeCallbacks(_tutorialRunnable); // Ensure no duplicates
+        _tutorialHandler.postDelayed(_tutorialRunnable, TUTORIAL_TRANSITION_DELAY);
     } else {
-      View.OnClickListener suggestionClickListener = v -> {
-        TextView tv = (TextView) v;
-        String suggestion = tv.getText().toString();
-        if (suggestion.length() > 0) {
-          _keyeventhandler.replaceCurrentWord(suggestion);
-        }
-      };
+        // Show suggestions view
+        _tutorialHandler.removeCallbacks(_tutorialRunnable); // Stop the timer
+        _tutorialFlipper.setVisibility(View.GONE);
+        _suggestionStripScroll.setVisibility(View.VISIBLE);
 
-      for (String suggestion : suggestions) {
-        TextView suggestionView = (TextView) inflater.inflate(R.layout.suggestion_item, _suggestionsGrid, false);
-        suggestionView.setText(suggestion);
-        suggestionView.setOnClickListener(suggestionClickListener);
-        _suggestionsGrid.addView(suggestionView);
-      }
+        Context themedContext = new ContextThemeWrapper(this, _config.theme);
+        LayoutInflater inflater = LayoutInflater.from(themedContext);
+        View.OnClickListener suggestionClickListener = v -> {
+            TextView tv = (TextView) v;
+            String suggestion = tv.getText().toString();
+            if (suggestion.length() > 0) {
+                _keyeventhandler.replaceCurrentWord(suggestion);
+            }
+        };
+
+        for (String suggestion : suggestions) {
+            TextView suggestionView = (TextView) inflater.inflate(R.layout.suggestion_item, _suggestionsGrid, false);
+            suggestionView.setText(suggestion);
+            suggestionView.setOnClickListener(suggestionClickListener);
+            _suggestionsGrid.addView(suggestionView);
+        }
     }
   }
 
