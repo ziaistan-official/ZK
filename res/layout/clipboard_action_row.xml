@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    style="?android:attr/buttonBarStyle"
-    android:background="?android:attr/colorBackground"
+    android:background="?attr/colorKeyboard"
     android:paddingTop="4dp"
     android:paddingBottom="4dp">
 

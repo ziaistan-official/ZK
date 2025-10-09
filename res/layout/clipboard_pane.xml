@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground">
+    android:background="?attr/colorKeyboard">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/clipboard_recycler_view"
