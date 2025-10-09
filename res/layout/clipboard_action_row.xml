@@ -13,7 +13,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="@string/clipboard_back_to_keyboard" />
+        android:text="@string/clipboard_back_to_keyboard"
+        android:textColor="?attr/colorLabel" />
 
     <Button
         android:id="@+id/clipboard_import_button"
@@ -21,7 +22,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="@string/clipboard_import" />
+        android:text="@string/clipboard_import"
+        android:textColor="?attr/colorLabel" />
 
     <Button
         android:id="@+id/clipboard_export_button"
@@ -29,6 +31,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="@string/clipboard_export" />
+        android:text="@string/clipboard_export"
+        android:textColor="?attr/colorLabel" />
 
 </LinearLayout>

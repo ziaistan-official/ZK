@@ -2,6 +2,40 @@
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
 
+## Clipboard Refactor
+
+The clipboard feature has been completely rebuilt from the ground up to provide a modern, intuitive, and powerful experience.
+
+### Modern, Theme-Aware UI
+- The old list has been replaced with a fluid, grid-based layout using `RecyclerView`.
+- Each clipboard item is displayed in a `CardView` with rounded, theme-aware borders, visually separating them.
+- The entire clipboard pane, including items and buttons, is now fully **theme-aware**, matching the background, key, and text colors of your active keyboard theme.
+
+### Gestures and Actions
+- **Tap to Paste**: Simply tap any item to instantly paste its content.
+- **Long-Press to Pin/Unpin**: Long-press any item to toggle its pinned status.
+- **Swipe to Delete**: Swipe any item left or right to delete it from your history.
+- **Scrolling**: Vertical scrolling is now smooth and uninterrupted, as the conflicting vertical swipe gestures have been removed.
+
+### Pinning Logic
+- When an item is pinned, it moves to the bottom of the grid.
+- Pinned items remain at the bottom, sorted by the time they were pinned.
+- Unpinned items appear at the top, sorted with the most recent items first.
+
+### Import and Export
+- **Export**: Save your entire clipboard history (pinned and unpinned items) to a JSON file.
+- **Import**: Load clipboard items from a JSON file. The import function intelligently avoids adding duplicate entries.
+
+### Navigation
+- A **Back** button has been added to the bottom action row to easily return to the main keyboard.
+- The system's navigation bar back button will also now correctly close the clipboard view.
+
+### Settings
+- Clipboard history is now **enabled by default** for a better out-of-the-box experience.
+- You can toggle the feature on or off in **Settings > Clipboard**.
+
+This refactoring provides a much more robust and user-friendly clipboard that is seamlessly integrated with the keyboard's look and feel.
+
 ## Custom Dictionary
 
 This feature allows you to create and manage a personal dictionary for word suggestions. Words from your custom dictionary will be prioritized over the standard suggestions.

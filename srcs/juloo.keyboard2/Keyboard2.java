@@ -424,6 +424,15 @@ public class Keyboard2 extends InputMethodService
     }
   }
 
+  @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+      if (keyCode == KeyEvent.KEYCODE_BACK && _clipboard_pane != null && _clipboard_pane.isShown()) {
+          _keyeventhandler.key_up(KeyValue.getSpecialKeyByName("switch_back_clipboard"), Pointers.Modifiers.EMPTY);
+          return true; // Consume the event
+      }
+      return super.onKeyDown(keyCode, event);
+  }
+
   private void setupSuggestionStrip() {
     _suggestionStripScroll = _inputView.findViewById(R.id.suggestions_strip_scroll);
     _suggestionStrip = _inputView.findViewById(R.id.suggestions_strip);

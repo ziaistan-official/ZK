@@ -6,7 +6,9 @@
     android:layout_margin="4dp"
     card_view:cardBackgroundColor="?attr/colorKey"
     card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="2dp">
+    card_view:cardElevation="2dp"
+    card_view:strokeColor="?attr/colorLabel"
+    card_view:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
