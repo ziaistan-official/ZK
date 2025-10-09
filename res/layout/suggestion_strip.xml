@@ -4,24 +4,44 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="?attr/colorKeyboard"
-    android:visibility="gone">
+    android:visibility="gone"
+    android:gravity="center_vertical">
 
-    <HorizontalScrollView
-        android:id="@+id/suggestions_strip_scroll"
+    <TextView
+        android:id="@+id/ziaistan_official_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\@ziaistan_official"
+        android:textColor="?attr/colorLabel"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"/>
+
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:scrollbars="none">
+        android:layout_weight="1">
 
-        <GridLayout
-            android:id="@+id/suggestions_grid"
-            android:layout_width="wrap_content"
+        <HorizontalScrollView
+            android:id="@+id/suggestions_strip_scroll"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="100"
-            android:rowCount="2"
-            android:orientation="horizontal" />
+            android:scrollbars="none">
 
-    </HorizontalScrollView>
+            <GridLayout
+                android:id="@+id/suggestions_grid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:columnCount="100"
+                android:rowCount="2"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <ViewFlipper
+            android:id="@+id/tutorial_flipper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/suggestion_strip_handle"
