@@ -56,7 +56,7 @@ public class Keyboard2 extends InputMethodService
   private final Handler _tutorialHandler = new Handler();
   private Runnable _tutorialRunnable;
   private final Random _random = new Random();
-  private static final int TUTORIAL_TRANSITION_DELAY = 5000; // 5 seconds
+  private static final int TUTORIAL_TRANSITION_DELAY = 25000; // 25 seconds
   /** If not 'null', the layout to use instead of [_config.current_layout]. */
   private KeyboardData _currentSpecialLayout;
   /** Layout associated with the currently selected locale. Not 'null'. */
