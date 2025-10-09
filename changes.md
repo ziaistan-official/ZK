@@ -2,6 +2,15 @@
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
 
+## Theme Switching Key
+
+A new theme-switching key has been added to the bottom row of the keyboard to allow for quick and easy theme changes.
+
+*   **Icon**: The key is represented by a 👕 icon.
+*   **Tap to Cycle**: A short tap on the key cycles through a predefined list of six themes: Galactic, Golden Pearl, Neon Punk, Everforest Light, Cobalt, and ePaper.
+*   **Swipe to Select**: A swipe to the sides on the key changing the themes right side lighter themes left side darker themes, allowing you to select one directly.
+*   **Instant Refresh**: The selected theme is applied to the keyboard immediately, without requiring a restart.
+
 ## Enhanced Suggestion Strip Tutorials
 
 To help users discover the keyboard's rich feature set, the suggestion strip now includes a dynamic tutorial system.
