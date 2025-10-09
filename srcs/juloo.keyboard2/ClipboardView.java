@@ -43,6 +43,12 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new GestureCallback());
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+        Keyboard2View bottomRowView = findViewById(R.id.clipboard_bottom_row_view);
+        if (bottomRowView != null) {
+            KeyboardData bottomRowLayout = KeyboardData.load(getContext().getResources(), R.xml.clipboard_bottom_row);
+            bottomRowView.setKeyboard(bottomRowLayout);
+        }
+
         Button importButton = findViewById(R.id.clipboard_import_button);
         importButton.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ImportClipboardActivity.class);
@@ -61,7 +67,6 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
         backButton.setOnClickListener(v -> {
             KeyEventHandler handler = (KeyEventHandler) Config.globalConfig().handler;
             if (handler != null) {
-                // Use the static factory method to ensure correct constructor usage
                 handler.key_up(KeyValue.getSpecialKeyByName("switch_back_clipboard"), Pointers.Modifiers.EMPTY);
             }
         });

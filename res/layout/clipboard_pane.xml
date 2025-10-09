@@ -13,4 +13,10 @@
 
     <include layout="@layout/clipboard_action_row" />
 
+    <juloo.keyboard2.Keyboard2View
+        android:id="@+id/clipboard_bottom_row_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorKeyboard" />
+
 </juloo.keyboard2.ClipboardView>
