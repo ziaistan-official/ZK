@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
+import juloo.keyboard2.AutoCorrectionProvider;
 
 public final class KeyEventHandler
   implements Config.IKeyEventHandler,

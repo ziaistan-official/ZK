@@ -36,6 +36,7 @@ import java.util.Random;
 import java.util.Set;
 import juloo.keyboard2.prefs.LayoutsPreference;
 import juloo.keyboard2.SuggestionProvider;
+import juloo.keyboard2.AutoCorrectionProvider;
 
 public class Keyboard2 extends InputMethodService
   implements SharedPreferences.OnSharedPreferenceChangeListener
