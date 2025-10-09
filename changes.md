@@ -2,6 +2,38 @@
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
 
+## Enhanced Suggestion Strip Tutorials
+
+To help users discover the keyboard's rich feature set, the suggestion strip now includes a dynamic tutorial system.
+
+### Feature Overview
+
+*   **Context-Aware Display**: When there are no word suggestions to show, the suggestion strip will automatically display helpful tips and tricks.
+*   **Dynamic Content**: The feature includes over 80 detailed tutorials covering everything from basic clipboard actions to advanced circle gestures.
+*   **Automatic Scrolling**: To ensure users see a variety of tips, the tutorials automatically transition to a new, random tip every 5 seconds.
+*   **Manual Navigation**: Users can also manually swipe left or right on the tutorial text to navigate to the previous or next tip. Manual interaction will temporarily pause the automatic scrolling.
+
+This system provides a seamless way for users to learn about the keyboard's capabilities directly within the UI.
+
+### How to Add New Tutorials
+
+Adding new tutorials is simple and can be done by editing a single resource file.
+
+1.  **Locate the File**: Open the `res/values/arrays.xml` file in the project.
+2.  **Find the Array**: Inside this file, locate the `<string-array>` with the name `tutorials`.
+3.  **Add a New Item**: To add a new tip, simply add a new `<item>` tag within the `tutorials` array. For example:
+
+    ```xml
+    <string-array name="tutorials">
+        <!-- Existing tips -->
+        <item>Your new tutorial tip goes here.</item>
+    </string-array>
+    ```
+
+4.  **Important Note on Special Characters**: If your tutorial string contains special characters like an apostrophe (`'`), you **must** escape it with a backslash (`\'`) to prevent the build from failing. For example: `Tip: This is a user\'s guide.`
+
+The keyboard will automatically pick up the new tutorial the next time the application is built.
+
 ## Clipboard Refactor
 
 The clipboard feature has been completely rebuilt from the ground up to provide a modern, intuitive, and powerful experience.
