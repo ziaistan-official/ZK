@@ -27,7 +27,7 @@ public class DataSyncService {
     public boolean importData() {
         boolean dictSuccess = importDictionary();
         boolean clipSuccess = importClipboard();
-        return dictSuccess && clipSuccess;
+        return dictSuccess || clipSuccess; // Return true if at least one import was successful
     }
 
     public boolean exportData() {
@@ -60,7 +60,7 @@ public class DataSyncService {
         Log.d(TAG, "Importing from: " + sourceFile.getAbsolutePath() + " to " + destFile.getAbsolutePath());
 
         if (!sourceFile.exists()) {
-            Log.e(TAG, "Import failed: Source file does not exist.");
+            Log.e(TAG, "Import failed: Source file does not exist: " + sourceFile.getAbsolutePath());
             return false;
         }
 
