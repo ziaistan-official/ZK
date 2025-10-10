@@ -80,6 +80,10 @@
     <item name="android:orientation">horizontal</item>
   </style>
   <style name="appTheme" parent="@android:style/Theme.DeviceDefault.DayNight"/>
+  <style name="darkDialogTheme" parent="@android:style/Theme.DeviceDefault.Dialog">
+    <item name="android:background">@color/menu_background_dark</item>
+  </style>
+
   <style name="settingsTheme" parent="appTheme">
     <!-- Setting this in the activity theme so it propagate to nested
          preference screens. -->
@@ -89,6 +93,7 @@
     <item name="android:textColorPrimary">@color/menu_text_aqua</item>
     <item name="android:textColorSecondary">@color/menu_text_aqua</item>
     <item name="android:colorAccent">@color/menu_text_aqua</item>
+    <item name="android:dialogTheme">@style/darkDialogTheme</item>
   </style>
   <style name="SuggestionTextStyle">
     <item name="android:layout_width">wrap_content</item>
