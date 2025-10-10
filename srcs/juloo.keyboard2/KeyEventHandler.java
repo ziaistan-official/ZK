@@ -505,6 +505,30 @@ public final class KeyEventHandler
     // Any other key press invalidates the revert state
     justAutoCorrected = false;
 
+    if (" ".equals(text.toString())) {
+        CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+        if (textBeforeCursor != null && textBeforeCursor.length() > 0) {
+            int i = textBeforeCursor.length();
+            while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+                i--;
+            }
+            String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
+            if (word.length() > 0) {
+                java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(word.toLowerCase());
+                if (!corrections.isEmpty()) {
+                    String bestCorrection = corrections.get(0);
+                    conn.deleteSurroundingText(word.length(), 0);
+                    conn.commitText(bestCorrection + " ", 1);
+                    originalWord = word;
+                    correctedWord = bestCorrection;
+                    justAutoCorrected = true;
+                    _recv.showSuggestions(corrections);
+                    return; // Correction applied, so we are done.
+                }
+            }
+        }
+    }
+
     conn.commitText(text, 1);
     _autocap.typed(text);
     if (mSuggestionsEnabledForThisInput) {
@@ -824,14 +848,10 @@ public final class KeyEventHandler
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
           _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          String lowerCasePrefix = prefix.toLowerCase();
-          java.util.List<String> completions = _suggestionProvider.getSuggestions(lowerCasePrefix);
-          java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCasePrefix);
-
-          java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>(corrections);
-          combinedSuggestions.addAll(completions);
-
-          _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
+          // Show prefix-based completions as the user types.
+          // Auto-correction is handled separately when the spacebar is pressed.
+          java.util.List<String> suggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
+          _recv.showSuggestions(suggestions);
       }
   }
 
