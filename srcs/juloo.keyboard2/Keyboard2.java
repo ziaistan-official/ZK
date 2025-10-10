@@ -768,11 +768,9 @@ public class Keyboard2 extends InputMethodService
     public void selection_state_changed(boolean selection_is_ongoing)
     {
       _keyboardView.set_selection_state(selection_is_ongoing);
-    }
-
-    @Override
-    public void updateSuggestionsFromPrefix(String prefix) {
-      Keyboard2.this.updateSuggestionsFromPrefix(prefix);
+      if (selection_is_ongoing) {
+          _keyeventhandler.updateSuggestionsFromPrefix();
+      }
     }
 
     @Override

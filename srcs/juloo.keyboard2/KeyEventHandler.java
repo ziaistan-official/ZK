@@ -91,7 +91,7 @@ public final class KeyEventHandler
     } else {
         mSuggestionsEnabledForThisInput = false;
     }
-    _recv.updateSuggestionsFromPrefix(null);
+    _recv.showSuggestions(java.util.Collections.emptyList());
   }
 
   /** Selection has been updated. */
@@ -507,7 +507,7 @@ public final class KeyEventHandler
     _autocap.typed(text);
     if (mSuggestionsEnabledForThisInput) {
         if (" ".equals(text.toString())) {
-            _recv.updateSuggestionsFromPrefix(null);
+            _recv.showSuggestions(java.util.Collections.emptyList());
         } else {
             updateSuggestionsFromPrefix();
         }
@@ -796,19 +796,19 @@ public final class KeyEventHandler
     return info.packageName.startsWith("org.godotengine.editor");
   }
 
-  private void updateSuggestionsFromPrefix() {
+  public void updateSuggestionsFromPrefix() {
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
       ExtractedText et = get_cursor_pos(conn);
       if (et != null && et.selectionStart != et.selectionEnd) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
           return;
       }
 
       CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
       if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
           return;
       }
 
@@ -820,9 +820,10 @@ public final class KeyEventHandler
       String prefix = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
 
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          _recv.updateSuggestionsFromPrefix(prefix.toLowerCase());
+          java.util.List<String> suggestions = _autoCorrectionProvider.getCorrections(prefix.toLowerCase());
+          _recv.showSuggestions(suggestions);
       }
   }
 
@@ -909,7 +910,6 @@ public final class KeyEventHandler
     public void set_shift_state(boolean state, boolean lock);
     public void set_compose_pending(boolean pending);
     public void selection_state_changed(boolean selection_is_ongoing);
-  void updateSuggestionsFromPrefix(String prefix);
   void showSuggestions(java.util.List<String> suggestions);
     void reloadCustomDictionary();
     public InputConnection getCurrentInputConnection();
