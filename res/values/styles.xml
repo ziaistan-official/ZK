@@ -86,6 +86,9 @@
     <item name="android:fitsSystemWindows">true</item>
     <item name="android:windowBackground">@color/menu_background_dark</item>
     <item name="android:textColor">@color/menu_text_aqua</item>
+    <item name="android:textColorPrimary">@color/menu_text_aqua</item>
+    <item name="android:textColorSecondary">@color/menu_text_aqua</item>
+    <item name="android:colorAccent">@color/menu_text_aqua</item>
   </style>
   <style name="SuggestionTextStyle">
     <item name="android:layout_width">wrap_content</item>
