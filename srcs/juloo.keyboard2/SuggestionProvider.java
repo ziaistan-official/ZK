@@ -7,12 +7,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SuggestionProvider {
 
@@ -28,7 +25,6 @@ public class SuggestionProvider {
     private final TrieNode commonRoot;
     private final TrieNode wordlistRoot;
     private final Context context;
-    private final Map<String, List<String>> anagramMap = new ConcurrentHashMap<>();
 
     private volatile boolean commonLoaded = false;
     private volatile boolean wordlistLoaded = false;
@@ -53,9 +49,6 @@ public class SuggestionProvider {
         synchronized (customRoot) {
             customRoot.children.clear();
             customRoot.isEndOfWord = false;
-            // Note: This only clears anagrams from the custom dictionary.
-            // A full reload would require more extensive logic.
-            anagramMap.clear();
             loadCustomDictionary(customRoot);
         }
     }
@@ -93,35 +86,6 @@ public class SuggestionProvider {
             current = current.children.computeIfAbsent(ch, c -> new TrieNode());
         }
         current.isEndOfWord = true;
-
-        // Populate the anagram map
-        String signature = getWordSignature(word);
-        List<String> anagrams = anagramMap.computeIfAbsent(signature, k -> Collections.synchronizedList(new ArrayList<>()));
-        if (!anagrams.contains(word)) {
-            anagrams.add(word);
-        }
-    }
-
-    /**
-     * Generates a signature for a word by sorting its characters.
-     * This is used to find anagrams.
-     * @param word The word to process.
-     * @return The signature of the word.
-     */
-    private String getWordSignature(String word) {
-        char[] chars = word.toLowerCase().toCharArray();
-        Arrays.sort(chars);
-        return new String(chars);
-    }
-
-    /**
-     * Gets a list of anagrams for a given word.
-     * @param word The word to find anagrams for.
-     * @return A list of anagrams, or an empty list if none are found.
-     */
-    public List<String> getAnagrams(String word) {
-        String signature = getWordSignature(word);
-        return anagramMap.getOrDefault(signature, Collections.emptyList());
     }
 
     public List<String> getSuggestions(String prefix) {

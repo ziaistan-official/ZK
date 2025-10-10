@@ -189,13 +189,15 @@ public class LayoutBasedAutoCorrectionProvider {
     }
 
     private void getTranspositionCandidates(String word, Set<CorrectionCandidate> candidates) {
-        // Implements the user's request for a complex, multi-character transposition
-        // by finding all anagrams of the typed word in the dictionary.
-        List<String> anagrams = suggestionProvider.getAnagrams(word);
-        for (String anagram : anagrams) {
-            // Don't suggest the word back to itself.
-            if (!word.equals(anagram)) {
-                candidates.add(new CorrectionCandidate(anagram, suggestionProvider.getWordSource(anagram)));
+        if (word.length() < 2) return;
+        for (int i = 0; i < word.length() - 1; i++) {
+            char[] chars = word.toCharArray();
+            char temp = chars[i];
+            chars[i] = chars[i + 1];
+            chars[i + 1] = temp;
+            String candidateWord = new String(chars);
+            if (suggestionProvider.isValidWord(candidateWord)) {
+                candidates.add(new CorrectionCandidate(candidateWord, suggestionProvider.getWordSource(candidateWord)));
             }
         }
     }
