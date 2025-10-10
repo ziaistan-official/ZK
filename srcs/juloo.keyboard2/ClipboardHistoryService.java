@@ -245,14 +245,19 @@ public final class ClipboardHistoryService {
             }
         }
 
+        String jsonPayload = jsonArray.toString();
+
+        // Persist to internal storage
         File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
         try (FileOutputStream fos = new FileOutputStream(file);
              OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
-            writer.write(jsonArray.toString());
-            new DataSyncService(context).exportClipboard();
+            writer.write(jsonPayload);
         } catch (IOException e) {
             Log.e(TAG, "Failed to persist clipboard history", e);
         }
+
+        // Export directly to external storage
+        new DataSyncService(context).exportClipboard(jsonPayload);
     }
 
     private void migrateFromPrefs() {

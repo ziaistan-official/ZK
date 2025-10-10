@@ -46,8 +46,24 @@ public class DataSyncService {
         exportFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
     }
 
-    public void exportClipboard() {
-        exportFile(CLIPBOARD_EXPORT_FILENAME, CLIPBOARD_INTERNAL_FILENAME);
+    public void exportClipboard(String jsonPayload) {
+        File externalDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_DIR_NAME);
+        if (!externalDir.exists()) {
+            if (!externalDir.mkdirs()) {
+                Log.e(TAG, "Export failed: Could not create external directory: " + externalDir.getAbsolutePath());
+                return;
+            }
+        }
+
+        File destFile = new File(externalDir, CLIPBOARD_EXPORT_FILENAME);
+        Log.d(TAG, "Attempting to export clipboard to: " + destFile.getAbsolutePath());
+
+        try (FileOutputStream fos = new FileOutputStream(destFile)) {
+            fos.write(jsonPayload.getBytes());
+            Log.d(TAG, "Successfully exported " + CLIPBOARD_EXPORT_FILENAME);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to export " + CLIPBOARD_EXPORT_FILENAME, e);
+        }
     }
 
     private void importFile(String sourceFileName, String destFileName) {
