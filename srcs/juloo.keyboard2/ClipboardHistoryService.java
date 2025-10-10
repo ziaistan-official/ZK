@@ -249,6 +249,7 @@ public final class ClipboardHistoryService {
         try (FileOutputStream fos = new FileOutputStream(file);
              OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
             writer.write(jsonArray.toString());
+            new DataSyncService(context).exportClipboard();
         } catch (IOException e) {
             Log.e(TAG, "Failed to persist clipboard history", e);
         }

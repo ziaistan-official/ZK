@@ -309,7 +309,7 @@ public final class KeyEventHandler
                   fos.write((newWord + "\n").getBytes());
                   Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
                   _recv.reloadCustomDictionary();
-                  // Automatic export is handled by the settings activity now
+                  new DataSyncService(_recv.getContext()).exportDictionary();
               } catch (IOException e) {
                   e.printStackTrace();
                   Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();

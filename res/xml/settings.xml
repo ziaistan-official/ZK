@@ -86,22 +86,4 @@
         android:entryValues="@array/pref_clipboard_duration_values"
         android:dependency="clipboard_history_enabled"/>
    </PreferenceCategory>
-  <PreferenceCategory android:title="Backup &amp; Restore">
-    <Preference
-        android:key="import_custom_dictionary"
-        android:title="Import Custom Dictionary"
-        android:summary="Import words from a text file"/>
-    <Preference
-        android:key="export_custom_dictionary"
-        android:title="Export Custom Dictionary"
-        android:summary="Export custom words to a text file"/>
-    <Preference
-        android:key="import_clipboard_history"
-        android:title="Import Clipboard History"
-        android:summary="Import clips from a JSON file"/>
-    <Preference
-        android:key="export_clipboard_history"
-        android:title="Export Clipboard History"
-        android:summary="Export clips to a JSON file"/>
-  </PreferenceCategory>
 </PreferenceScreen>
