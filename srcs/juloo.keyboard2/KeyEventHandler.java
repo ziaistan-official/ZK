@@ -170,7 +170,13 @@ public final class KeyEventHandler
             }
         }
         break;
-      case Event: _recv.handle_event_key(key.getEvent()); break;
+      case Event:
+        if (key.getEvent() == KeyValue.Event.EXPORT_DATA) {
+          Toast.makeText(_recv.getContext(), "Export from keyboard settings.", Toast.LENGTH_LONG).show();
+        } else {
+          _recv.handle_event_key(key.getEvent());
+        }
+        break;
       case Keyevent: send_key_down_up(key.getKeyevent()); break;
       case Modifier: break;
       case Editing: handle_editing_key(key.getEditing()); break;
@@ -303,6 +309,7 @@ public final class KeyEventHandler
                   fos.write((newWord + "\n").getBytes());
                   Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
                   _recv.reloadCustomDictionary();
+                  new DataSyncService(_recv.getContext()).exportDictionary();
               } catch (IOException e) {
                   e.printStackTrace();
                   Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
