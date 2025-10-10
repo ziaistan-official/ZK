@@ -872,7 +872,7 @@ public final class KeyEventHandler
       conn.endBatchEdit();
 
       _autocap.typed(" ");
-      _recv.updateSuggestionsFromPrefix(null); // Clear suggestions after selection
+      _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
 
       // Reset the correction state
       justAutoCorrected = false;
