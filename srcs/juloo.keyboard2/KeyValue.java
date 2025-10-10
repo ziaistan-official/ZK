@@ -30,6 +30,7 @@ public final class KeyValue implements Comparable<KeyValue>
     SET_THEME_EVERFOREST_LIGHT,
     SET_THEME_COBALT,
     SET_THEME_EPAPER,
+    EXPORT_DATA,
   }
 
   // Must be evaluated in the reverse order of their values.
@@ -659,6 +660,7 @@ public final class KeyValue implements Comparable<KeyValue>
       case "set_theme_everforest_light": return eventKey("▫️", Event.SET_THEME_EVERFOREST_LIGHT, FLAG_SMALLER_FONT);
       case "set_theme_cobalt": return eventKey("▪️", Event.SET_THEME_COBALT, FLAG_SMALLER_FONT);
       case "set_theme_epaper": return eventKey("▫️", Event.SET_THEME_EPAPER, FLAG_SMALLER_FONT);
+      case "export_data": return eventKey("📤", Event.EXPORT_DATA, 0);
 
       /* Key events */
       case "esc": return keyeventKey("Esc", KeyEvent.KEYCODE_ESCAPE, FLAG_SMALLER_FONT);

@@ -13,7 +13,7 @@ import java.nio.channels.FileChannel;
 public class DataSyncService {
 
     private static final String TAG = "DataSyncService";
-    private static final String EXTERNAL_DIR_NAME = "ziaistan_keyblard";
+    private static final String EXTERNAL_DIR_NAME = "ziaistan_keyboard_backup";
     private static final String CUSTOM_DICT_FILENAME = "custom.txt";
     private static final String CLIPBOARD_EXPORT_FILENAME = "clipboard_export.json";
     private static final String CLIPBOARD_INTERNAL_FILENAME = "clipboard_history.json";

@@ -51,7 +51,7 @@ public class LauncherActivity extends Activity implements Handler.Callback
           this.new Tryhere_OnUnhandledKeyEventListener());
     _handler = new Handler(getMainLooper(), this);
 
-    SharedPreferences prefs = getSharedPreferences("juloo.keyboard2.prefs", MODE_PRIVATE);
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
     if (prefs.getBoolean("isFirstRun", true)) {
         if (checkAndRequestStoragePermission()) {
             performFirstRunTasks();
@@ -77,7 +77,7 @@ public class LauncherActivity extends Activity implements Handler.Callback
       DataSyncService dataSyncService = new DataSyncService(this);
       dataSyncService.importData();
 
-      SharedPreferences prefs = getSharedPreferences("juloo.keyboard2.prefs", MODE_PRIVATE);
+      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
       prefs.edit().putBoolean("isFirstRun", false).apply();
   }
 

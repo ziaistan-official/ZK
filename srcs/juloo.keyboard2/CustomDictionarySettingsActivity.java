@@ -103,6 +103,7 @@ public class CustomDictionarySettingsActivity extends PreferenceActivity {
             Toast.makeText(this, "Dictionary imported successfully.", Toast.LENGTH_SHORT).show();
             if (dictionaryChanged) {
                 sendBroadcast(new Intent(RELOAD_CUSTOM_DICTIONARY_ACTION));
+                new DataSyncService(this).exportDictionary();
             }
         } catch (IOException e) {
             Toast.makeText(this, "Error importing dictionary.", Toast.LENGTH_SHORT).show();

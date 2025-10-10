@@ -86,7 +86,7 @@
         android:entryValues="@array/pref_clipboard_duration_values"
         android:dependency="clipboard_history_enabled"/>
    </PreferenceCategory>
-  <PreferenceCategory android:title="Backup & Restore">
+  <PreferenceCategory android:title="Backup &amp; Restore">
     <Preference
         android:key="import_data"
         android:title="Import Data"
