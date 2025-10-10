@@ -172,12 +172,7 @@ public final class KeyEventHandler
         break;
       case Event:
         if (key.getEvent() == KeyValue.Event.EXPORT_DATA) {
-          boolean success = new DataSyncService(_recv.getContext()).exportData();
-          if (success) {
-              Toast.makeText(_recv.getContext(), "Data exported successfully.", Toast.LENGTH_SHORT).show();
-          } else {
-              Toast.makeText(_recv.getContext(), "Export failed. Check logs for details.", Toast.LENGTH_LONG).show();
-          }
+          Toast.makeText(_recv.getContext(), "Export from keyboard settings.", Toast.LENGTH_LONG).show();
         } else {
           _recv.handle_event_key(key.getEvent());
         }
@@ -314,7 +309,7 @@ public final class KeyEventHandler
                   fos.write((newWord + "\n").getBytes());
                   Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
                   _recv.reloadCustomDictionary();
-                  new DataSyncService(_recv.getContext()).exportDictionary(); // This is fire-and-forget, as per user feedback
+                  // Automatic export is handled by the settings activity now
               } catch (IOException e) {
                   e.printStackTrace();
                   Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
