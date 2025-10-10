@@ -220,6 +220,11 @@ Here is a complete list of the new gestures and their functions. These gestures 
 | **North-West** | Clockwise | `CircleNW` | Appends 'o' | `ko` |
 | **North-West** | Anti-Clockwise| `AnticircleNW`| `Ctrl+Shift+Character`| `Ctrl+Shift+k` |
 
+
+View the animated grid in: [grid.html](grid.html) download it amd view in web browser
+
+
+
 ### Technical Implementation Details
 
 For developers or those interested in the underlying changes, here is a summary of how this feature was implemented:
