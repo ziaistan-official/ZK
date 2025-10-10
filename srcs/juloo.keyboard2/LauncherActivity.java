@@ -8,6 +8,9 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build.VERSION;
+import android.Manifest;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,11 +23,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LauncherActivity extends Activity implements Handler.Callback
 {
+  private static final int STORAGE_PERMISSION_REQUEST_CODE = 1;
+
   /** Text is replaced when receiving key events. */
   TextView _tryhere_text;
   EditText _tryhere_area;
@@ -43,6 +50,45 @@ public class LauncherActivity extends Activity implements Handler.Callback
       _tryhere_area.addOnUnhandledKeyEventListener(
           this.new Tryhere_OnUnhandledKeyEventListener());
     _handler = new Handler(getMainLooper(), this);
+
+    SharedPreferences prefs = getSharedPreferences("juloo.keyboard2.prefs", MODE_PRIVATE);
+    if (prefs.getBoolean("isFirstRun", true)) {
+        if (checkAndRequestStoragePermission()) {
+            performFirstRunTasks();
+        }
+    }
+  }
+
+  private boolean checkAndRequestStoragePermission() {
+      if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+          ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+          ActivityCompat.requestPermissions(this,
+                  new String[]{
+                          Manifest.permission.READ_EXTERNAL_STORAGE,
+                          Manifest.permission.WRITE_EXTERNAL_STORAGE
+                  },
+                  STORAGE_PERMISSION_REQUEST_CODE);
+          return false;
+      }
+      return true;
+  }
+
+  private void performFirstRunTasks() {
+      DataSyncService dataSyncService = new DataSyncService(this);
+      dataSyncService.importData();
+
+      SharedPreferences prefs = getSharedPreferences("juloo.keyboard2.prefs", MODE_PRIVATE);
+      prefs.edit().putBoolean("isFirstRun", false).apply();
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+      super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+      if (requestCode == STORAGE_PERMISSION_REQUEST_CODE) {
+          if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+              performFirstRunTasks();
+          }
+      }
   }
 
   @Override
