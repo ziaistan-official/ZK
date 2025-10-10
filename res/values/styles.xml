@@ -84,6 +84,8 @@
     <!-- Setting this in the activity theme so it propagate to nested
          preference screens. -->
     <item name="android:fitsSystemWindows">true</item>
+    <item name="android:windowBackground">@color/menu_background_dark</item>
+    <item name="android:textColor">@color/menu_text_aqua</item>
   </style>
   <style name="SuggestionTextStyle">
     <item name="android:layout_width">wrap_content</item>
