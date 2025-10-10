@@ -86,4 +86,14 @@
         android:entryValues="@array/pref_clipboard_duration_values"
         android:dependency="clipboard_history_enabled"/>
    </PreferenceCategory>
+  <PreferenceCategory android:title="Backup & Restore">
+    <Preference
+        android:key="import_data"
+        android:title="Import Data"
+        android:summary="Import custom dictionary and clipboard from Downloads folder"/>
+    <Preference
+        android:key="export_data"
+        android:title="Export Data"
+        android:summary="Export custom dictionary and clipboard to Downloads folder"/>
+  </PreferenceCategory>
 </PreferenceScreen>

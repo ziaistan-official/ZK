@@ -2,7 +2,10 @@ package juloo.keyboard2;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build.VERSION;
@@ -32,6 +35,7 @@ import java.util.Set;
 public final class ClipboardHistoryService {
     private static final String TAG = "ClipboardHistoryService";
     private static final String PERSIST_FILE_NAME = "clipboard_history.json";
+    public static final String RELOAD_CLIPBOARD_HISTORY_ACTION = "juloo.keyboard2.RELOAD_CLIPBOARD_HISTORY";
     private static final int MAX_UNPINNED_HISTORY_SIZE = 20;
 
     private static ClipboardHistoryService _service = null;
@@ -76,6 +80,15 @@ public final class ClipboardHistoryService {
         this.clipboardManager = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
         this.clipboardManager.addPrimaryClipChangedListener(new SystemListener());
         loadItems();
+
+        IntentFilter filter = new IntentFilter(RELOAD_CLIPBOARD_HISTORY_ACTION);
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                loadItems();
+                notifyHistoryChange();
+            }
+        }, filter);
     }
 
     public List<ClipboardItem> getItems() {
@@ -236,7 +249,6 @@ public final class ClipboardHistoryService {
         try (FileOutputStream fos = new FileOutputStream(file);
              OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
             writer.write(jsonArray.toString());
-            new DataSyncService(context).exportClipboard();
         } catch (IOException e) {
             Log.e(TAG, "Failed to persist clipboard history", e);
         }

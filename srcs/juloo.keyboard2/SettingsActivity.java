@@ -3,9 +3,12 @@ package juloo.keyboard2;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 public class SettingsActivity extends PreferenceActivity
 {
@@ -31,6 +34,23 @@ public class SettingsActivity extends PreferenceActivity
     findPreference("horizontal_margin_landscape_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_landscape_unfolded").setEnabled(foldableDevice);
+
+    Preference importDataPref = findPreference("import_data");
+    importDataPref.setOnPreferenceClickListener(p -> {
+      new DataSyncService(this).importData();
+      Toast.makeText(this, "Data imported successfully.", Toast.LENGTH_SHORT).show();
+      // Reload dictionaries and clipboard view if needed
+      sendBroadcast(new Intent(CustomDictionarySettingsActivity.RELOAD_CUSTOM_DICTIONARY_ACTION));
+      sendBroadcast(new Intent(ClipboardHistoryService.RELOAD_CLIPBOARD_HISTORY_ACTION));
+      return true;
+    });
+
+    Preference exportDataPref = findPreference("export_data");
+    exportDataPref.setOnPreferenceClickListener(p -> {
+      new DataSyncService(this).exportData();
+      Toast.makeText(this, "Data exported successfully.", Toast.LENGTH_SHORT).show();
+      return true;
+    });
   }
 
   void fallbackEncrypted()
