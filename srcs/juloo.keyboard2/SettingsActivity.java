@@ -37,18 +37,26 @@ public class SettingsActivity extends PreferenceActivity
 
     Preference importDataPref = findPreference("import_data");
     importDataPref.setOnPreferenceClickListener(p -> {
-      new DataSyncService(this).importData();
-      Toast.makeText(this, "Data imported successfully.", Toast.LENGTH_SHORT).show();
-      // Reload dictionaries and clipboard view if needed
-      sendBroadcast(new Intent(CustomDictionarySettingsActivity.RELOAD_CUSTOM_DICTIONARY_ACTION));
-      sendBroadcast(new Intent(ClipboardHistoryService.RELOAD_CLIPBOARD_HISTORY_ACTION));
+      boolean success = new DataSyncService(this).importData();
+      if (success) {
+          Toast.makeText(this, "Data imported successfully.", Toast.LENGTH_SHORT).show();
+          // Reload dictionaries and clipboard view if needed
+          sendBroadcast(new Intent(CustomDictionarySettingsActivity.RELOAD_CUSTOM_DICTIONARY_ACTION));
+          sendBroadcast(new Intent(ClipboardHistoryService.RELOAD_CLIPBOARD_HISTORY_ACTION));
+      } else {
+          Toast.makeText(this, "Import failed. Check logs for details.", Toast.LENGTH_LONG).show();
+      }
       return true;
     });
 
     Preference exportDataPref = findPreference("export_data");
     exportDataPref.setOnPreferenceClickListener(p -> {
-      new DataSyncService(this).exportData();
-      Toast.makeText(this, "Data exported successfully.", Toast.LENGTH_SHORT).show();
+      boolean success = new DataSyncService(this).exportData();
+      if (success) {
+          Toast.makeText(this, "Data exported successfully.", Toast.LENGTH_SHORT).show();
+      } else {
+          Toast.makeText(this, "Export failed. Check logs for details.", Toast.LENGTH_LONG).show();
+      }
       return true;
     });
   }
