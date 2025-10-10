@@ -29,10 +29,6 @@ public class DataSyncService {
         importClipboard();
     }
 
-    public void exportData() {
-        exportDictionary();
-        exportClipboard();
-    }
 
     public void importDictionary() {
         importFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
