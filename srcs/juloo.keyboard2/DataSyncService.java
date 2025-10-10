@@ -24,71 +24,86 @@ public class DataSyncService {
         this.context = context;
     }
 
-    public void importData() {
-        importDictionary();
-        importClipboard();
+    public boolean importData() {
+        boolean dictSuccess = importDictionary();
+        boolean clipSuccess = importClipboard();
+        return dictSuccess || clipSuccess;
     }
 
-    public void exportData() {
-        exportDictionary();
-        exportClipboard();
+    public boolean exportData() {
+        boolean dictSuccess = exportDictionary();
+        boolean clipSuccess = exportClipboard();
+        return dictSuccess && clipSuccess;
     }
 
-    public void importDictionary() {
-        importFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
+    public boolean importDictionary() {
+        return importFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
     }
 
-    public void importClipboard() {
-        importFile(CLIPBOARD_EXPORT_FILENAME, CLIPBOARD_INTERNAL_FILENAME);
+    public boolean importClipboard() {
+        return importFile(CLIPBOARD_EXPORT_FILENAME, CLIPBOARD_INTERNAL_FILENAME);
     }
 
-    public void exportDictionary() {
-        exportFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
+    public boolean exportDictionary() {
+        return exportFile(CUSTOM_DICT_FILENAME, CUSTOM_DICT_FILENAME);
     }
 
-    public void exportClipboard() {
-        exportFile(CLIPBOARD_EXPORT_FILENAME, CLIPBOARD_INTERNAL_FILENAME);
+    public boolean exportClipboard() {
+        return exportFile(CLIPBOARD_EXPORT_FILENAME, CLIPBOARD_INTERNAL_FILENAME);
     }
 
-    private void importFile(String sourceFileName, String destFileName) {
+    private boolean importFile(String sourceFileName, String destFileName) {
         File externalDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_DIR_NAME);
         File sourceFile = new File(externalDir, sourceFileName);
         File destFile = new File(context.getFilesDir(), destFileName);
 
+        Log.d(TAG, "Attempting to import from: " + sourceFile.getAbsolutePath());
+        Log.d(TAG, "Attempting to import to: " + destFile.getAbsolutePath());
+
         if (!sourceFile.exists()) {
-            Log.d(TAG, "Source file not found for import: " + sourceFile.getAbsolutePath());
-            return;
+            Log.e(TAG, "Import failed: Source file does not exist.");
+            return false;
         }
 
         try (FileChannel sourceChannel = new FileInputStream(sourceFile).getChannel();
              FileChannel destChannel = new FileOutputStream(destFile).getChannel()) {
             destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
             Log.d(TAG, "Successfully imported " + sourceFileName);
+            return true;
         } catch (IOException e) {
             Log.e(TAG, "Failed to import " + sourceFileName, e);
+            return false;
         }
     }
 
-    private void exportFile(String destFileName, String sourceFileName) {
+    private boolean exportFile(String destFileName, String sourceFileName) {
         File internalFile = new File(context.getFilesDir(), sourceFileName);
+        Log.d(TAG, "Attempting to export from: " + internalFile.getAbsolutePath());
+
         if (!internalFile.exists()) {
-            Log.d(TAG, "Internal file not found for export: " + internalFile.getAbsolutePath());
-            return;
+            Log.e(TAG, "Export failed: Internal file not found: " + internalFile.getAbsolutePath());
+            return false;
         }
 
         File externalDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_DIR_NAME);
-        if (!externalDir.exists() && !externalDir.mkdirs()) {
-            Log.e(TAG, "Failed to create external directory: " + externalDir.getAbsolutePath());
-            return;
+        if (!externalDir.exists()) {
+            if (!externalDir.mkdirs()) {
+                Log.e(TAG, "Export failed: Could not create external directory: " + externalDir.getAbsolutePath());
+                return false;
+            }
         }
 
         File destFile = new File(externalDir, destFileName);
+        Log.d(TAG, "Attempting to export to: " + destFile.getAbsolutePath());
+
         try (FileChannel sourceChannel = new FileInputStream(internalFile).getChannel();
              FileChannel destChannel = new FileOutputStream(destFile).getChannel()) {
             destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
             Log.d(TAG, "Successfully exported " + destFileName);
+            return true;
         } catch (IOException e) {
             Log.e(TAG, "Failed to export " + destFileName, e);
+            return false;
         }
     }
 }
