@@ -47,14 +47,16 @@ public final class KeyEventHandler
   boolean mSuggestionsEnabledForThisInput = false;
   private String _pending_font_size_digit = null;
   private final LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
+  private final SuggestionProvider _suggestionProvider;
   private String originalWord = null;
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
 
-  public KeyEventHandler(IReceiver recv, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
+  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
   {
     _recv = recv;
+    _suggestionProvider = suggestionProvider;
     _autoCorrectionProvider = autoCorrectionProvider;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
@@ -822,8 +824,14 @@ public final class KeyEventHandler
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
           _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          java.util.List<String> suggestions = _autoCorrectionProvider.getCorrections(prefix.toLowerCase());
-          _recv.showSuggestions(suggestions);
+          String lowerCasePrefix = prefix.toLowerCase();
+          java.util.List<String> completions = _suggestionProvider.getSuggestions(lowerCasePrefix);
+          java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCasePrefix);
+
+          java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>(corrections);
+          combinedSuggestions.addAll(completions);
+
+          _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
       }
   }
 

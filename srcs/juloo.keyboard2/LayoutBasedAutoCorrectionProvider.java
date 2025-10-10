@@ -189,9 +189,7 @@ public class LayoutBasedAutoCorrectionProvider {
     }
 
     private void getTranspositionCandidates(String word, Set<CorrectionCandidate> candidates) {
-        if (word.length() < 2) return;
-        // Per user request, transposition for words over 4 letters. This is ambiguous
-        // but we will apply it for any word length to catch common typos.
+        if (word.length() <= 4) return; // Only apply to words with more than 4 characters.
         for (int i = 0; i < word.length() - 1; i++) {
             char[] chars = word.toCharArray();
             char temp = chars[i];
