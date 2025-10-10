@@ -47,14 +47,16 @@ public final class KeyEventHandler
   boolean mSuggestionsEnabledForThisInput = false;
   private String _pending_font_size_digit = null;
   private final LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
+  private final SuggestionProvider _suggestionProvider;
   private String originalWord = null;
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
 
-  public KeyEventHandler(IReceiver recv, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
+  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
   {
     _recv = recv;
+    _suggestionProvider = suggestionProvider;
     _autoCorrectionProvider = autoCorrectionProvider;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
@@ -91,7 +93,7 @@ public final class KeyEventHandler
     } else {
         mSuggestionsEnabledForThisInput = false;
     }
-    _recv.updateSuggestionsFromPrefix(null);
+    _recv.showSuggestions(java.util.Collections.emptyList());
   }
 
   /** Selection has been updated. */
@@ -317,6 +319,14 @@ public final class KeyEventHandler
     if (conn == null)
       return;
 
+    if (" ".equals(text.toString())) {
+        handleAutoCorrectionOnSpace();
+        return;
+    }
+
+    // Any other key press invalidates the revert state and commits the correction.
+    justAutoCorrected = false;
+
     CharSequence selectedText = conn.getSelectedText(0);
     if (selectedText != null && selectedText.length() > 0) {
         String textStr = text.toString();
@@ -466,52 +476,80 @@ public final class KeyEventHandler
         }
     }
 
-    if (" ".equals(text.toString())) {
-        CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
-        if (textBeforeCursor != null && textBeforeCursor.length() > 0) {
-            int i = textBeforeCursor.length();
-            while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
-                i--;
-            }
-            String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
-            String lowerCaseWord = word.toLowerCase();
-
-            // Check if the word was just reverted, and then clear the list for the next cycle.
-            boolean wasReverted = revertedWords.contains(lowerCaseWord);
-            revertedWords.clear();
-
-            if (word.length() > 0 && !wasReverted) {
-                java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
-                if (!corrections.isEmpty()) {
-                    String bestCorrection = corrections.get(0);
-                    conn.deleteSurroundingText(word.length(), 0);
-                    conn.commitText(bestCorrection + " ", 1);
-
-                    // Set state for potential revert
-                    originalWord = word;
-                    correctedWord = bestCorrection;
-                    justAutoCorrected = true;
-
-                    _autocap.typed(" ");
-                    _recv.showSuggestions(corrections); // Show all original correction candidates
-                    return;
-                }
-            }
-        }
-    }
-
-    // Any other key press invalidates the revert state
-    justAutoCorrected = false;
-
     conn.commitText(text, 1);
     _autocap.typed(text);
     if (mSuggestionsEnabledForThisInput) {
-        if (" ".equals(text.toString())) {
-            _recv.updateSuggestionsFromPrefix(null);
-        } else {
-            updateSuggestionsFromPrefix();
-        }
+        updateSuggestionsFromPrefix();
     }
+  }
+
+  private void handleAutoCorrectionOnSpace() {
+    InputConnection conn = _recv.getCurrentInputConnection();
+    if (conn == null) {
+        sendTextVerbatim(" ");
+        return;
+    }
+
+    CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+    if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
+        sendTextVerbatim(" ");
+        return;
+    }
+
+    int i = textBeforeCursor.length();
+    while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
+        i--;
+    }
+    String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
+    String lowerCaseWord = word.toLowerCase();
+
+    if (word.isEmpty()) {
+        sendTextVerbatim(" ");
+        return;
+    }
+
+    if (revertedWords.contains(lowerCaseWord)) {
+        revertedWords.remove(lowerCaseWord); // Consume the revert flag for this word
+        sendTextVerbatim(" ");
+        return;
+    }
+
+    // Since we are now considering a new word, clear any old revert flags.
+    if (!revertedWords.isEmpty()) {
+        revertedWords.clear();
+    }
+
+    java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
+    if (!corrections.isEmpty()) {
+        String bestCorrection = corrections.get(0);
+
+        conn.beginBatchEdit();
+        // This should fix the cursor jump issue.
+        conn.deleteSurroundingText(word.length(), 0);
+        conn.commitText(bestCorrection, 1);
+        conn.commitText(" ", 1);
+        conn.endBatchEdit();
+
+        originalWord = word;
+        correctedWord = bestCorrection;
+        justAutoCorrected = true;
+        _autocap.typed(" ");
+        _recv.showSuggestions(corrections);
+    } else {
+        sendTextVerbatim(" ");
+    }
+  }
+
+  // Helper to send text without triggering correction logic, used for committing a simple space.
+  private void sendTextVerbatim(CharSequence text) {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) return;
+
+      conn.commitText(text, 1);
+      _autocap.typed(text);
+      if (mSuggestionsEnabledForThisInput) {
+          _recv.showSuggestions(java.util.Collections.emptyList());
+      }
   }
 
   /** See {!InputConnection.performContextMenuAction}. */
@@ -796,19 +834,19 @@ public final class KeyEventHandler
     return info.packageName.startsWith("org.godotengine.editor");
   }
 
-  private void updateSuggestionsFromPrefix() {
+  public void updateSuggestionsFromPrefix() {
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
       ExtractedText et = get_cursor_pos(conn);
       if (et != null && et.selectionStart != et.selectionEnd) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
           return;
       }
 
       CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
       if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
           return;
       }
 
@@ -820,9 +858,12 @@ public final class KeyEventHandler
       String prefix = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
 
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
-          _recv.updateSuggestionsFromPrefix(null);
+          _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          _recv.updateSuggestionsFromPrefix(prefix.toLowerCase());
+          // Show prefix-based completions as the user types.
+          // Auto-correction is handled separately when the spacebar is pressed.
+          java.util.List<String> suggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
+          _recv.showSuggestions(suggestions);
       }
   }
 
@@ -871,7 +912,7 @@ public final class KeyEventHandler
       conn.endBatchEdit();
 
       _autocap.typed(" ");
-      _recv.updateSuggestionsFromPrefix(null); // Clear suggestions after selection
+      _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
 
       // Reset the correction state
       justAutoCorrected = false;
@@ -909,7 +950,6 @@ public final class KeyEventHandler
     public void set_shift_state(boolean state, boolean lock);
     public void set_compose_pending(boolean pending);
     public void selection_state_changed(boolean selection_is_ongoing);
-  void updateSuggestionsFromPrefix(String prefix);
   void showSuggestions(java.util.List<String> suggestions);
     void reloadCustomDictionary();
     public InputConnection getCurrentInputConnection();

@@ -185,4 +185,14 @@ public class SuggestionProvider {
 
         return WordSource.NONE;
     }
+
+    /**
+     * Checks if a word exists in any of the loaded dictionaries.
+     * This check is case-insensitive.
+     * @param word The word to validate.
+     * @return {@code true} if the word is found, {@code false} otherwise.
+     */
+    public boolean isValidWord(String word) {
+        return getWordSource(word) != WordSource.NONE;
+    }
 }

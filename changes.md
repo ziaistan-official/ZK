@@ -2,6 +2,24 @@
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
 
+## On-the-Fly Auto-Correction
+
+This keyboard now includes a powerful, on-the-fly auto-correction system designed to fix typos as you type without slowing you down.
+
+### How It Works
+
+*   **Triggered on Spacebar:** Auto-correction is automatically triggered when you press the spacebar after typing a word. If the system detects a potential typo, it will instantly replace the word with the most likely correction.
+*   **Keyboard-Aware Corrections:** The correction engine is "keyboard-aware," meaning it understands the layout of the keyboard. It prioritizes corrections based on keys that are physically adjacent to the ones you typed, which is a common source of typos. For example, it knows that 'o' is next to 'i' and 'p' on a QWERTY keyboard and will use this information to make more accurate suggestions.
+*   **Advanced Correction Algorithms:** The system uses a suite of sophisticated algorithms running in parallel to find the best correction for your typos. These include:
+    *   **Substitution:** Corrects typos where the wrong key was pressed (e.g., "tets" -> "test").
+    *   **Deletion:** Corrects typos where an extra character was added (e.g., "heello" -> "hello").
+    *   **Insertion:** Corrects typos where a character was missed (e.g., "hallo" -> "hello").
+    *   **Transposition:** Corrects typos where adjacent characters were swapped (e.g., "teh" -> "the").
+    *   **Reversal:** Corrects words that were typed completely backward.
+    *   **Doubling/Singling:** Corrects typos involving doubled or singled letters.
+*   **High Performance:** All correction algorithms run on a background thread pool to ensure that the keyboard's UI remains fast and responsive at all times.
+*   **Easy Revert:** If a correction was made by mistake, simply press the backspace key once to instantly revert to the original word you typed.
+
 ## Theme Switching Key
 
 A new theme-switching key has been added to the bottom row of the keyboard to allow for quick and easy theme changes.
