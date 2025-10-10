@@ -75,8 +75,10 @@ public class LauncherActivity extends Activity implements Handler.Callback
   }
 
   private void performFirstRunTasks() {
-      DataSyncService dataSyncService = new DataSyncService(this);
-      dataSyncService.importData();
+      KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+          DataSyncService dataSyncService = new DataSyncService(this);
+          dataSyncService.importData();
+      });
 
       SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
       prefs.edit().putBoolean("isFirstRun", false).apply();
