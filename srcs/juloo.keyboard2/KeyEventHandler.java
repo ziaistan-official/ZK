@@ -519,35 +519,24 @@ public final class KeyEventHandler
         return;
     }
 
-    if (revertedWords.contains(lowerCaseWord)) {
-        revertedWords.remove(lowerCaseWord); // Consume the revert flag for this word
+    if (_suggestionProvider.isValidWord(lowerCaseWord)) {
         sendTextVerbatim(" ");
         return;
     }
 
-    // Since we are now considering a new word, clear any old revert flags.
-    if (!revertedWords.isEmpty()) {
-        revertedWords.clear();
+    java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
+    java.util.List<KeyboardAwareSuggester.Suggestion> keyboardSuggestions = _keyboardAwareSuggester.suggest(lowerCaseWord);
+
+    java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>();
+    combinedSuggestions.addAll(corrections);
+    for (KeyboardAwareSuggester.Suggestion suggestion : keyboardSuggestions) {
+        combinedSuggestions.add(suggestion.word);
     }
 
-    java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
-    if (!corrections.isEmpty()) {
-        String bestCorrection = corrections.get(0);
+    sendTextVerbatim(" ");
 
-        conn.beginBatchEdit();
-        // This should fix the cursor jump issue.
-        conn.deleteSurroundingText(word.length(), 0);
-        conn.commitText(bestCorrection, 1);
-        conn.commitText(" ", 1);
-        conn.endBatchEdit();
-
-        originalWord = word;
-        correctedWord = bestCorrection;
-        justAutoCorrected = true;
-        _autocap.typed(" ");
-        _recv.showSuggestions(corrections);
-    } else {
-        sendTextVerbatim(" ");
+    if (!combinedSuggestions.isEmpty()) {
+        _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
     }
   }
 
@@ -871,16 +860,10 @@ public final class KeyEventHandler
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
           _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          java.util.List<KeyboardAwareSuggester.Suggestion> keyboardSuggestions = _keyboardAwareSuggester.suggest(prefix);
-          java.util.List<String> prefixSuggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
-
-          java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>();
-          for (KeyboardAwareSuggester.Suggestion suggestion : keyboardSuggestions) {
-              combinedSuggestions.add(suggestion.word);
-          }
-          combinedSuggestions.addAll(prefixSuggestions);
-
-          _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
+          // Show prefix-based completions as the user types.
+          // Auto-correction is handled separately when the spacebar is pressed.
+          java.util.List<String> suggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
+          _recv.showSuggestions(suggestions);
       }
   }
 

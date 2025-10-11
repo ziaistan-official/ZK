@@ -27,12 +27,13 @@ public class KeyboardAwareSuggester {
     private final Context context;
     private final Map<Character, List<Character>> surroundings;
     private final TrieNode root;
+    private volatile boolean dictionariesLoaded = false;
 
     public KeyboardAwareSuggester(Context context) {
         this.context = context;
         this.surroundings = parseSurroundings();
         this.root = new TrieNode();
-        loadDictionaries();
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(this::loadDictionaries);
     }
 
     private Map<Character, List<Character>> parseSurroundings() {
@@ -63,6 +64,7 @@ public class KeyboardAwareSuggester {
         loadDictionary("custom.txt", WordSource.CUSTOM);
         loadDictionary(R.raw.common, WordSource.COMMON);
         loadDictionary(R.raw.wordlist, WordSource.WORDLIST);
+        dictionariesLoaded = true;
     }
 
     private void loadDictionary(String filename, WordSource source) {
@@ -101,7 +103,7 @@ public class KeyboardAwareSuggester {
     }
 
     public List<Suggestion> suggest(String token) {
-        if (token == null || token.isEmpty()) {
+        if (token == null || token.isEmpty() || !dictionariesLoaded) {
             return Collections.emptyList();
         }
         String normalizedToken = token.toLowerCase();
