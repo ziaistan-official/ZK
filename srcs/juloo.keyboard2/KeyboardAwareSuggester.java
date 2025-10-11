@@ -57,33 +57,25 @@ public class KeyboardAwareSuggester {
         final List<String> commonSuggestions = Collections.synchronizedList(new ArrayList<>());
         final List<String> wordlistSuggestions = Collections.synchronizedList(new ArrayList<>());
 
-        final CountDownLatch latch = new CountDownLatch(3);
+        final CountDownLatch latch = new CountDownLatch(6); // 2 searches x 3 dictionaries
 
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-            try {
-                unifiedTrieSearch(new StringBuilder(), suggestionProvider.customRoot, normalizedToken, 0, 1, customSuggestions);
-            } finally {
-                latch.countDown();
+        // Full Substitution Search
+        runInParallel(latch, () -> fullSubstitutionSearch(new StringBuilder(), suggestionProvider.customRoot, getAlternates(normalizedToken), 0, customSuggestions));
+        runInParallel(latch, () -> {
+            if (suggestionProvider.commonLoaded) {
+                fullSubstitutionSearch(new StringBuilder(), suggestionProvider.commonRoot, getAlternates(normalizedToken), 0, commonSuggestions);
             }
         });
+        runInParallel(latch, () -> fullSubstitutionSearch(new StringBuilder(), suggestionProvider.wordlistRoot, getAlternates(normalizedToken), 0, wordlistSuggestions));
 
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-            try {
-                if (suggestionProvider.commonLoaded) {
-                    unifiedTrieSearch(new StringBuilder(), suggestionProvider.commonRoot, normalizedToken, 0, 1, commonSuggestions);
-                }
-            } finally {
-                latch.countDown();
+        // Edit Distance 1 Search
+        runInParallel(latch, () -> editDistanceSearch(new StringBuilder(), suggestionProvider.customRoot, normalizedToken, 0, 1, customSuggestions));
+        runInParallel(latch, () -> {
+            if (suggestionProvider.commonLoaded) {
+                editDistanceSearch(new StringBuilder(), suggestionProvider.commonRoot, normalizedToken, 0, 1, commonSuggestions);
             }
         });
-
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-            try {
-                unifiedTrieSearch(new StringBuilder(), suggestionProvider.wordlistRoot, normalizedToken, 0, 1, wordlistSuggestions);
-            } finally {
-                latch.countDown();
-            }
-        });
+        runInParallel(latch, () -> editDistanceSearch(new StringBuilder(), suggestionProvider.wordlistRoot, normalizedToken, 0, 1, wordlistSuggestions));
 
         try {
             latch.await();
@@ -100,15 +92,58 @@ public class KeyboardAwareSuggester {
         return new ArrayList<>(finalSuggestions);
     }
 
-    private void unifiedTrieSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
-                                   String token, int tokenIndex, int edits, List<String> suggestions) {
+    private void runInParallel(CountDownLatch latch, Runnable task) {
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            try {
+                task.run();
+            } finally {
+                latch.countDown();
+            }
+        });
+    }
+
+    private List<List<Character>> getAlternates(String token) {
+        List<List<Character>> alternates = new ArrayList<>();
+        for (char c : token.toCharArray()) {
+            List<Character> neighbors = surroundings.get(c);
+            if (neighbors == null) {
+                neighbors = Collections.singletonList(c);
+            }
+            alternates.add(neighbors);
+        }
+        return alternates;
+    }
+
+    private void fullSubstitutionSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
+                                        List<List<Character>> alternates, int position, List<String> suggestions) {
+        if (position == alternates.size()) {
+            if (node.isEndOfWord) {
+                if (!suggestions.contains(currentWord.toString())) {
+                    suggestions.add(currentWord.toString());
+                }
+            }
+            return;
+        }
+
+        for (char c : alternates.get(position)) {
+            SuggestionProvider.TrieNode child = node.children.get(c);
+            if (child != null) {
+                currentWord.append(c);
+                fullSubstitutionSearch(currentWord, child, alternates, position + 1, suggestions);
+                currentWord.deleteCharAt(currentWord.length() - 1);
+            }
+        }
+    }
+
+    private void editDistanceSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
+                                    String token, int tokenIndex, int edits, List<String> suggestions) {
         if (node.isEndOfWord && tokenIndex == token.length()) {
             if (!suggestions.contains(currentWord.toString())) {
                 suggestions.add(currentWord.toString());
             }
         }
 
-        if (tokenIndex > token.length()) {
+        if (tokenIndex > token.length() || edits < 0) {
             return;
         }
 
@@ -119,20 +154,17 @@ public class KeyboardAwareSuggester {
 
             // Match
             if (tokenIndex < token.length() && c == token.charAt(tokenIndex)) {
-                unifiedTrieSearch(currentWord, child, token, tokenIndex + 1, edits, suggestions);
+                editDistanceSearch(currentWord, child, token, tokenIndex + 1, edits, suggestions);
             } else if (edits > 0) {
                 // Substitution
-                List<Character> neighbors = surroundings.get(token.charAt(tokenIndex));
-                if (neighbors != null && neighbors.contains(c)) {
-                    unifiedTrieSearch(currentWord, child, token, tokenIndex + 1, edits - 1, suggestions);
-                }
+                editDistanceSearch(currentWord, child, token, tokenIndex + 1, edits - 1, suggestions);
                 // Deletion
-                unifiedTrieSearch(currentWord, child, token, tokenIndex, edits - 1, suggestions);
+                editDistanceSearch(currentWord, child, token, tokenIndex, edits - 1, suggestions);
                 // Insertion
-                unifiedTrieSearch(currentWord, node, token, tokenIndex + 1, edits - 1, suggestions);
+                editDistanceSearch(currentWord, node, token, tokenIndex + 1, edits - 1, suggestions);
                 // Transposition
                 if (tokenIndex < token.length() - 1 && c == token.charAt(tokenIndex + 1) && entry.getValue().children.containsKey(token.charAt(tokenIndex))) {
-                    unifiedTrieSearch(currentWord, child.children.get(token.charAt(tokenIndex)), token, tokenIndex + 2, edits - 1, suggestions);
+                    editDistanceSearch(currentWord, child.children.get(token.charAt(tokenIndex)), token, tokenIndex + 2, edits - 1, suggestions);
                 }
             }
             currentWord.deleteCharAt(currentWord.length() - 1);

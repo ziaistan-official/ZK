@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file defines the keyboard neighbor data for the Keyboard-Aware Suggester.
+  Each <char> tag defines a character and its neighbors on the keyboard.
+  The "value" attribute is the character itself.
+  The "neighbors" attribute is a string of characters that are physically close to the key.
+  This data is used to find likely substitutions for typos.
+  You can edit this file to customize the neighbor data for your specific keyboard layout.
+-->
 <surroundings>
-    <!-- QWERTY Layout with second-degree neighbors -->
+    <!-- QWERTY Layout with second-degree neighbors and special characters -->
     <char value="q" neighbors="aws" />
     <char value="w" neighbors="qasedr" />
     <char value="e" neighbors="wsdrft" />
@@ -26,7 +34,7 @@
     <char value="v" neighbors="cfgb" />
     <char value="b" neighbors="vghn" />
     <char value="n" neighbors="bhjm" />
-    <char value="m" neighbors="njk" />
+    <char value="m" neighbors="njk,." />
 
     <!-- Urdu Phonetic Layout -->
     <char value="ق" neighbors="کگ" />
@@ -44,7 +52,7 @@
     <char value="ے" neighbors="ی" />
     <char value="ر" neighbors="ڑزژ" />
     <char value="ڑ" neighbors="رزژس" />
-    <char value="ز" neighbors="рڑژسش" />
+    <char value="ز" neighbors="рڑژсш" />
     <char value="ژ" neighbors="зсшص" />
     <char value="س" neighbors="ژشصض" />
     <char value="ش" neighbors="سصضط" />
