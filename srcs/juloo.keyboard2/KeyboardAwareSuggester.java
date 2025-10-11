@@ -55,7 +55,10 @@ public class KeyboardAwareSuggester {
         }
 
         String normalizedToken = token.toLowerCase();
-        final Set<String> validSuggestions = Collections.synchronizedSet(new LinkedHashSet<>());
+        final List<String> customSuggestions = Collections.synchronizedList(new ArrayList<>());
+        final List<String> commonSuggestions = Collections.synchronizedList(new ArrayList<>());
+        final List<String> wordlistSuggestions = Collections.synchronizedList(new ArrayList<>());
+
         List<List<Character>> alternates = new ArrayList<>();
         for (char c : normalizedToken.toCharArray()) {
             List<Character> neighbors = surroundings.get(c);
@@ -77,7 +80,7 @@ public class KeyboardAwareSuggester {
                 try {
                     StringBuilder sb = new StringBuilder();
                     sb.append(firstChar);
-                    generateCandidates(normalizedToken, alternates, 1, sb, validSuggestions);
+                    generateCandidates(normalizedToken, alternates, 1, sb, customSuggestions, commonSuggestions, wordlistSuggestions);
                 } finally {
                     latch.countDown();
                 }
@@ -88,29 +91,46 @@ public class KeyboardAwareSuggester {
             latch.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return Collections.emptyList(); // Return empty list if interrupted
+            return Collections.emptyList();
         }
 
-        return new ArrayList<>(validSuggestions);
+        Set<String> finalSuggestions = new LinkedHashSet<>();
+        finalSuggestions.addAll(customSuggestions);
+        finalSuggestions.addAll(commonSuggestions);
+        finalSuggestions.addAll(wordlistSuggestions);
+
+        return new ArrayList<>(finalSuggestions);
     }
 
     private void generateCandidates(String token, List<List<Character>> alternates, int position,
-                                    StringBuilder currentCandidate, Set<String> validSuggestions) {
-        if (validSuggestions.size() >= MAX_CANDIDATES) {
+                                    StringBuilder currentCandidate, List<String> customSuggestions,
+                                    List<String> commonSuggestions, List<String> wordlistSuggestions) {
+        if (customSuggestions.size() + commonSuggestions.size() + wordlistSuggestions.size() >= MAX_CANDIDATES) {
             return;
         }
 
         if (position == token.length()) {
             String candidate = currentCandidate.toString();
-            if (suggestionProvider.isValidWord(candidate)) {
-                validSuggestions.add(candidate);
+            SuggestionProvider.WordSource source = suggestionProvider.getWordSource(candidate);
+            switch (source) {
+                case CUSTOM:
+                    customSuggestions.add(candidate);
+                    break;
+                case COMMON:
+                    commonSuggestions.add(candidate);
+                    break;
+                case WORDLIST:
+                    wordlistSuggestions.add(candidate);
+                    break;
+                default:
+                    break;
             }
             return;
         }
 
         for (char alternate : alternates.get(position)) {
             currentCandidate.append(alternate);
-            generateCandidates(token, alternates, position + 1, currentCandidate, validSuggestions);
+            generateCandidates(token, alternates, position + 1, currentCandidate, customSuggestions, commonSuggestions, wordlistSuggestions);
             currentCandidate.deleteCharAt(currentCandidate.length() - 1);
         }
     }
