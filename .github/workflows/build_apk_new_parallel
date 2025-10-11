@@ -1,0 +1,90 @@
+name: BUILD APK NEW parallel
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # Enable Gradle build cache for faster builds
+          cache-read-only: false
+      
+      - name: Configure Gradle for Multi-threading
+        run: |
+          mkdir -p ~/.gradle
+          cat > ~/.gradle/gradle.properties << EOF
+          # Parallel execution
+          org.gradle.parallel=true
+          org.gradle.workers.max=$(nproc)
+          
+          # Configure memory for parallel builds
+          org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -XX:+UseParallelGC
+          
+          # Build cache
+          org.gradle.caching=true
+          org.gradle.configuration-cache=true
+          
+          # Daemon optimization
+          org.gradle.daemon=true
+          
+          # Kotlin compiler optimizations
+          kotlin.incremental=true
+          kotlin.compiler.execution.strategy=in-process
+          kotlin.parallel.tasks.in.project=true
+          
+          # Android build optimizations
+          android.enableJetifier=true
+          android.useAndroidX=true
+          android.enableR8.fullMode=true
+          EOF
+          
+          # Show CPU count for verification
+          echo "Building with $(nproc) parallel workers"
+      
+      - name: Generate Temporary Release Keystore
+        run: |
+          keytool -genkeypair \
+            -dname "CN=GitHub Actions, OU=Automated Build, O=Open Source, L=Unknown, ST=Unknown, C=US" \
+            -keystore release.keystore \
+            -alias release-alias \
+            -storepass insecure_password_123 \
+            -keypass insecure_password_123 \
+            -keyalg RSA -keysize 2048 -validity 1
+      
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      
+      - name: Build (assembleRelease) using wrapper with parallel processing
+        run: |
+          ./gradlew assembleRelease \
+            --parallel \
+            --max-workers=$(nproc) \
+            --build-cache \
+            --configuration-cache \
+            --no-daemon \
+            --stacktrace
+        env:
+          RELEASE_KEYSTORE: release.keystore
+          RELEASE_KEYSTORE_PASSWORD: "insecure_password_123"
+          RELEASE_KEY_ALIAS: "release-alias"
+          RELEASE_KEY_PASSWORD: "insecure_password_123"
+          # Gradle optimizations
+          GRADLE_OPTS: "-Dorg.gradle.parallel=true -Dorg.gradle.workers.max=$(nproc) -Xmx4g"
+      
+      - name: Upload Release APK as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-${{ github.run_number }}
+          path: build/outputs/apk/release/*.apk
+          compression-level: 0  # Skip compression since APKs are already compressed
