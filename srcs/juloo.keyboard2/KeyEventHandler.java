@@ -495,13 +495,13 @@ public final class KeyEventHandler
   }
 
   private void handleAutoCorrectionOnSpace() {
-    InputConnection conn = _recv.getCurrentInputConnection();
+    final InputConnection conn = _recv.getCurrentInputConnection();
     if (conn == null) {
         sendTextVerbatim(" ");
         return;
     }
 
-    CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
+    final CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
     if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
         sendTextVerbatim(" ");
         return;
@@ -511,33 +511,38 @@ public final class KeyEventHandler
     while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
         i--;
     }
-    String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
-    String lowerCaseWord = word.toLowerCase();
+    final String word = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
+    final String lowerCaseWord = word.toLowerCase();
 
     if (word.isEmpty()) {
         sendTextVerbatim(" ");
         return;
     }
 
+    // First, commit the space immediately so the user isn't blocked.
+    sendTextVerbatim(" ");
+
+    // If the word is valid, we don't need to generate suggestions.
     if (_suggestionProvider.isValidWord(lowerCaseWord)) {
-        sendTextVerbatim(" ");
         return;
     }
 
-    java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
-    java.util.List<KeyboardAwareSuggester.Suggestion> keyboardSuggestions = _keyboardAwareSuggester.suggest(lowerCaseWord);
+    // Now, run the heavy suggestion generation on a background thread.
+    KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+        final java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
+        final java.util.List<String> keyboardSuggestions = _keyboardAwareSuggester.suggest(lowerCaseWord);
 
-    java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>();
-    combinedSuggestions.addAll(corrections);
-    for (KeyboardAwareSuggester.Suggestion suggestion : keyboardSuggestions) {
-        combinedSuggestions.add(suggestion.word);
-    }
+        final java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>();
+        combinedSuggestions.addAll(corrections);
+        combinedSuggestions.addAll(keyboardSuggestions);
 
-    sendTextVerbatim(" ");
-
-    if (!combinedSuggestions.isEmpty()) {
-        _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
-    }
+        if (!combinedSuggestions.isEmpty()) {
+            // Post the result back to the UI thread to be displayed.
+            _recv.getHandler().post(() -> {
+                _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
+            });
+        }
+    });
   }
 
   // Helper to send text without triggering correction logic, used for committing a simple space.
