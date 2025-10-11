@@ -1,4 +1,4 @@
-name: BUILD APK NEW
+name: BUILD APK NEW PARALLEL
 on:
   workflow_dispatch:
 jobs:
