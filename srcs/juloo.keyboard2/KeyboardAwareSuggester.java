@@ -15,8 +15,6 @@ import java.util.concurrent.CountDownLatch;
 
 public class KeyboardAwareSuggester {
 
-    private static final int MAX_CANDIDATES = 1000;
-
     private final Map<Character, List<Character>> surroundings;
     private final SuggestionProvider suggestionProvider;
 
@@ -68,24 +66,33 @@ public class KeyboardAwareSuggester {
             alternates.add(neighbors);
         }
 
-        if (alternates.isEmpty()) {
-            return Collections.emptyList();
-        }
+        final CountDownLatch latch = new CountDownLatch(3);
 
-        List<Character> firstCharAlternates = alternates.get(0);
-        final CountDownLatch latch = new CountDownLatch(firstCharAlternates.size());
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            try {
+                trieGuidedSearch(new StringBuilder(), suggestionProvider.customRoot, alternates, 0, customSuggestions);
+            } finally {
+                latch.countDown();
+            }
+        });
 
-        for (final char firstChar : firstCharAlternates) {
-            KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-                try {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(firstChar);
-                    generateCandidates(normalizedToken, alternates, 1, sb, customSuggestions, commonSuggestions, wordlistSuggestions);
-                } finally {
-                    latch.countDown();
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            try {
+                if (suggestionProvider.commonLoaded) {
+                    trieGuidedSearch(new StringBuilder(), suggestionProvider.commonRoot, alternates, 0, commonSuggestions);
                 }
-            });
-        }
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            try {
+                trieGuidedSearch(new StringBuilder(), suggestionProvider.wordlistRoot, alternates, 0, wordlistSuggestions);
+            } finally {
+                latch.countDown();
+            }
+        });
 
         try {
             latch.await();
@@ -102,36 +109,22 @@ public class KeyboardAwareSuggester {
         return new ArrayList<>(finalSuggestions);
     }
 
-    private void generateCandidates(String token, List<List<Character>> alternates, int position,
-                                    StringBuilder currentCandidate, List<String> customSuggestions,
-                                    List<String> commonSuggestions, List<String> wordlistSuggestions) {
-        if (customSuggestions.size() + commonSuggestions.size() + wordlistSuggestions.size() >= MAX_CANDIDATES) {
-            return;
-        }
-
-        if (position == token.length()) {
-            String candidate = currentCandidate.toString();
-            SuggestionProvider.WordSource source = suggestionProvider.getWordSource(candidate);
-            switch (source) {
-                case CUSTOM:
-                    customSuggestions.add(candidate);
-                    break;
-                case COMMON:
-                    commonSuggestions.add(candidate);
-                    break;
-                case WORDLIST:
-                    wordlistSuggestions.add(candidate);
-                    break;
-                default:
-                    break;
+    private void trieGuidedSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
+                                  List<List<Character>> alternates, int position, List<String> suggestions) {
+        if (position == alternates.size()) {
+            if (node.isEndOfWord) {
+                suggestions.add(currentWord.toString());
             }
             return;
         }
 
-        for (char alternate : alternates.get(position)) {
-            currentCandidate.append(alternate);
-            generateCandidates(token, alternates, position + 1, currentCandidate, customSuggestions, commonSuggestions, wordlistSuggestions);
-            currentCandidate.deleteCharAt(currentCandidate.length() - 1);
+        for (char c : alternates.get(position)) {
+            SuggestionProvider.TrieNode child = node.children.get(c);
+            if (child != null) {
+                currentWord.append(c);
+                trieGuidedSearch(currentWord, child, alternates, position + 1, suggestions);
+                currentWord.deleteCharAt(currentWord.length() - 1);
+            }
         }
     }
 }
