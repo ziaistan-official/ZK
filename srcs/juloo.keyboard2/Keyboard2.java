@@ -45,6 +45,7 @@ public class Keyboard2 extends InputMethodService
   private KeyEventHandler _keyeventhandler;
   private SuggestionProvider _suggestionProvider;
   private LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
+  private KeyboardAwareSuggester _keyboardAwareSuggester;
   private HorizontalScrollView _suggestionStripScroll;
   private View _suggestionStrip;
   private GridLayout _suggestionsGrid;
@@ -155,7 +156,8 @@ public class Keyboard2 extends InputMethodService
     _handler = new Handler(getMainLooper());
     _suggestionProvider = new SuggestionProvider(this);
     _autoCorrectionProvider = new LayoutBasedAutoCorrectionProvider(_suggestionProvider);
-    _keyeventhandler = new KeyEventHandler(this.new Receiver(), _suggestionProvider, _autoCorrectionProvider);
+    _keyboardAwareSuggester = new KeyboardAwareSuggester(this, _suggestionProvider);
+    _keyeventhandler = new KeyEventHandler(this.new Receiver(), _suggestionProvider, _autoCorrectionProvider, _keyboardAwareSuggester);
     _foldStateTracker = new FoldStateTracker(this);
     Config.initGlobalConfig(prefs, getResources(), _keyeventhandler, _foldStateTracker.isUnfolded());
     prefs.registerOnSharedPreferenceChangeListener(this);
