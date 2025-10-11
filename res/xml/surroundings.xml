@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<surroundings>
+    <char value="a" neighbors="qwsz" />
+    <char value="b" neighbors="vghn" />
+    <char value="c" neighbors="xdfv" />
+    <char value="d" neighbors="serfcx" />
+    <char value="e" neighbors="wsdr" />
+    <char value="f" neighbors="drtgvc" />
+    <char value="g" neighbors="ftyhbv" />
+    <char value="h" neighbors="gyujnb" />
+    <char value="i" neighbors="ujko" />
+    <char value="j" neighbors="huikmn" />
+    <char value="k" neighbors="jiolm" />
+    <char value="l" neighbors="kop" />
+    <char value="m" neighbors="njk" />
+    <char value="n" neighbors="bhjm" />
+    <char value="o" neighbors="iklp" />
+    <char value="p" neighbors="ol" />
+    <char value="q" neighbors="wa" />
+    <char value="r" neighbors="edft" />
+    <char value="s" neighbors="awedxz" />
+    <char value="t" neighbors="rfgy" />
+    <char value="u" neighbors="yhji" />
+    <char value="v" neighbors="cfgb" />
+    <char value="w" neighbors="qase" />
+    <char value="x" neighbors="zsdc" />
+    <char value="y" neighbors="tghu" />
+    <char value="z" neighbors="asx" />
+</surroundings>

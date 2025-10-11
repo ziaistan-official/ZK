@@ -48,16 +48,20 @@ public final class KeyEventHandler
   private String _pending_font_size_digit = null;
   private final LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
   private final SuggestionProvider _suggestionProvider;
+  private final KeyboardAwareSuggester _keyboardAwareSuggester;
   private String originalWord = null;
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
 
-  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
+  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider,
+                         LayoutBasedAutoCorrectionProvider autoCorrectionProvider,
+                         KeyboardAwareSuggester keyboardAwareSuggester)
   {
     _recv = recv;
     _suggestionProvider = suggestionProvider;
     _autoCorrectionProvider = autoCorrectionProvider;
+    _keyboardAwareSuggester = keyboardAwareSuggester;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
     _mods = Pointers.Modifiers.EMPTY;
@@ -867,10 +871,16 @@ public final class KeyEventHandler
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
           _recv.showSuggestions(java.util.Collections.emptyList());
       } else {
-          // Show prefix-based completions as the user types.
-          // Auto-correction is handled separately when the spacebar is pressed.
-          java.util.List<String> suggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
-          _recv.showSuggestions(suggestions);
+          java.util.List<KeyboardAwareSuggester.Suggestion> keyboardSuggestions = _keyboardAwareSuggester.suggest(prefix);
+          java.util.List<String> prefixSuggestions = _suggestionProvider.getSuggestions(prefix.toLowerCase());
+
+          java.util.Set<String> combinedSuggestions = new java.util.LinkedHashSet<>();
+          for (KeyboardAwareSuggester.Suggestion suggestion : keyboardSuggestions) {
+              combinedSuggestions.add(suggestion.word);
+          }
+          combinedSuggestions.addAll(prefixSuggestions);
+
+          _recv.showSuggestions(new java.util.ArrayList<>(combinedSuggestions));
       }
   }
 
