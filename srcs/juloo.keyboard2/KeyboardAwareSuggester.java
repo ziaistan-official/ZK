@@ -14,7 +14,6 @@ import java.util.HashMap;
 
 public class KeyboardAwareSuggester {
 
-    private static final int MAX_ALTERNATES_PER_POSITION = 4;
     private static final int MAX_CANDIDATES = 1000;
 
     private final Map<Character, List<Character>> surroundings;
@@ -55,14 +54,14 @@ public class KeyboardAwareSuggester {
         }
 
         String normalizedToken = token.toLowerCase();
-        Set<String> validSuggestions = new HashSet<>();
+        Set<String> validSuggestions = new java.util.LinkedHashSet<>();
         List<List<Character>> alternates = new ArrayList<>();
         for (char c : normalizedToken.toCharArray()) {
             List<Character> neighbors = surroundings.get(c);
             if (neighbors == null) {
                 neighbors = Collections.singletonList(c);
             }
-            alternates.add(neighbors.subList(0, Math.min(neighbors.size(), MAX_ALTERNATES_PER_POSITION)));
+            alternates.add(neighbors);
         }
 
         generateCandidates(normalizedToken, alternates, 0, new StringBuilder(), validSuggestions);
