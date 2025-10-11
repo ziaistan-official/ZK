@@ -48,16 +48,20 @@ public final class KeyEventHandler
   private String _pending_font_size_digit = null;
   private final LayoutBasedAutoCorrectionProvider _autoCorrectionProvider;
   private final SuggestionProvider _suggestionProvider;
+  private final KeyboardAwareSuggester _keyboardAwareSuggester;
   private String originalWord = null;
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
 
-  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider, LayoutBasedAutoCorrectionProvider autoCorrectionProvider)
+  public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider,
+                         LayoutBasedAutoCorrectionProvider autoCorrectionProvider,
+                         KeyboardAwareSuggester keyboardAwareSuggester)
   {
     _recv = recv;
     _suggestionProvider = suggestionProvider;
     _autoCorrectionProvider = autoCorrectionProvider;
+    _keyboardAwareSuggester = keyboardAwareSuggester;
     _autocap = new Autocapitalisation(recv.getHandler(),
         this.new Autocapitalisation_callback());
     _mods = Pointers.Modifiers.EMPTY;
@@ -521,17 +525,27 @@ public final class KeyEventHandler
         return;
     }
 
-    // Since we are now considering a new word, clear any old revert flags.
     if (!revertedWords.isEmpty()) {
         revertedWords.clear();
     }
 
+    if (_suggestionProvider.isValidWord(lowerCaseWord)) {
+        sendTextVerbatim(" ");
+        return;
+    }
+
     java.util.List<String> corrections = _autoCorrectionProvider.getCorrections(lowerCaseWord);
-    if (!corrections.isEmpty()) {
-        String bestCorrection = corrections.get(0);
+    java.util.List<String> keyboardSuggestions = _keyboardAwareSuggester.suggest(lowerCaseWord);
+
+    java.util.Set<String> combinedSuggestionsSet = new java.util.LinkedHashSet<>();
+    combinedSuggestionsSet.addAll(corrections);
+    combinedSuggestionsSet.addAll(keyboardSuggestions);
+
+    if (!combinedSuggestionsSet.isEmpty()) {
+        java.util.List<String> combinedSuggestions = new java.util.ArrayList<>(combinedSuggestionsSet);
+        String bestCorrection = combinedSuggestions.get(0);
 
         conn.beginBatchEdit();
-        // This should fix the cursor jump issue.
         conn.deleteSurroundingText(word.length(), 0);
         conn.commitText(bestCorrection, 1);
         conn.commitText(" ", 1);
@@ -541,7 +555,7 @@ public final class KeyEventHandler
         correctedWord = bestCorrection;
         justAutoCorrected = true;
         _autocap.typed(" ");
-        _recv.showSuggestions(corrections);
+        _recv.showSuggestions(combinedSuggestions);
     } else {
         sendTextVerbatim(" ");
     }
