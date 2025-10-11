@@ -57,39 +57,29 @@ public class KeyboardAwareSuggester {
         final List<String> commonSuggestions = Collections.synchronizedList(new ArrayList<>());
         final List<String> wordlistSuggestions = Collections.synchronizedList(new ArrayList<>());
 
-        final CountDownLatch latch = new CountDownLatch(4);
+        final CountDownLatch latch = new CountDownLatch(3);
 
-        // 1. Substitutions
         KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
             try {
-                performSubstitutionSearch(normalizedToken, customSuggestions, commonSuggestions, wordlistSuggestions);
+                unifiedTrieSearch(new StringBuilder(), suggestionProvider.customRoot, normalizedToken, 0, 1, customSuggestions);
             } finally {
                 latch.countDown();
             }
         });
 
-        // 2. Deletions
         KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
             try {
-                performDeletionSearch(normalizedToken, customSuggestions, commonSuggestions, wordlistSuggestions);
+                if (suggestionProvider.commonLoaded) {
+                    unifiedTrieSearch(new StringBuilder(), suggestionProvider.commonRoot, normalizedToken, 0, 1, commonSuggestions);
+                }
             } finally {
                 latch.countDown();
             }
         });
 
-        // 3. Insertions
         KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
             try {
-                performInsertionSearch(normalizedToken, customSuggestions, commonSuggestions, wordlistSuggestions);
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        // 4. Transpositions
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-            try {
-                performTranspositionSearch(normalizedToken, customSuggestions, commonSuggestions, wordlistSuggestions);
+                unifiedTrieSearch(new StringBuilder(), suggestionProvider.wordlistRoot, normalizedToken, 0, 1, wordlistSuggestions);
             } finally {
                 latch.countDown();
             }
@@ -110,78 +100,42 @@ public class KeyboardAwareSuggester {
         return new ArrayList<>(finalSuggestions);
     }
 
-    private void performSubstitutionSearch(String token, List<String> custom, List<String> common, List<String> wordlist) {
-        List<List<Character>> alternates = new ArrayList<>();
-        for (char c : token.toCharArray()) {
-            List<Character> neighbors = surroundings.get(c);
-            if (neighbors == null) {
-                neighbors = Collections.singletonList(c);
-            }
-            alternates.add(neighbors);
-        }
-
-        trieGuidedSearch(new StringBuilder(), suggestionProvider.customRoot, alternates, 0, custom);
-        if (suggestionProvider.commonLoaded) {
-            trieGuidedSearch(new StringBuilder(), suggestionProvider.commonRoot, alternates, 0, common);
-        }
-        trieGuidedSearch(new StringBuilder(), suggestionProvider.wordlistRoot, alternates, 0, wordlist);
-    }
-
-    private void performDeletionSearch(String token, List<String> custom, List<String> common, List<String> wordlist) {
-        for (int i = 0; i < token.length(); i++) {
-            String candidate = token.substring(0, i) + token.substring(i + 1);
-            addCandidate(candidate, custom, common, wordlist);
-        }
-    }
-
-    private void performInsertionSearch(String token, List<String> custom, List<String> common, List<String> wordlist) {
-        for (int i = 0; i <= token.length(); i++) {
-            for (char c = 'a'; c <= 'z'; c++) {
-                String candidate = token.substring(0, i) + c + token.substring(i);
-                addCandidate(candidate, custom, common, wordlist);
-            }
-        }
-    }
-
-    private void performTranspositionSearch(String token, List<String> custom, List<String> common, List<String> wordlist) {
-        if (token.length() < 2) return;
-        char[] chars = token.toCharArray();
-        for (int i = 0; i < token.length() - 1; i++) {
-            char temp = chars[i];
-            chars[i] = chars[i + 1];
-            chars[i + 1] = temp;
-            addCandidate(new String(chars), custom, common, wordlist);
-            chars[i + 1] = chars[i];
-            chars[i] = temp;
-        }
-    }
-
-    private void addCandidate(String candidate, List<String> custom, List<String> common, List<String> wordlist) {
-        SuggestionProvider.WordSource source = suggestionProvider.getWordSource(candidate);
-        switch (source) {
-            case CUSTOM: custom.add(candidate); break;
-            case COMMON: common.add(candidate); break;
-            case WORDLIST: wordlist.add(candidate); break;
-            default: break;
-        }
-    }
-
-    private void trieGuidedSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
-                                  List<List<Character>> alternates, int position, List<String> suggestions) {
-        if (position == alternates.size()) {
-            if (node.isEndOfWord) {
+    private void unifiedTrieSearch(StringBuilder currentWord, SuggestionProvider.TrieNode node,
+                                   String token, int tokenIndex, int edits, List<String> suggestions) {
+        if (node.isEndOfWord && tokenIndex == token.length()) {
+            if (!suggestions.contains(currentWord.toString())) {
                 suggestions.add(currentWord.toString());
             }
+        }
+
+        if (tokenIndex > token.length()) {
             return;
         }
 
-        for (char c : alternates.get(position)) {
-            SuggestionProvider.TrieNode child = node.children.get(c);
-            if (child != null) {
-                currentWord.append(c);
-                trieGuidedSearch(currentWord, child, alternates, position + 1, suggestions);
-                currentWord.deleteCharAt(currentWord.length() - 1);
+        for (Map.Entry<Character, SuggestionProvider.TrieNode> entry : node.children.entrySet()) {
+            char c = entry.getKey();
+            SuggestionProvider.TrieNode child = entry.getValue();
+            currentWord.append(c);
+
+            // Match
+            if (tokenIndex < token.length() && c == token.charAt(tokenIndex)) {
+                unifiedTrieSearch(currentWord, child, token, tokenIndex + 1, edits, suggestions);
+            } else if (edits > 0) {
+                // Substitution
+                List<Character> neighbors = surroundings.get(token.charAt(tokenIndex));
+                if (neighbors != null && neighbors.contains(c)) {
+                    unifiedTrieSearch(currentWord, child, token, tokenIndex + 1, edits - 1, suggestions);
+                }
+                // Deletion
+                unifiedTrieSearch(currentWord, child, token, tokenIndex, edits - 1, suggestions);
+                // Insertion
+                unifiedTrieSearch(currentWord, node, token, tokenIndex + 1, edits - 1, suggestions);
+                // Transposition
+                if (tokenIndex < token.length() - 1 && c == token.charAt(tokenIndex + 1) && entry.getValue().children.containsKey(token.charAt(tokenIndex))) {
+                    unifiedTrieSearch(currentWord, child.children.get(token.charAt(tokenIndex)), token, tokenIndex + 2, edits - 1, suggestions);
+                }
             }
+            currentWord.deleteCharAt(currentWord.length() - 1);
         }
     }
 }

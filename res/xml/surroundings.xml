@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <surroundings>
-    <!-- QWERTY Layout -->
-    <char value="q" neighbors="aw" />
-    <char value="w" neighbors="qase" />
-    <char value="e" neighbors="wsdr" />
-    <char value="r" neighbors="edft" />
-    <char value="t" neighbors="rfgy" />
-    <char value="y" neighbors="tghu" />
-    <char value="u" neighbors="yhji" />
-    <char value="i" neighbors="ujko" />
+    <!-- QWERTY Layout with second-degree neighbors -->
+    <char value="q" neighbors="aws" />
+    <char value="w" neighbors="qasedr" />
+    <char value="e" neighbors="wsdrft" />
+    <char value="r" neighbors="edftgy" />
+    <char value="t" neighbors="rfgyhu" />
+    <char value="y" neighbors="tghuji" />
+    <char value="u" neighbors="yhjiko" />
+    <char value="i" neighbors="ujkolp" />
     <char value="o" neighbors="iklp" />
     <char value="p" neighbors="ol" />
-    <char value="a" neighbors="qwsz" />
-    <char value="s" neighbors="awedxz" />
-    <char value="d" neighbors="serfcx" />
+    <char value="a" neighbors="qwszx" />
+    <char value="s" neighbors="awedxzc" />
+    <char value="d" neighbors="serfcxv" />
     <char value="f" neighbors="drtgvc" />
     <char value="g" neighbors="ftyhbv" />
     <char value="h" neighbors="gyujnb" />
@@ -44,8 +44,8 @@
     <char value="ے" neighbors="ی" />
     <char value="ر" neighbors="ڑزژ" />
     <char value="ڑ" neighbors="رزژس" />
-    <char value="ز" neighbors="رڑژسش" />
-    <char value="ژ" neighbors="زسشص" />
+    <char value="ز" neighbors="рڑژسش" />
+    <char value="ژ" neighbors="зсшص" />
     <char value="س" neighbors="ژشصض" />
     <char value="ش" neighbors="سصضط" />
     <char value="ص" neighbors="شضطظ" />
