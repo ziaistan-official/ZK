@@ -311,15 +311,40 @@ public final class KeyEventHandler
       if (isWordInDictionary(newWord)) {
           Toast.makeText(_recv.getContext(), "Word already in dictionary.", Toast.LENGTH_SHORT).show();
       } else {
-          try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
-              fos.write((newWord + "\n").getBytes());
-              Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
-              _recv.reloadCustomDictionary();
-              new DataSyncService(_recv.getContext()).exportDictionary();
+          updateCustomDictionary(java.util.Collections.singleton(newWord));
+          Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
+          _recv.reloadCustomDictionary();
+          new DataSyncService(_recv.getContext()).exportDictionary();
+      }
+  }
+
+  private void updateCustomDictionary(java.util.Collection<String> newWords) {
+      File customDictFile = new File(_recv.getContext().getFilesDir(), "custom.txt");
+      java.util.Set<String> words = new java.util.HashSet<>();
+      if (customDictFile.exists()) {
+          try (BufferedReader reader = new BufferedReader(new FileReader(customDictFile))) {
+              String line;
+              while ((line = reader.readLine()) != null) {
+                  words.add(line.trim());
+              }
           } catch (IOException e) {
               e.printStackTrace();
-              Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
+              Toast.makeText(_recv.getContext(), "Error reading custom dictionary", Toast.LENGTH_SHORT).show();
+              return;
           }
+      }
+
+      words.addAll(newWords);
+      java.util.List<String> sortedWords = new java.util.ArrayList<>(words);
+      java.util.Collections.sort(sortedWords);
+
+      try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_PRIVATE)) {
+          for (String word : sortedWords) {
+              fos.write((word + "\n").getBytes());
+          }
+      } catch (IOException e) {
+          e.printStackTrace();
+          Toast.makeText(_recv.getContext(), "Error writing to custom dictionary", Toast.LENGTH_SHORT).show();
       }
   }
 
@@ -333,31 +358,26 @@ public final class KeyEventHandler
           return;
       }
 
-      String sanitizedText = selectedText.toString().replaceAll("[^a-zA-Z\\u0600-\\u06FF\\s]", "");
+      String textToProcess = selectedText.toString().replaceAll("[/.:-]", " ");
+      String sanitizedText = textToProcess.replaceAll("[^\\p{L}\\s]", "");
       String[] words = sanitizedText.trim().split("\\s+");
       java.util.Set<String> uniqueWords = new java.util.HashSet<>();
       for (String word : words) {
-          if (!word.isEmpty() && !isWordInDictionary(word.toLowerCase())) {
-              uniqueWords.add(word.toLowerCase());
+          String finalWord = word.toLowerCase();
+          if (finalWord.length() > 1 && !isWordInDictionary(finalWord)) {
+              uniqueWords.add(finalWord);
           }
       }
 
       if (uniqueWords.isEmpty()) {
-          Toast.makeText(_recv.getContext(), "All words are already in the dictionary or the selection is empty.", Toast.LENGTH_SHORT).show();
+          Toast.makeText(_recv.getContext(), "All words are already in the dictionary, single characters, or the selection is empty.", Toast.LENGTH_SHORT).show();
           return;
       }
 
-      try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
-          for (String word : uniqueWords) {
-              fos.write((word + "\n").getBytes());
-          }
-          Toast.makeText(_recv.getContext(), uniqueWords.size() + " words added to custom dictionary", Toast.LENGTH_SHORT).show();
-          _recv.reloadCustomDictionary();
-          new DataSyncService(_recv.getContext()).exportDictionary();
-      } catch (IOException e) {
-          e.printStackTrace();
-          Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
-      }
+      updateCustomDictionary(uniqueWords);
+      Toast.makeText(_recv.getContext(), uniqueWords.size() + " words added to custom dictionary", Toast.LENGTH_SHORT).show();
+      _recv.reloadCustomDictionary();
+      new DataSyncService(_recv.getContext()).exportDictionary();
   }
 
   void send_text(CharSequence text)
@@ -382,10 +402,6 @@ public final class KeyEventHandler
 
         if ("d".equals(textStr)) {
             addSelectedTextToDictionary();
-            return;
-        }
-        if ("D".equals(textStr)) {
-            addSelectedTextToDictionaryBatch();
             return;
         }
 
