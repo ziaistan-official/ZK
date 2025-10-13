@@ -302,25 +302,61 @@ public final class KeyEventHandler
           return;
       }
 
-      String originalText = selectedText.toString();
-      String[] words = originalText.trim().split("\\s+");
-      if (words.length >= 1 && words.length <= 5) {
-          String newWord = originalText.trim().toLowerCase();
-          if (isWordInDictionary(newWord)) {
-              Toast.makeText(_recv.getContext(), "Word already in dictionary.", Toast.LENGTH_SHORT).show();
-          } else {
-              try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
-                  fos.write((newWord + "\n").getBytes());
-                  Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
-                  _recv.reloadCustomDictionary();
-                  new DataSyncService(_recv.getContext()).exportDictionary();
-              } catch (IOException e) {
-                  e.printStackTrace();
-                  Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
-              }
-          }
+      String newWord = selectedText.toString().trim();
+      if (newWord.isEmpty()) {
+          Toast.makeText(_recv.getContext(), "No text selected.", Toast.LENGTH_SHORT).show();
+          return;
+      }
+
+      if (isWordInDictionary(newWord)) {
+          Toast.makeText(_recv.getContext(), "Word already in dictionary.", Toast.LENGTH_SHORT).show();
       } else {
-          Toast.makeText(_recv.getContext(), "Select 1 to 5 words to add to the dictionary", Toast.LENGTH_SHORT).show();
+          try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
+              fos.write((newWord + "\n").getBytes());
+              Toast.makeText(_recv.getContext(), "Added to custom dictionary", Toast.LENGTH_SHORT).show();
+              _recv.reloadCustomDictionary();
+              new DataSyncService(_recv.getContext()).exportDictionary();
+          } catch (IOException e) {
+              e.printStackTrace();
+              Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
+          }
+      }
+  }
+
+  private void addSelectedTextToDictionaryBatch() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) return;
+
+      CharSequence selectedText = conn.getSelectedText(0);
+      if (selectedText == null || selectedText.length() == 0) {
+          Toast.makeText(_recv.getContext(), "No text selected.", Toast.LENGTH_SHORT).show();
+          return;
+      }
+
+      String sanitizedText = selectedText.toString().replaceAll("[^a-zA-Z\\u0600-\\u06FF\\s]", "");
+      String[] words = sanitizedText.trim().split("\\s+");
+      java.util.Set<String> uniqueWords = new java.util.HashSet<>();
+      for (String word : words) {
+          if (!word.isEmpty() && !isWordInDictionary(word.toLowerCase())) {
+              uniqueWords.add(word.toLowerCase());
+          }
+      }
+
+      if (uniqueWords.isEmpty()) {
+          Toast.makeText(_recv.getContext(), "All words are already in the dictionary or the selection is empty.", Toast.LENGTH_SHORT).show();
+          return;
+      }
+
+      try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_APPEND)) {
+          for (String word : uniqueWords) {
+              fos.write((word + "\n").getBytes());
+          }
+          Toast.makeText(_recv.getContext(), uniqueWords.size() + " words added to custom dictionary", Toast.LENGTH_SHORT).show();
+          _recv.reloadCustomDictionary();
+          new DataSyncService(_recv.getContext()).exportDictionary();
+      } catch (IOException e) {
+          e.printStackTrace();
+          Toast.makeText(_recv.getContext(), "Error adding to dictionary", Toast.LENGTH_SHORT).show();
       }
   }
 
@@ -346,6 +382,10 @@ public final class KeyEventHandler
 
         if ("d".equals(textStr)) {
             addSelectedTextToDictionary();
+            return;
+        }
+        if ("D".equals(textStr)) {
+            addSelectedTextToDictionaryBatch();
             return;
         }
 
@@ -602,6 +642,7 @@ public final class KeyEventHandler
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
       case ADD_TO_DICTIONARY: addSelectedTextToDictionary(); break;
+      case ADD_TO_DICTIONARY_BATCH: addSelectedTextToDictionaryBatch(); break;
       case MOVE_WORD_BACKWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 1, KeyEvent.META_CTRL_ON); break;
       case MOVE_WORD_FORWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 1, KeyEvent.META_CTRL_ON); break;
       case MOVE_WORD_BACKWARD_2: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 2, KeyEvent.META_CTRL_ON); break;
