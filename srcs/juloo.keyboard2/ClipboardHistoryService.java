@@ -36,7 +36,6 @@ public final class ClipboardHistoryService {
     private static final String TAG = "ClipboardHistoryService";
     private static final String PERSIST_FILE_NAME = "clipboard_history.json";
     public static final String RELOAD_CLIPBOARD_HISTORY_ACTION = "juloo.keyboard2.RELOAD_CLIPBOARD_HISTORY";
-    private static final int MAX_UNPINNED_HISTORY_SIZE = 20;
 
     private static ClipboardHistoryService _service = null;
     private static ClipboardPasteCallback _paste_callback = null;
@@ -100,7 +99,12 @@ public final class ClipboardHistoryService {
             return;
         }
 
-        ClipboardItem newItem = new ClipboardItem(clip, System.currentTimeMillis(), false);
+        long currentTime = System.currentTimeMillis();
+        long durationMillis = Config.globalConfig().clipboard_history_duration * 60 * 1000L;
+
+        items.removeIf(item -> !item.isPinned() && (currentTime - item.getTimestamp() > durationMillis));
+
+        ClipboardItem newItem = new ClipboardItem(clip, currentTime, false);
 
         // Remove existing item to update its timestamp and move it to the top
         items.remove(newItem);
@@ -175,8 +179,9 @@ public final class ClipboardHistoryService {
             }
         }
 
-        if (unpinnedItems.size() > MAX_UNPINNED_HISTORY_SIZE) {
-            int toRemove = unpinnedItems.size() - MAX_UNPINNED_HISTORY_SIZE;
+        int maxSize = Config.globalConfig().clipboard_history_size;
+        if (unpinnedItems.size() > maxSize) {
+            int toRemove = unpinnedItems.size() - maxSize;
             for (int i = 0; i < toRemove; i++) {
                 items.remove(unpinnedItems.get(i));
             }
