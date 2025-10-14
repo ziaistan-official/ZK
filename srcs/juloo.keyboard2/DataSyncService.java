@@ -83,7 +83,7 @@ public class DataSyncService {
             JSONArray jsonArray = new JSONArray(json);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                items.add(new ClipboardItem(obj));
+                items.add(ClipboardItem.fromJSON(obj));
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, "Failed to read clipboard file: " + file.getAbsolutePath(), e);
@@ -94,7 +94,11 @@ public class DataSyncService {
     private void writeClipboardFile(File file, Set<ClipboardItem> items) {
         JSONArray jsonArray = new JSONArray();
         for (ClipboardItem item : items) {
-            jsonArray.put(item.toJson());
+            try {
+                jsonArray.put(item.toJSON());
+            } catch (JSONException e) {
+                Log.e(TAG, "Failed to serialize clipboard item", e);
+            }
         }
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
