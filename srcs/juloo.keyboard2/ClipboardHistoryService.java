@@ -43,6 +43,7 @@ public final class ClipboardHistoryService {
     private final Context context;
     private final ClipboardManager clipboardManager;
     private final List<ClipboardItem> items;
+    private ClipboardItem lastRemovedItem = null;
     private OnClipboardHistoryChange listener = null;
 
     public static void on_startup(Context ctx, ClipboardPasteCallback cb) {
@@ -116,6 +117,7 @@ public final class ClipboardHistoryService {
 
     public void removeItem(ClipboardItem item) {
         if (items.remove(item)) {
+            lastRemovedItem = item;
             // If the removed item was the most recent one, clear the system clipboard
             if (isSystemClipboard(item.getText())) {
                 if (VERSION.SDK_INT >= 28) {
@@ -126,6 +128,16 @@ public final class ClipboardHistoryService {
             }
             persistItems();
             notifyHistoryChange();
+        }
+    }
+
+    public void restoreLastDeletedItem() {
+        if (lastRemovedItem != null) {
+            items.add(lastRemovedItem);
+            sortItems();
+            persistItems();
+            notifyHistoryChange();
+            lastRemovedItem = null;
         }
     }
 
