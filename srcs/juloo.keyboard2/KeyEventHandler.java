@@ -1019,4 +1019,38 @@ public final class KeyEventHandler
       updateCustomDictionary(uniqueWords);
       Toast.makeText(_recv.getContext(), uniqueWords.size() + " words added to custom dictionary", Toast.LENGTH_SHORT).show();
   }
+
+    private void updateCustomDictionary(java.util.Collection<String> newWords) {
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            File customDictFile = new File(_recv.getContext().getFilesDir(), "custom.txt");
+            java.util.Set<String> words = new java.util.HashSet<>();
+            if (customDictFile.exists()) {
+                try (BufferedReader reader = new BufferedReader(new FileReader(customDictFile))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        words.add(line.trim());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    _recv.getHandler().post(() -> Toast.makeText(_recv.getContext(), "Error reading custom dictionary", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+            }
+
+            words.addAll(newWords);
+            java.util.List<String> sortedWords = new java.util.ArrayList<>(words);
+            java.util.Collections.sort(sortedWords);
+
+            try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_PRIVATE)) {
+                for (String word : sortedWords) {
+                    fos.write((word + "\n").getBytes());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                _recv.getHandler().post(() -> Toast.makeText(_recv.getContext(), "Error writing to custom dictionary", Toast.LENGTH_SHORT).show());
+            }
+            _recv.getHandler().post(() -> _recv.reloadCustomDictionary());
+            new DataSyncService(_recv.getContext()).exportDictionary();
+        });
+    }
 }
