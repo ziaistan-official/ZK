@@ -237,28 +237,30 @@ public final class ClipboardHistoryService {
     }
 
     private void persistItems() {
-        JSONArray jsonArray = new JSONArray();
-        for (ClipboardItem item : items) {
-            try {
-                jsonArray.put(item.toJSON());
-            } catch (JSONException e) {
-                Log.e(TAG, "Failed to convert item to JSON", e);
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            JSONArray jsonArray = new JSONArray();
+            for (ClipboardItem item : items) {
+                try {
+                    jsonArray.put(item.toJSON());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to convert item to JSON", e);
+                }
             }
-        }
 
-        String jsonPayload = jsonArray.toString();
+            String jsonPayload = jsonArray.toString();
 
-        // Persist to internal storage
-        File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
-            writer.write(jsonPayload);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to persist clipboard history", e);
-        }
+            // Persist to internal storage
+            File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
+            try (FileOutputStream fos = new FileOutputStream(file);
+                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                writer.write(jsonPayload);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to persist clipboard history", e);
+            }
 
-        // Export directly to external storage
-        new DataSyncService(context).exportClipboard(jsonPayload);
+            // Export directly to external storage
+            new DataSyncService(context).exportClipboard(jsonPayload);
+        });
     }
 
     private void migrateFromPrefs() {
