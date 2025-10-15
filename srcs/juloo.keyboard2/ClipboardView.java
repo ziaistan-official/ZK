@@ -11,8 +11,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -122,9 +120,6 @@ public class ClipboardView extends LinearLayout implements ClipboardHistoryServi
             // Swipe left or right to delete
             if (direction == ItemTouchHelper.LEFT || direction == ItemTouchHelper.RIGHT) {
                 service.removeItem(item);
-                Snackbar.make(recyclerView, "Item removed", Snackbar.LENGTH_LONG)
-                        .setAction("Undo", v -> service.restoreLastDeletedItem())
-                        .show();
             }
         }
 

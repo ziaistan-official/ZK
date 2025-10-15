@@ -602,7 +602,6 @@ public final class KeyEventHandler
       case FORWARD_DELETE_WORD: send_key_down_up(KeyEvent.KEYCODE_FORWARD_DEL, KeyEvent.META_CTRL_ON | KeyEvent.META_CTRL_LEFT_ON); break;
       case SELECTION_CANCEL: cancel_selection(); break;
       case ADD_TO_DICTIONARY: addSelectedTextToDictionary(); break;
-      case ADD_TO_DICTIONARY_BATCH: addSelectedTextToDictionaryBatch(); break;
       case MOVE_WORD_BACKWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 1, KeyEvent.META_CTRL_ON); break;
       case MOVE_WORD_FORWARD_1: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_RIGHT, 1, KeyEvent.META_CTRL_ON); break;
       case MOVE_WORD_BACKWARD_2: send_key_down_up_repeat(KeyEvent.KEYCODE_DPAD_LEFT, 2, KeyEvent.META_CTRL_ON); break;
@@ -990,67 +989,4 @@ public final class KeyEventHandler
         _recv.set_shift_state(false, false);
     }
   }
-
-  private void addSelectedTextToDictionaryBatch() {
-      InputConnection conn = _recv.getCurrentInputConnection();
-      if (conn == null) return;
-
-      CharSequence selectedText = conn.getSelectedText(0);
-      if (selectedText == null || selectedText.length() == 0) {
-          Toast.makeText(_recv.getContext(), "No text selected.", Toast.LENGTH_SHORT).show();
-          return;
-      }
-
-      String sanitizedText = selectedText.toString().replaceAll("[^\\p{L}]+", " ");
-      String[] words = sanitizedText.trim().split("\\s+");
-      java.util.Set<String> uniqueWords = new java.util.HashSet<>();
-      for (String word : words) {
-          String finalWord = word.toLowerCase();
-          if (finalWord.length() > 1 && !isWordInDictionary(finalWord)) {
-              uniqueWords.add(finalWord);
-          }
-      }
-
-      if (uniqueWords.isEmpty()) {
-          Toast.makeText(_recv.getContext(), "All words are already in the dictionary, single characters, or the selection is empty.", Toast.LENGTH_SHORT).show();
-          return;
-      }
-
-      updateCustomDictionary(uniqueWords);
-      Toast.makeText(_recv.getContext(), uniqueWords.size() + " words added to custom dictionary", Toast.LENGTH_SHORT).show();
-  }
-
-    private void updateCustomDictionary(java.util.Collection<String> newWords) {
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
-            File customDictFile = new File(_recv.getContext().getFilesDir(), "custom.txt");
-            java.util.Set<String> words = new java.util.HashSet<>();
-            if (customDictFile.exists()) {
-                try (BufferedReader reader = new BufferedReader(new FileReader(customDictFile))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        words.add(line.trim());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    _recv.getHandler().post(() -> Toast.makeText(_recv.getContext(), "Error reading custom dictionary", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-            }
-
-            words.addAll(newWords);
-            java.util.List<String> sortedWords = new java.util.ArrayList<>(words);
-            java.util.Collections.sort(sortedWords);
-
-            try (FileOutputStream fos = _recv.getContext().openFileOutput("custom.txt", Context.MODE_PRIVATE)) {
-                for (String word : sortedWords) {
-                    fos.write((word + "\n").getBytes());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                _recv.getHandler().post(() -> Toast.makeText(_recv.getContext(), "Error writing to custom dictionary", Toast.LENGTH_SHORT).show());
-            }
-            _recv.getHandler().post(() -> _recv.reloadCustomDictionary());
-            new DataSyncService(_recv.getContext()).exportDictionary();
-        });
-    }
 }
