@@ -73,7 +73,6 @@ public final class Config
   public int circle_sensitivity;
   public boolean clipboard_history_enabled;
   public int clipboard_history_duration;
-  public int clipboard_history_size;
   public boolean popup_on_keypress;
   public boolean circle_gestures;
   public boolean application_integrations;
@@ -193,7 +192,6 @@ public final class Config
     circle_sensitivity = Integer.valueOf(_prefs.getString("circle_sensitivity", "2"));
     clipboard_history_enabled = _prefs.getBoolean("clipboard_history_enabled", true);
     clipboard_history_duration = Integer.parseInt(_prefs.getString("clipboard_history_duration", String.valueOf(Integer.MAX_VALUE)));
-    clipboard_history_size = Integer.parseInt(_prefs.getString("clipboard_history_size", "10001"));
     popup_on_keypress = _prefs.getBoolean("popup_on_keypress", true);
     circle_gestures = _prefs.getBoolean("circle_gestures", true);
     application_integrations = _prefs.getBoolean("application_integrations", true);

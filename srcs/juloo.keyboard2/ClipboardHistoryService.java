@@ -100,9 +100,6 @@ public final class ClipboardHistoryService {
         }
 
         long currentTime = System.currentTimeMillis();
-        long durationMillis = Config.globalConfig().clipboard_history_duration * 60 * 1000L;
-
-        items.removeIf(item -> !item.isPinned() && (currentTime - item.getTimestamp() > durationMillis));
 
         ClipboardItem newItem = new ClipboardItem(clip, currentTime, false);
 
@@ -172,22 +169,7 @@ public final class ClipboardHistoryService {
     }
 
     private void trimHistory() {
-        List<ClipboardItem> unpinnedItems = new ArrayList<>();
-        for (ClipboardItem item : items) {
-            if (!item.isPinned()) {
-                unpinnedItems.add(item);
-            }
-        }
-
-        int maxSize = Config.globalConfig().clipboard_history_size;
-        if (unpinnedItems.size() > maxSize) {
-            // Sort by timestamp, oldest first
-            Collections.sort(unpinnedItems, (a, b) -> Long.compare(a.getTimestamp(), b.getTimestamp()));
-            int toRemove = unpinnedItems.size() - maxSize;
-            for (int i = 0; i < toRemove; i++) {
-                items.remove(unpinnedItems.get(i));
-            }
-        }
+        // No-op to keep all items
     }
 
     private void notifyHistoryChange() {
