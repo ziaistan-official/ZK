@@ -181,6 +181,8 @@ public final class ClipboardHistoryService {
 
         int maxSize = Config.globalConfig().clipboard_history_size;
         if (unpinnedItems.size() > maxSize) {
+            // Sort by timestamp, oldest first
+            Collections.sort(unpinnedItems, (a, b) -> Long.compare(a.getTimestamp(), b.getTimestamp()));
             int toRemove = unpinnedItems.size() - maxSize;
             for (int i = 0; i < toRemove; i++) {
                 items.remove(unpinnedItems.get(i));
