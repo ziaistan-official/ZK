@@ -361,3 +361,20 @@ The following settings have been updated to new defaults:
 *   **Double Tap for Caps Lock**: Double-tapping the shift key to enable caps lock is now on by default.
 *   **Number Row**: The number row is now shown with symbols by default.
 *   **Spacebar Slider Sensitivity**: The sensitivity of the spacebar slider for cursor movement is now set to **fast** by default.
+
+
+
+## Clipboard Limit increased
+
+Clipboard copied items limit increased and also history timeout increased until app stopped and automatic removal of copied content now it will be only removed by swiping left right
+
+
+
+### Batch Add to Dictionary
+
+The "batch add to dictionary" feature has been added. You can now swipe top left to the "++" button on the keyboard to add all the words in a selected block of text to your custom dictionary.
+*   **Advanced Sanitization:** The feature includes advanced text processing to ensure only valid words are added. It will:
+    *   Split words based on any non-letter character (spaces, symbols, numbers, etc.).
+    *   Convert all words to lowercase.
+    *   Ignore single-letter words.
+    *   Ignore words that are already in your dictionary.
