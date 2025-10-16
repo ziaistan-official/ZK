@@ -361,3 +361,20 @@ The following settings have been updated to new defaults:
 *   **Double Tap for Caps Lock**: Double-tapping the shift key to enable caps lock is now on by default.
 *   **Number Row**: The number row is now shown with symbols by default.
 *   **Spacebar Slider Sensitivity**: The sensitivity of the spacebar slider for cursor movement is now set to **fast** by default.
+
+## Clipboard Crash Fix and Batch Add to Dictionary
+
+This update addresses a critical crash that occurred when removing items from the clipboard and re-implements the "batch add to dictionary" feature.
+
+### Clipboard Crash Fix
+
+*   **Background Processing:** All file I/O operations related to the clipboard (saving, exporting) have been moved to a background thread. This prevents the keyboard from becoming unresponsive and crashing, especially when the clipboard history is large.
+
+### Batch Add to Dictionary
+
+*   **Re-implemented Feature:** The "batch add to dictionary" feature has been restored. You can now long-press the "+" button on the keyboard to add all the words in a selected block of text to your custom dictionary.
+*   **Advanced Sanitization:** The feature includes advanced text processing to ensure only valid words are added. It will:
+    *   Split words based on any non-letter character (spaces, symbols, numbers, etc.).
+    *   Convert all words to lowercase.
+    *   Ignore single-letter words.
+    *   Ignore words that are already in your dictionary.

@@ -88,6 +88,7 @@ public final class KeyValue implements Comparable<KeyValue>
     FORWARD_DELETE_WORD,
     SELECTION_CANCEL,
     ADD_TO_DICTIONARY,
+    ADD_TO_DICTIONARY_BATCH,
     MOVE_WORD_BACKWARD_1,
     MOVE_WORD_FORWARD_1,
     MOVE_WORD_BACKWARD_2,
@@ -745,6 +746,7 @@ public final class KeyValue implements Comparable<KeyValue>
 
       /* Editing keys */
       case "add_to_dictionary": return editingKey("+", Editing.ADD_TO_DICTIONARY);
+      case "add_to_dictionary_batch": return editingKey("++", Editing.ADD_TO_DICTIONARY_BATCH);
       case "copy": return editingKey(0xE030, Editing.COPY);
       case "paste": return editingKey(0xE032, Editing.PASTE);
       case "cut": return editingKey(0xE031, Editing.CUT);

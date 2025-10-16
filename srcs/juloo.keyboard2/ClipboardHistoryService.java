@@ -36,7 +36,6 @@ public final class ClipboardHistoryService {
     private static final String TAG = "ClipboardHistoryService";
     private static final String PERSIST_FILE_NAME = "clipboard_history.json";
     public static final String RELOAD_CLIPBOARD_HISTORY_ACTION = "juloo.keyboard2.RELOAD_CLIPBOARD_HISTORY";
-    private static final int MAX_UNPINNED_HISTORY_SIZE = 20;
 
     private static ClipboardHistoryService _service = null;
     private static ClipboardPasteCallback _paste_callback = null;
@@ -100,7 +99,9 @@ public final class ClipboardHistoryService {
             return;
         }
 
-        ClipboardItem newItem = new ClipboardItem(clip, System.currentTimeMillis(), false);
+        long currentTime = System.currentTimeMillis();
+
+        ClipboardItem newItem = new ClipboardItem(clip, currentTime, false);
 
         // Remove existing item to update its timestamp and move it to the top
         items.remove(newItem);
@@ -168,19 +169,7 @@ public final class ClipboardHistoryService {
     }
 
     private void trimHistory() {
-        List<ClipboardItem> unpinnedItems = new ArrayList<>();
-        for (ClipboardItem item : items) {
-            if (!item.isPinned()) {
-                unpinnedItems.add(item);
-            }
-        }
-
-        if (unpinnedItems.size() > MAX_UNPINNED_HISTORY_SIZE) {
-            int toRemove = unpinnedItems.size() - MAX_UNPINNED_HISTORY_SIZE;
-            for (int i = 0; i < toRemove; i++) {
-                items.remove(unpinnedItems.get(i));
-            }
-        }
+        // No-op to keep all items
     }
 
     private void notifyHistoryChange() {
@@ -236,28 +225,30 @@ public final class ClipboardHistoryService {
     }
 
     private void persistItems() {
-        JSONArray jsonArray = new JSONArray();
-        for (ClipboardItem item : items) {
-            try {
-                jsonArray.put(item.toJSON());
-            } catch (JSONException e) {
-                Log.e(TAG, "Failed to convert item to JSON", e);
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
+            JSONArray jsonArray = new JSONArray();
+            for (ClipboardItem item : items) {
+                try {
+                    jsonArray.put(item.toJSON());
+                } catch (JSONException e) {
+                    Log.e(TAG, "Failed to convert item to JSON", e);
+                }
             }
-        }
 
-        String jsonPayload = jsonArray.toString();
+            String jsonPayload = jsonArray.toString();
 
-        // Persist to internal storage
-        File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
-            writer.write(jsonPayload);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to persist clipboard history", e);
-        }
+            // Persist to internal storage
+            File file = new File(context.getFilesDir(), PERSIST_FILE_NAME);
+            try (FileOutputStream fos = new FileOutputStream(file);
+                 OutputStreamWriter writer = new OutputStreamWriter(fos, StandardCharsets.UTF_8)) {
+                writer.write(jsonPayload);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to persist clipboard history", e);
+            }
 
-        // Export directly to external storage
-        new DataSyncService(context).exportClipboard(jsonPayload);
+            // Export directly to external storage
+            new DataSyncService(context).exportClipboard(jsonPayload);
+        });
     }
 
     private void migrateFromPrefs() {
