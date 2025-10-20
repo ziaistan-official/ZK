@@ -339,6 +339,9 @@ public class Keyboard2 extends InputMethodService
     _currentSpecialLayout = refresh_special_layout(info);
     _keyboardView.setKeyboard(current_layout());
     _keyeventhandler.started(info);
+    if (restarting && ((_clipboard_pane != null && _clipboard_pane.isShown()) || (_emojiPane != null && _emojiPane.isShown()))) {
+      return;
+    }
     setInputView(_inputView);
     updateSuggestionsFromPrefix(""); // Ensure tutorials are shown on start
     Logs.debug_startup_input_view(info, _config);
@@ -656,12 +659,13 @@ public class Keyboard2 extends InputMethodService
           if (_clipboard_pane == null) {
             _clipboard_pane = (ClipboardView) inflate_view(R.layout.clipboard_pane);
           }
-          // Ensure the clipboard pane has the same height as the keyboard view
+          // Ensure the clipboard pane has a consistent height
+          int paneHeight = (int) (_config.keyboardHeightPercent / 100.0 * _config.screenHeightPixels);
           ViewGroup.LayoutParams lp = _clipboard_pane.getLayoutParams();
           if (lp == null) {
-              lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, _keyboardView.getHeight());
+              lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, paneHeight);
           } else {
-              lp.height = _keyboardView.getHeight();
+              lp.height = paneHeight;
           }
           _clipboard_pane.setLayoutParams(lp);
           setInputView(_clipboard_pane);
