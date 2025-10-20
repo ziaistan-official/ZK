@@ -167,4 +167,5 @@
     <string name="pref_clipboard_history_summary">Save a history of copied text</string>
     <string name="drag_handle_content_description">Drag to move suggestions strip</string>
     <string name="clipboard_back_to_keyboard">Back</string>
+    <string name="close_clipboard">Close clipboard</string>
 </resources>
