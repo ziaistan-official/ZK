@@ -64,7 +64,7 @@ public class Keyboard2 extends InputMethodService
   /** Layout associated with the currently selected locale. Not 'null'. */
   private KeyboardData _localeTextLayout;
   private ViewGroup _emojiPane = null;
-  private ClipboardView _clipboard_pane = null;
+  private ViewGroup _clipboard_pane = null;
   public int actionId; // Action performed by the Action key.
   private Handler _handler;
 
@@ -657,17 +657,11 @@ public class Keyboard2 extends InputMethodService
 
         case SWITCH_CLIPBOARD:
           if (_clipboard_pane == null) {
-            _clipboard_pane = (ClipboardView) inflate_view(R.layout.clipboard_pane);
+            _clipboard_pane = (ViewGroup) inflate_view(R.layout.clipboard_pane);
+            _clipboard_pane.findViewById(R.id.close_clipboard_button).setOnClickListener(v -> {
+                handle_event_key(KeyValue.Event.SWITCH_BACK_CLIPBOARD);
+            });
           }
-          // Ensure the clipboard pane has a consistent height
-          int paneHeight = (int) (_config.keyboardHeightPercent / 100.0 * _config.screenHeightPixels);
-          ViewGroup.LayoutParams lp = _clipboard_pane.getLayoutParams();
-          if (lp == null) {
-              lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, paneHeight);
-          } else {
-              lp.height = paneHeight;
-          }
-          _clipboard_pane.setLayoutParams(lp);
           setInputView(_clipboard_pane);
           break;
 

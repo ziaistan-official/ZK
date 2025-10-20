@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<juloo.keyboard2.ClipboardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/colorKeyboard">
+    android:background="#00000000">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/clipboard_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+    <juloo.keyboard2.ClipboardView
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:background="?attr/colorKeyboard">
 
-    <include layout="@layout/clipboard_action_row" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/clipboard_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-    <juloo.keyboard2.Keyboard2View
-        android:id="@+id/clipboard_bottom_row_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorKeyboard" />
+        <include layout="@layout/clipboard_action_row" />
 
-</juloo.keyboard2.ClipboardView>
+        <juloo.keyboard2.Keyboard2View
+            android:id="@+id/clipboard_bottom_row_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorKeyboard" />
+
+    </juloo.keyboard2.ClipboardView>
+
+    <ImageView
+        android:id="@+id/close_clipboard_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_arrow_downward"
+        android:contentDescription="@string/close_clipboard" />
+
+</FrameLayout>
