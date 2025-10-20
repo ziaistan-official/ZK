@@ -25,7 +25,6 @@ For instructions on building the application, see
 [Contributing](CONTRIBUTING.md).
 
 
-
 # Changelog
 
 This document outlines the new features and enhancements added to the keyboard, based on recent requests.
@@ -390,59 +389,19 @@ The following settings have been updated to new defaults:
 *   **Number Row**: The number row is now shown with symbols by default.
 *   **Spacebar Slider Sensitivity**: The sensitivity of the spacebar slider for cursor movement is now set to **fast** by default.
 
-## Advanced Keyboard-Aware Correction
 
-The keyboard's auto-correction and suggestion engine has been significantly enhanced with a powerful, high-performance system. This system runs two different, sophisticated search algorithms in parallel across three separate dictionaries to provide highly accurate and context-aware suggestions.
 
-### How It Truly Works: A Practical Breakdown
+## Clipboard Limit increased
 
-The core strategy is to find the best possible corrections for a typed word by combining a keyboard-aware search with a traditional typo-search, all running simultaneously for maximum speed. **Note:** This process analyzes the entire typed word against the dictionaries. It does not break words into smaller chunks (e.g., groups of three characters); its power comes from the parallel, trie-guided search across the complete word and its keyboard-adjacent variations.
+Clipboard copied items limit increased and also history timeout increased until app stopped and automatic removal of copied content now it will be only removed by swiping left right
 
-**1. The Foundation: Data Sources**
 
-The system relies on two key pieces of information:
 
-*   **Three Dictionaries (Tries):** The keyboard maintains three dictionaries, each stored in an efficient tree-like structure called a "Trie," which is extremely fast for searching words and prefixes.
-    1.  `custom.txt`: Your personal dictionary. Words from here always have the **highest priority**.
-    2.  `common.txt`: A list of common words for providing relevant, everyday suggestions.
-    3.  `wordlist.txt`: A massive, general-purpose word list for comprehensive coverage.
-*   **Keyboard Layout (`surroundings.xml`):** This critical file maps every key on the keyboard to a list of its immediate physical neighbors. For example, for the key 't', the neighbors include 'r', 'f', 'g', and 'y'. This is what makes the suggester "keyboard-aware."
+### Batch Add to Dictionary
 
-**2. The Strategy: A Parallel, Two-Algorithm Attack**
-
-When you type a word (e.g., "tets"), the system launches **six** search tasks in parallel to find suggestions:
-
-*   Algorithm #1 (`fullSubstitutionSearch`) runs on the `custom` Trie.
-*   Algorithm #1 (`fullSubstitutionSearch`) runs on the `common` Trie.
-*   Algorithm #1 (`fullSubstitutionSearch`) runs on the `wordlist` Trie.
-*   Algorithm #2 (`editDistanceSearch`) runs on the `custom` Trie.
-*   Algorithm #2 (`editDistanceSearch`) runs on the `common` Trie.
-*   Algorithm #2 (`editDistanceSearch`) runs on the `wordlist` Trie.
-
-**3. The Algorithms Explained**
-
-*   **Algorithm #1: `fullSubstitutionSearch` (The Keyboard-Aware Search)**
-    This is the most advanced algorithm, designed to find words that could have resulted from accidentally hitting an adjacent key.
-    1.  **Get Alternates:** For each character in your typed word "tets", it uses `surroundings.xml` to create a list of all possible intended characters (the key itself plus its neighbors).
-        *   `t` -> `['t', 'r', 'f', 'g', 'y']`
-        *   `e` -> `['e', 'w', 's', 'd', 'r']`
-        *   `t` -> `['t', 'r', 'f', 'g', 'y']`
-        *   `s` -> `['s', 'w', 'a', 'd', 'x', 'z']`
-    2.  **Trie-Guided Search:** It then intelligently searches the dictionary Trie for any valid words that can be formed by combining these alternates (e.g., "**t**-**e**-**s**-**t**"). It doesn't generate every single combination; it traverses the Trie, and if a path doesn't exist, it immediately stops pursuing that path, making the search incredibly fast.
-
-*   **Algorithm #2: `editDistanceSearch` (The Classic Typo Search)**
-    This algorithm is designed to catch common, non-keyboard-related typos. It searches the Tries for words that are a single "edit" away from the typed word. An "edit" can be:
-    *   **An Insertion:** (e.g., "hallo" -> "h**e**llo")
-    *   **A Deletion:** (e.g., "he**e**llo" -> "hello")
-    *   **A Substitution:** (e.g., "t**a**st" -> "t**e**st")
-    *   **A Transposition** (swapping adjacent letters): (e.g., "**teh**" -> "**the**")
-
-**4. The Finale: Combining and Prioritizing Results**
-
-After all six parallel searches are complete, the system merges the results:
-
-1.  **Collects all found suggestions.**
-2.  **Prioritizes:** It builds the final list by first adding all unique suggestions found in the `custom` dictionary, followed by those from the `common` dictionary, and finally from the `wordlist`.
-3.  **Removes Duplicates:** This process automatically ensures that a word suggested by multiple algorithms only appears once, while preserving the crucial priority order.
-
-The result is a highly relevant, prioritized, and de-duplicated list of suggestions, generated with maximum speed and accuracy.
+The "batch add to dictionary" feature has been added. You can now swipe top left to the "++" button on the keyboard to add all the words in a selected block of text to your custom dictionary.
+*   **Advanced Sanitization:** The feature includes advanced text processing to ensure only valid words are added. It will:
+    *   Split words based on any non-letter character (spaces, symbols, numbers, etc.).
+    *   Convert all words to lowercase.
+    *   Ignore single-letter words.
+    *   Ignore words that are already in your dictionary.
