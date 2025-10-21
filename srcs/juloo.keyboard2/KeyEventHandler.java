@@ -149,6 +149,10 @@ public final class KeyEventHandler
       return;
 
     if (justAutoCorrected) {
+        if (key.getKind() == KeyValue.Kind.Keyevent && key.getKeyevent() == KeyEvent.KEYCODE_DEL) {
+            revertAutoCorrection();
+            return; // Intercept the backspace
+        }
         // Any other key press commits the correction, so we reset the flag.
         justAutoCorrected = false;
     }
@@ -583,11 +587,7 @@ public final class KeyEventHandler
         correctedWord = bestCorrection;
         justAutoCorrected = true;
         _autocap.typed(" ");
-
-        java.util.List<String> suggestionsWithRevert = new java.util.ArrayList<>();
-        suggestionsWithRevert.add(word); // Add original word for easy revert
-        suggestionsWithRevert.addAll(combinedSuggestions);
-        _recv.showSuggestions(suggestionsWithRevert);
+        _recv.showSuggestions(combinedSuggestions);
     } else {
         sendTextVerbatim(" ");
     }
@@ -980,6 +980,32 @@ public final class KeyEventHandler
       _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
 
       // Reset the correction state
+      justAutoCorrected = false;
+      originalWord = null;
+      correctedWord = null;
+  }
+
+  private void revertAutoCorrection() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null || correctedWord == null || originalWord == null) {
+          return;
+      }
+
+      conn.beginBatchEdit();
+      // Delete the corrected word and the space that was added after it.
+      conn.deleteSurroundingText(correctedWord.length() + 1, 0);
+      conn.commitText(originalWord, 1);
+      conn.endBatchEdit();
+
+      // Prevent this word from being auto-corrected again in this session.
+      revertedWords.add(originalWord.toLowerCase());
+
+      // Show the corrected word in the suggestion strip
+      java.util.List<String> suggestions = new java.util.ArrayList<>();
+      suggestions.add(correctedWord);
+      _recv.showSuggestions(suggestions);
+
+      // Reset state
       justAutoCorrected = false;
       originalWord = null;
       correctedWord = null;
