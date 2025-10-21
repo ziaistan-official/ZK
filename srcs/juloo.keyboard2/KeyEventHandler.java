@@ -149,10 +149,6 @@ public final class KeyEventHandler
       return;
 
     if (justAutoCorrected) {
-        if (key.getKind() == KeyValue.Kind.Keyevent && key.getKeyevent() == KeyEvent.KEYCODE_DEL) {
-            revertAutoCorrection();
-            return; // Intercept the backspace
-        }
         // Any other key press commits the correction, so we reset the flag.
         justAutoCorrected = false;
     }
@@ -587,7 +583,11 @@ public final class KeyEventHandler
         correctedWord = bestCorrection;
         justAutoCorrected = true;
         _autocap.typed(" ");
-        _recv.showSuggestions(combinedSuggestions);
+
+        java.util.List<String> suggestionsWithRevert = new java.util.ArrayList<>();
+        suggestionsWithRevert.add(word); // Add original word for easy revert
+        suggestionsWithRevert.addAll(combinedSuggestions);
+        _recv.showSuggestions(suggestionsWithRevert);
     } else {
         sendTextVerbatim(" ");
     }
@@ -951,19 +951,30 @@ public final class KeyEventHandler
           // Standard suggestion replacement logic.
           CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
           if (textBeforeCursor != null) {
-              int i = textBeforeCursor.length();
-              while (i > 0 && Character.isLetter(textBeforeCursor.charAt(i - 1))) {
-                  i--;
+              String text = textBeforeCursor.toString();
+              int end = text.length();
+              while (end > 0 && Character.isWhitespace(text.charAt(end - 1))) {
+                  end--;
               }
-              int wordLength = textBeforeCursor.length() - i;
-              if (wordLength > 0) {
-                  conn.deleteSurroundingText(wordLength, 0);
+              int start = end;
+              while (start > 0 && Character.isLetter(text.charAt(start - 1))) {
+                  start--;
+              }
+
+              int charsToDelete = text.length() - start;
+              if (charsToDelete > 0) {
+                  conn.deleteSurroundingText(charsToDelete, 0);
               }
           }
       }
 
       conn.commitText(suggestion + " ", 1);
       conn.endBatchEdit();
+
+      // If the user chose the original word, add it to the reverted list
+      if (justAutoCorrected && suggestion.equals(originalWord)) {
+          revertedWords.add(originalWord.toLowerCase());
+      }
 
       _autocap.typed(" ");
       _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
@@ -972,30 +983,6 @@ public final class KeyEventHandler
       justAutoCorrected = false;
       originalWord = null;
       correctedWord = null;
-  }
-
-  private void revertAutoCorrection() {
-      InputConnection conn = _recv.getCurrentInputConnection();
-      if (conn == null || correctedWord == null || originalWord == null) {
-          return;
-      }
-
-      conn.beginBatchEdit();
-      // Delete the corrected word and the space that was added after it.
-      conn.deleteSurroundingText(correctedWord.length() + 1, 0);
-      conn.commitText(originalWord, 1);
-      conn.endBatchEdit();
-
-      // Prevent this word from being auto-corrected again in this session.
-      revertedWords.add(originalWord);
-
-      // Reset state
-      justAutoCorrected = false;
-      originalWord = null;
-      correctedWord = null;
-
-      // Update suggestions for the reverted word
-      updateSuggestionsFromPrefix();
   }
 
   public static interface IReceiver
