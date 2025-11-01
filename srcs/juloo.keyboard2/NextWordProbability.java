@@ -100,7 +100,7 @@ public class NextWordProbability {
         int secondId = getOrCreateId(secondWord);
         Map<Integer, Integer> counts = nextWordCounts.computeIfAbsent(firstId, k -> new HashMap<>());
         int currentCount = counts.getOrDefault(secondId, 0);
-        if (currentCount < 10) {
+        if (currentCount < 99999) {
             counts.put(secondId, currentCount + 1);
         }
     }
