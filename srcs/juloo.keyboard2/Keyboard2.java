@@ -746,6 +746,9 @@ public class Keyboard2 extends InputMethodService
         case SET_THEME_EPAPER:
           setTheme("epaper");
           break;
+        case LEARN_FROM_TEXT:
+          _keyeventhandler.learnFromTextField();
+          break;
       }
     }
 

@@ -385,7 +385,7 @@ public final class KeyEventHandler
         String originalText = selectedText.toString();
 
         if ("d".equals(textStr)) {
-            addSelectedTextToDictionary();
+            learnFromTextField();
             return;
         }
 
@@ -956,6 +956,11 @@ public final class KeyEventHandler
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
+      if (previousWord != null) {
+          _suggestionProvider.trackWordSequence(previousWord, suggestion);
+      }
+      previousWord = suggestion;
+
       conn.beginBatchEdit();
       if (justAutoCorrected && correctedWord != null) {
           // An auto-correction just happened. We need to replace the auto-corrected word.
@@ -1035,6 +1040,21 @@ public final class KeyEventHandler
       else if (should_disable)
         _recv.set_shift_state(false, false);
     }
+  }
+
+  private void learnFromTextField() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) return;
+
+      ExtractedText extractedText = conn.getExtractedText(new ExtractedTextRequest(), 0);
+      if (extractedText == null || extractedText.text == null) return;
+
+      String text = extractedText.text.toString();
+      String[] words = text.split("\\s+");
+      for (int i = 0; i < words.length - 1; i++) {
+          _suggestionProvider.trackWordSequence(words[i], words[i+1]);
+      }
+      Toast.makeText(_recv.getContext(), "Learned from text field.", Toast.LENGTH_SHORT).show();
   }
 
   private void addSelectedTextToDictionaryBatch() {

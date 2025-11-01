@@ -1,6 +1,7 @@
 package juloo.keyboard2;
 
 import android.content.Context;
+import android.os.Environment;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,7 +18,7 @@ import java.util.Map;
 public class NextWordProbability {
 
     private static final String PROBABILITY_FILE = "next_word_prob.txt";
-    private static final String BACKUP_DIR = "backup";
+    private static final String EXTERNAL_DIR_NAME = "ziaistan_keyboard_backup";
     private final File probabilityFile;
 
     private final Map<String, Integer> wordToId = new HashMap<>();
@@ -26,7 +27,7 @@ public class NextWordProbability {
     private int nextId = 0;
 
     public NextWordProbability(Context context) {
-        File backupDir = new File(context.getFilesDir(), BACKUP_DIR);
+        File backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_DIR_NAME);
         if (!backupDir.exists()) {
             backupDir.mkdirs();
         }
