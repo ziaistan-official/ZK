@@ -59,7 +59,7 @@ public class NextWordProbability {
         }
     }
 
-    private void saveProbabilities() {
+    private void saveProbabilitiesInternal() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(probabilityFile))) {
             for (Map.Entry<Integer, Map<Integer, Integer>> entry : nextWordCounts.entrySet()) {
                 String word = idToWord.get(entry.getKey());
@@ -97,7 +97,7 @@ public class NextWordProbability {
     }
 
     public void saveProbabilities() {
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(this::saveProbabilities);
+        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(this::saveProbabilitiesInternal);
     }
 
     public List<String> getNextWordSuggestions(String word) {
