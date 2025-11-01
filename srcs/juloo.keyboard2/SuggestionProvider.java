@@ -25,6 +25,7 @@ public class SuggestionProvider {
     public final TrieNode commonRoot;
     public final TrieNode wordlistRoot;
     private final Context context;
+    public final NextWordProbability nextWordProbability;
 
     public volatile boolean commonLoaded = false;
     private volatile boolean wordlistLoaded = false;
@@ -34,6 +35,7 @@ public class SuggestionProvider {
         customRoot = new TrieNode();
         commonRoot = new TrieNode();
         wordlistRoot = new TrieNode();
+        nextWordProbability = new NextWordProbability(context);
         loadCustomDictionary(customRoot);
         KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(() -> {
             loadDictionary(R.raw.common, commonRoot);
@@ -194,5 +196,35 @@ public class SuggestionProvider {
      */
     public boolean isValidWord(String word) {
         return getWordSource(word) != WordSource.NONE;
+    }
+
+    public List<String> getNextWordSuggestions(String currentWord) {
+        List<String> suggestions = new ArrayList<>();
+        if (currentWord == null || currentWord.isEmpty()) {
+            return suggestions;
+        }
+
+        // Get suggestions from the probability model
+        suggestions.addAll(nextWordProbability.getNextWordSuggestions(currentWord));
+
+        // Fill remaining space with common words
+        if (suggestions.size() < MAX_SUGGESTIONS) {
+            TrieNode node = commonRoot;
+            findAllWords(node, "", suggestions);
+        }
+        if (suggestions.size() < MAX_SUGGESTIONS) {
+            TrieNode node = wordlistRoot;
+            findAllWords(node, "", suggestions);
+        }
+
+
+        return suggestions.subList(0, Math.min(suggestions.size(), MAX_SUGGESTIONS));
+    }
+
+    public void trackWordSequence(String previousWord, String currentWord) {
+        nextWordProbability.trackWordSequence(previousWord, currentWord);
+    }
+    public String getTutorial() {
+        return context.getString(R.string.next_word_tutorial);
     }
 }
