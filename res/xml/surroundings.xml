@@ -86,6 +86,16 @@
     <char value="ے" neighbors="یفغ" />
 
     <!-- Urdu Ziaistani Layout -->
+    <char value="ط" neighbors="ظ"/>
+    <char value="ظ" neighbors="طئ"/>
+    <char value="ئ" neighbors="ظح"/>
+    <char value="ح" neighbors="ئث"/>
+    <char value="ث" neighbors="حٹ"/>
+    <char value="ٹ" neighbors="ثڑ"/>
+    <char value="ڑ" neighbors="ٹغ"/>
+    <char value="غ" neighbors="ڑص"/>
+    <char value="ص" neighbors="غض"/>
+    <char value="ض" neighbors="ص"/>
     <char value="ق" neighbors="و"/>
     <char value="و" neighbors="قعا"/>
     <char value="ع" neighbors="ورس"/>
@@ -108,7 +118,6 @@
     <char value="ز" neighbors="ش"/>
     <char value="ش" neighbors="زچا"/>
     <char value="چ" neighbors="شطس"/>
-    <char value="ط" neighbors="چبد"/>
     <char value="ب" neighbors="طنل"/>
     <char value="ن" neighbors="بمگ"/>
     <char value="م" neighbors="نح"/>

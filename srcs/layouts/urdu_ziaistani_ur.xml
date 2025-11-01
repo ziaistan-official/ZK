@@ -47,7 +47,7 @@
     <fn a="ژ" b="="/>
     <fn a="ز" b="|"/>
     <fn a="ڑ" b="\\"/>
-    <fn a="ر" b="~"/>
+    <fn a="р" b="~"/>
 
     <!-- Fn Layer: Main Typing Area (Common Symbols) -->
     <fn a="ے" b="!"/>
@@ -89,35 +89,50 @@
 
   <!-- New Gboard-like Urdu Typing Area -->
   <row>
-    <key c="ق" ne="قَ" nw="قِ" se="قٌ" sw="قّ"/>
-    <key c="و" ne="وَ" nw="وِ" se="وٌ" sw="وّ"/>
-    <key c="ع" ne="عَ" nw="عِ" se="عٌ" sw="عّ"/>
-    <key c="ر" ne="رَ" nw="رِ" se="رٌ" sw="رّ"/>
-    <key c="ت" ne="تَ" nw="تِ" se="تٌ" sw="تّ"/>
-    <key c="ے" ne="ےَ" nw="ےِ" se="ےٌ" sw="ےّ"/>
-    <key c="ء" ne="ءَ" nw="ءِ" se="ءٌ" sw="ءّ"/>
-    <key c="ی" ne="یَ" nw="یِ" se="یٌ" sw="یّ"/>
-    <key c="ہ" ne="ہَ" nw="ہِ" se="ہٌ" sw="ہّ"/>
-    <key c="پ" ne="پَ" nw="پِ" se="پٌ" sw="پّ"/>
+    <key width="1.5" c="ض" ne="ضَ" nw="ضِ" se="ضٌ" sw="ضّ"/>
+    <key width="1.5" c="ص" ne="صَ" nw="صِ" se="صٌ" sw="صّ"/>
+    <key width="1.5" c="غ" ne="غَ" nw="غِ" se="غٌ" sw="غّ"/>
+    <key width="1.5" c="ڑ" ne="ڑَ" nw="ڑِ" se="ڑٌ" sw="ڑّ"/>
+    <key width="1.5" c="ٹ" ne="ٹَ" nw="ٹِ" se="ٹٌ" sw="ٹّ"/>
+    <key width="1.5" c="ث" ne="ثَ" nw="ثِ" se="ثٌ" sw="ثّ"/>
+    <key width="1.5" c="ح" ne="حَ" nw="حِ" se="حٌ" sw="حّ"/>
+    <key width="1.5" c="ئ" ne="ئَ" nw="ئِ" se="ئٌ" sw="ئّ"/>
+    <key width="1.5" c="ظ" ne="ظَ" nw="ظِ" se="ظٌ" sw="ظّ"/>
+    <key width="1.5" c="ط" ne="طَ" nw="طِ" se="طٌ" sw="طّ"/>
   </row>
   <row>
-    <key c="ا" ne="اَ" nw="اِ" se="اٌ" sw="اّ"/>
-    <key c="س" ne="سَ" nw="سِ" se="سٌ" sw="سّ"/>
-    <key c="د" ne="دَ" nw="دِ" se="دٌ" sw="دّ"/>
-    <key c="ف" ne="فَ" nw="فِ" se="فٌ" sw="فّ"/>
-    <key c="گ" ne="گَ" nw="گِ" se="گٌ" sw="گّ"/>
-    <key c="ح" ne="حَ" nw="حِ" se="حٌ" sw="حّ"/>
-    <key c="ج" ne="جَ" nw="جِ" se="جٌ" sw="جّ"/>
-    <key c="ک" ne="کَ" nw="کِ" se="کٌ" sw="کّ"/>
-    <key c="ل" ne="لَ" nw="لِ" se="لٌ" sw="لّ"/>
+    <key width="1.5" c="ق" ne="قَ" nw="قِ" se="قٌ" sw="قّ"/>
+    <key width="1.5" c="و" ne="وَ" nw="وِ" se="وٌ" sw="وّ"/>
+    <key width="1.5" c="ع" ne="عَ" nw="عِ" se="عٌ" sw="عّ"/>
+    <key width="1.5" c="ر" ne="رَ" nw="رِ" se="رٌ" sw="رّ"/>
+    <key width="1.5" c="ت" ne="تَ" nw="تِ" se="تٌ" sw="تّ"/>
+    <key width="1.5" c="ے" ne="ےَ" nw="ےِ" se="ےٌ" sw="ےّ"/>
+    <key width="1.5" c="ء" ne="ءَ" nw="ءِ" se="ءٌ" sw="ءّ"/>
+    <key width="1.5" c="ی" ne="یَ" nw="یِ" se="یٌ" sw="یّ"/>
+    <key width="1.5" c="ہ" ne="ہَ" nw="ہِ" se="ہٌ" sw="ہّ"/>
+    <key width="1.5" c="پ" ne="پَ" nw="پِ" se="پٌ" sw="پّ"/>
   </row>
   <row>
-    <key c="ز" ne="زَ" nw="زِ" se="زٌ" sw="زّ"/>
-    <key c="ش" ne="شَ" nw="شِ" se="شٌ" sw="شّ"/>
-    <key c="چ" ne="چَ" nw="چِ" se="چٌ" sw="چّ"/>
-    <key c="ط" ne="طَ" nw="طِ" se="طٌ" sw="طّ"/>
-    <key c="ب" ne="بَ" nw="بِ" se="بٌ" sw="بّ"/>
-    <key c="ن" ne="نَ" nw="نِ" se="نٌ" sw="نّ"/>
-    <key c="م" ne="مَ" nw="مِ" se="مٌ" sw="مّ"/>
+    <key width="1.5" c="ا" ne="اَ" nw="اِ" se="اٌ" sw="اّ"/>
+    <key width="1.5" c="س" ne="سَ" nw="سِ" se="سٌ" sw="سّ"/>
+    <key width="1.5" c="ڈ" ne="ڈَ" nw="ڈِ" se="ڈٌ" sw="ڈّ"/>
+    <key width="1.5" c="د" ne="دَ" nw="دِ" se="دٌ" sw="دّ"/>
+    <key width="1.5" c="ف" ne="فَ" nw="فِ" se="فٌ" sw="فّ"/>
+    <key width="1.5" c="گ" ne="گَ" nw="گِ" se="گٌ" sw="گّ"/>
+    <key width="1.5" c="ھ" ne="ھَ" nw="ھِ" se="ھٌ" sw="ھّ"/>
+    <key width="1.5" c="ج" ne="جَ" nw="جِ" se="جٌ" sw="جّ"/>
+    <key width="1.5" c="ک" ne="کَ" nw="کِ" se="کٌ" sw="کّ"/>
+    <key width="1.5" c="ل" ne="لَ" nw="لِ" se="لٌ" sw="لّ"/>
+  </row>
+  <row>
+    <key width="1.5" c="ذ" ne="ذَ" nw="ذِ" se="ذٌ" sw="ذّ"/>
+    <key width="1.5" c="ز" ne="زَ" nw="زِ" se="زٌ" sw="زّ"/>
+    <key width="1.5" c="ش" ne="شَ" nw="شِ" se="شٌ" sw="شّ"/>
+    <key width="1.5" c="خ" ne="خَ" nw="خِ" se="خٌ" sw="خّ"/>
+    <key width="1.5" c="چ" ne="چَ" nw="چِ" se="چٌ" sw="چّ"/>
+    <key width="1.5" c="ب" ne="بَ" nw="بِ" se="بٌ" sw="بّ"/>
+    <key width="1.5" c="ں" ne="ںَ" nw="ںِ" se="ںٌ" sw="ںّ"/>
+    <key width="1.5" c="ن" ne="نَ" nw="نِ" se="نٌ" sw="نّ"/>
+    <key width="1.5" c="م" ne="مَ" nw="мِ" se="مٌ" sw="مّ"/>
   </row>
 </keyboard>
