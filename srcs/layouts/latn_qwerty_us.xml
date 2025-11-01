@@ -100,8 +100,8 @@ Useful links.
   
   <!-- English QWERTY Typing Area -->
   <row>
-    <key width="1.05" c="\t" ne="{" />
-    <key width="1.05" c="\n" ne="}" />
+    <key width="1.05" c="\t" n="TAB" />
+    <key width="1.05" c="\n" n="NEW" sw="LI" s="NE" />
     <key width="1.05" c="q" n="1" s="!" ne="Q" se="loc esc" />
     <key width="1.05" c="w" n="2" s="\@" ne="W" />
     <key width="1.05" c="e" n="3" s="\#" ne="E" />
