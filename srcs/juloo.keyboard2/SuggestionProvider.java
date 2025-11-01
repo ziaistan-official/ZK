@@ -224,6 +224,11 @@ public class SuggestionProvider {
     public void trackWordSequence(String previousWord, String currentWord) {
         nextWordProbability.trackWordSequence(previousWord, currentWord);
     }
+
+    public void learnFromText(String text) {
+        nextWordProbability.learnFromText(text);
+    }
+
     public String getTutorial() {
         return context.getString(R.string.next_word_tutorial);
     }
