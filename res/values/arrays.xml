@@ -141,6 +141,11 @@
     <string-array name="tutorials">
         <item>You can train next word suggestion model by selecting all the text and pressing \'d\' key.</item>
         <item>The next word suggestion model will be trained with you as you type.</item>
+        <item>Automatic Import: Once permission is granted, the app will automatically import your custom.txt and clipboard_export.json.</item>
+        <item>Automatic Export: The app will automatically save your custom dictionary and clipboard history.</item>
+        <item>Copy your custom.txt and clipboard_export.json files into the Downloads/ziaistan_keyboard_backup/ directory.</item>
+        <item>Install and Launch the app and grant the "All files access" permission when prompted.</item>     
+        <item>Easy Revert: If a correction was made by mistake, simply press the backspace key once to instantly revert to the original word you typed.</item>
         <item>Next word suggestion model will be also trained if you paste copied text from clipboard.</item>
         <item>Clipboard Tip: Quickly paste any item from your history by simply tapping on it.</item>
         <item>Clipboard Tip: Keep important items from being deleted by long-pressing to pin them. Pinned items stay at the bottom.</item>
