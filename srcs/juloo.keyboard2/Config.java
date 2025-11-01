@@ -334,17 +334,21 @@ public final class Config
     switch (saved_version)
     {
       case 0:
-        // Primary, secondary and custom layout options are merged into the new
-        // Layouts option. This also sets the default value.
-        List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
-        l.add(migrate_layout(prefs.getString("layout", "urdu_phonetic_ur")));
-        String snd_layout = prefs.getString("second_layout", "latn_qwerty_us");
-        if (snd_layout != null && !snd_layout.equals("none"))
-          l.add(migrate_layout(snd_layout));
-        String custom_layout = prefs.getString("custom_layout", "");
-        if (custom_layout != null && !custom_layout.equals(""))
-          l.add(LayoutsPreference.CustomLayout.parse(custom_layout));
-        LayoutsPreference.save_to_preferences(e, l);
+        // This migration is only for users of very old versions.
+        // For new users, the LayoutsPreference class will set the default value itself.
+        if (prefs.contains("layout")) {
+            // Primary, secondary and custom layout options are merged into the new
+            // Layouts option.
+            List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
+            l.add(migrate_layout(prefs.getString("layout", null)));
+            String snd_layout = prefs.getString("second_layout", null);
+            if (snd_layout != null && !snd_layout.equals("none"))
+              l.add(migrate_layout(snd_layout));
+            String custom_layout = prefs.getString("custom_layout", "");
+            if (custom_layout != null && !custom_layout.equals(""))
+              l.add(LayoutsPreference.CustomLayout.parse(custom_layout));
+            LayoutsPreference.save_to_preferences(e, l);
+        }
         // Fallthrough
       case 1:
         Object numberRowPref = prefs.getAll().get("number_row");
