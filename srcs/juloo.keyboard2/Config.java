@@ -159,7 +159,7 @@ public final class Config
     longPressTimeout = _prefs.getInt("longpress_timeout", 600);
     longPressInterval = _prefs.getInt("longpress_interval", 65);
     keyrepeat_enabled = _prefs.getBoolean("keyrepeat_enabled", true);
-    margin_bottom = get_dip_pref_oriented(dm, "margin_bottom", 50, 3);
+    margin_bottom = get_dip_pref_oriented(dm, "margin_bottom", 0, 3);
     key_vertical_margin = get_dip_pref(dm, "key_vertical_margin", 1.5f) / 100;
     key_horizontal_margin = get_dip_pref(dm, "key_horizontal_margin", 2) / 100;
     // Label brightness is used as the alpha channel

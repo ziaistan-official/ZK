@@ -65,6 +65,26 @@ This keyboard now includes a powerful, on-the-fly auto-correction system designe
 *   **High Performance:** All correction algorithms run on a background thread pool to ensure that the keyboard's UI remains fast and responsive at all times.
 *   **Easy Revert:** If a correction was made by mistake, simply press the backspace key once to instantly revert to the original word you typed.
 
+## Next-Word Suggestions
+
+This keyboard now includes an intelligent next-word suggestion feature that learns from your typing habits to predict the next word you are likely to type.
+
+### How It Works
+
+*   **Learns from Your Typing:** The system learns your common word pairs as you type. It learns when you:
+    *   Type a word and press the spacebar.
+    *   Select a word from the suggestion strip.
+    *   Paste text from the clipboard.
+*   **Shows Suggestions:** After you type a word and press space, or select a suggestion, the keyboard will display a list of likely next words in the suggestion strip.
+*   **Handles Special Characters:** The learning model is designed to handle complex text. It will:
+    *   Convert all words to lowercase to avoid duplicates.
+    *   Support multilingual words (including Urdu).
+    *   Filter out all special characters and punctuation to learn only "pure" words.
+    *   Correctly split compound words joined by special characters (e.g., "medium_length" will be learned as "medium" and "length").
+*   **Capped Frequency:** To ensure a balanced learning model, the frequency of any given next word is capped at a maximum of 10.
+*   **Manual Learning:** You can manually train the suggestion model from a block of text. To do this, select the text in any app and long-press the 'd' key on the keyboard.
+*   **Tutorial:** A tutorial for this feature will appear in the suggestion strip when you double-press the spacebar.
+
 ## Theme Switching Key
 
 A new theme-switching key has been added to the bottom row of the keyboard to allow for quick and easy theme changes.

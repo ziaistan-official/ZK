@@ -86,6 +86,7 @@
     <item>sinhala_phonetic</item>
     <item>tamil_default</item>
     <item>urdu_phonetic_ur</item>
+    <item>urdu_ziaistani_ur</item>
     <item>custom</item>
   </string-array>
   <string-array name="pref_layout_entries">
@@ -173,6 +174,7 @@
     <item>සිංහල</item>
     <item>தமிழ்</item>
     <item>Urdu Phonetic</item>
+    <item>Urdu (Ziaistani)</item>
     <item>@string/pref_layout_e_custom</item>
   </string-array>
   <integer-array name="layout_ids">
@@ -260,6 +262,7 @@
     <item>@xml/sinhala_phonetic</item>
     <item>@xml/tamil_default</item>
     <item>@xml/urdu_phonetic_ur</item>
+    <item>@xml/urdu_ziaistani_ur</item>
     <item>-1</item>
   </integer-array>
 </resources>
