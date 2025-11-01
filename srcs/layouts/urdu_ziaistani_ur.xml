@@ -113,7 +113,7 @@
     <key width="1.37" c="پ" ne="پَ" nw="پِ" se="پٌ" sw="پّ"/>
   </row>
   <row>
-    <key width="1.37" c="ا" ne="اَ" nw="اِ" se="اٌ" sw="اّ"/>
+    <key width="1.37" c="ا" e="آ" ne="اَ" nw="اِ" se="اٌ" sw="اّ"/>
     <key width="1.37" c="س" ne="سَ" nw="سِ" se="سٌ" sw="سّ"/>
     <key width="1.37" c="ڈ" ne="ڈَ" nw="ڈِ" se="ڈٌ" sw="ڈّ"/>
     <key width="1.37" c="د" ne="دَ" nw="دِ" se="دٌ" sw="دّ"/>
