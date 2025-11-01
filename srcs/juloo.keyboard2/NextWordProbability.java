@@ -193,7 +193,7 @@ public class NextWordProbability {
         Collections.sort(sortedCounts, (o1, o2) -> o2.getValue().compareTo(o1.getValue()));
 
         List<String> suggestions = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : sortedCounts) {.
+        for (Map.Entry<Integer, Integer> entry : sortedCounts) {
             suggestions.add(idToWord.get(entry.getKey()));
         }
         return suggestions;
