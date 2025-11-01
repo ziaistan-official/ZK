@@ -95,18 +95,39 @@ public class NextWordProbability {
         if (previousWord == null || previousWord.isEmpty() || currentWord == null || currentWord.isEmpty()) {
             return;
         }
-        previousWord = previousWord.replaceAll("[^a-zA-Z]", "");
-        currentWord = currentWord.replaceAll("[^a-zA-Z]", "");
-        if (previousWord.isEmpty() || currentWord.isEmpty()) {
+
+        // Sanitize and combine words
+        String combined = (previousWord + " " + currentWord).toLowerCase();
+
+        // Replace all non-letter sequences with a single space to split words
+        String sanitized = combined.replaceAll("[^\\p{L}]+", " ");
+
+        String[] words = sanitized.trim().split("\\s+");
+
+        if (words.length < 2) {
             return;
         }
-        int prevId = getOrCreateId(previousWord);
-        int currentId = getOrCreateId(currentWord);
-        Map<Integer, Integer> counts = nextWordCounts.computeIfAbsent(prevId, k -> new HashMap<>());
-        int currentCount = counts.getOrDefault(currentId, 0);
-        if (currentCount < 10) {
-            counts.put(currentId, currentCount + 1);
+
+        // Iterate through the words and learn the pairs.
+        for (int i = 0; i < words.length - 1; i++) {
+            String word1 = words[i];
+            String word2 = words[i + 1];
+
+            if (word1.isEmpty() || word2.isEmpty()) {
+                continue;
+            }
+
+            // Now track the pair (word1, word2)
+            int prevId = getOrCreateId(word1);
+            int currentId = getOrCreateId(word2);
+            Map<Integer, Integer> counts = nextWordCounts.computeIfAbsent(prevId, k -> new HashMap<>());
+            int currentCount = counts.getOrDefault(currentId, 0);
+            if (currentCount < 10) {
+                counts.put(currentId, currentCount + 1);
+            }
         }
+
+        // Trigger the debounced save.
         saveProbabilities();
     }
 
