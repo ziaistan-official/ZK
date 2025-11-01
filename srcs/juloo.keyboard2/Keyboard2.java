@@ -443,6 +443,7 @@ public class Keyboard2 extends InputMethodService
   public void onFinishInputView(boolean finishingInput)
   {
     super.onFinishInputView(finishingInput);
+    _suggestionProvider.nextWordProbability.saveProbabilities();
     _tutorialHandler.removeCallbacks(_tutorialRunnable); // Stop timer on finish
     if (_suggestionStrip != null) {
       _suggestionStrip.setVisibility(View.GONE);
@@ -745,6 +746,9 @@ public class Keyboard2 extends InputMethodService
         case SET_THEME_EPAPER:
           setTheme("epaper");
           break;
+        case LEARN_FROM_TEXT:
+          _keyeventhandler.learnFromTextField();
+          break;
       }
     }
 
@@ -794,6 +798,11 @@ public class Keyboard2 extends InputMethodService
 
     public android.content.Context getContext() {
         return Keyboard2.this;
+    }
+
+    @Override
+    public void showTutorial(String tutorial) {
+        _keyboardView.showTutorial(tutorial);
     }
   }
 

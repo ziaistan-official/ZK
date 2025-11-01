@@ -95,13 +95,13 @@ Useful links.
     <key width="1.5" c="copy" nw="undo" ne="redo"/>
     <key width="1.5" c="capslock" nw="meta" ne="fn"/>
     <key width="1.9" c="shift" nw="ctrl" ne="alt" se="loc capslock" n="cursor_up" s="cursor_down" w="cursor_left" e="cursor_right"/>
-    <key width="2.5" c="backspace" nw="delete_word"/>
+    <key width="2.8" c="backspace" nw="delete_word"/>
   </row>
   
   <!-- English QWERTY Typing Area -->
   <row>
-    <key width="1.05" c="[" ne="{" />
-    <key width="1.05" c="]" ne="}" />
+    <key width="1.05" c="\t" n="TAB" />
+    <key width="1.05" c="\n" n="NEW" sw="LI" s="NE" />
     <key width="1.05" c="q" n="1" s="!" ne="Q" se="loc esc" />
     <key width="1.05" c="w" n="2" s="\@" ne="W" />
     <key width="1.05" c="e" n="3" s="\#" ne="E" />
