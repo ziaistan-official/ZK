@@ -2,6 +2,8 @@ package juloo.keyboard2;
 
 import android.content.Context;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,6 +27,8 @@ public class NextWordProbability {
     private final Map<Integer, String> idToWord = new HashMap<>();
     private final Map<Integer, Map<Integer, Integer>> nextWordCounts = new HashMap<>();
     private int nextId = 0;
+    private final Handler saveHandler = new Handler(Looper.getMainLooper());
+    private final Runnable saveRunnable = this::saveProbabilitiesInternal;
 
     public NextWordProbability(Context context) {
         File backupDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), EXTERNAL_DIR_NAME);
@@ -95,10 +99,12 @@ public class NextWordProbability {
         int currentId = getOrCreateId(currentWord);
         Map<Integer, Integer> counts = nextWordCounts.computeIfAbsent(prevId, k -> new HashMap<>());
         counts.put(currentId, counts.getOrDefault(currentId, 0) + 1);
+        saveProbabilities();
     }
 
     public void saveProbabilities() {
-        KeyboardExecutors.HIGH_PRIORITY_EXECUTOR.execute(this::saveProbabilitiesInternal);
+        saveHandler.removeCallbacks(saveRunnable);
+        saveHandler.postDelayed(saveRunnable, 2000);
     }
 
     public List<String> getNextWordSuggestions(String word) {

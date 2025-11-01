@@ -203,6 +203,10 @@ public final class KeyEventHandler
   public void paste_from_clipboard_pane(String content)
   {
     send_text(content);
+    String[] words = content.split("\\s+");
+    for (int i = 0; i < words.length - 1; i++) {
+        _suggestionProvider.trackWordSequence(words[i], words[i+1]);
+    }
   }
 
   /** Update [_mods] to be consistent with the [mods], sending key events if
@@ -984,7 +988,7 @@ public final class KeyEventHandler
       conn.endBatchEdit();
 
       _autocap.typed(" ");
-      _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
+      _recv.showSuggestions(_suggestionProvider.getNextWordSuggestions(suggestion));
 
       // Reset the correction state
       justAutoCorrected = false;
