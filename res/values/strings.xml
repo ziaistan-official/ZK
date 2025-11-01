@@ -168,4 +168,5 @@
     <string name="drag_handle_content_description">Drag to move suggestions strip</string>
     <string name="clipboard_back_to_keyboard">Back</string>
     <string name="close_clipboard">Close clipboard</string>
+    <string name="next_word_tutorial">Double space to get next word suggestions</string>
 </resources>

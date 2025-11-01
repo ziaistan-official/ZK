@@ -159,7 +159,7 @@ public final class Config
     longPressTimeout = _prefs.getInt("longpress_timeout", 600);
     longPressInterval = _prefs.getInt("longpress_interval", 65);
     keyrepeat_enabled = _prefs.getBoolean("keyrepeat_enabled", true);
-    margin_bottom = get_dip_pref_oriented(dm, "margin_bottom", 50, 3);
+    margin_bottom = get_dip_pref_oriented(dm, "margin_bottom", 0, 3);
     key_vertical_margin = get_dip_pref(dm, "key_vertical_margin", 1.5f) / 100;
     key_horizontal_margin = get_dip_pref(dm, "key_horizontal_margin", 2) / 100;
     // Label brightness is used as the alpha channel
@@ -334,17 +334,21 @@ public final class Config
     switch (saved_version)
     {
       case 0:
-        // Primary, secondary and custom layout options are merged into the new
-        // Layouts option. This also sets the default value.
-        List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
-        l.add(migrate_layout(prefs.getString("layout", "urdu_phonetic_ur")));
-        String snd_layout = prefs.getString("second_layout", "latn_qwerty_us");
-        if (snd_layout != null && !snd_layout.equals("none"))
-          l.add(migrate_layout(snd_layout));
-        String custom_layout = prefs.getString("custom_layout", "");
-        if (custom_layout != null && !custom_layout.equals(""))
-          l.add(LayoutsPreference.CustomLayout.parse(custom_layout));
-        LayoutsPreference.save_to_preferences(e, l);
+        // This migration is only for users of very old versions.
+        // For new users, the LayoutsPreference class will set the default value itself.
+        if (prefs.contains("layout")) {
+            // Primary, secondary and custom layout options are merged into the new
+            // Layouts option.
+            List<LayoutsPreference.Layout> l = new ArrayList<LayoutsPreference.Layout>();
+            l.add(migrate_layout(prefs.getString("layout", null)));
+            String snd_layout = prefs.getString("second_layout", null);
+            if (snd_layout != null && !snd_layout.equals("none"))
+              l.add(migrate_layout(snd_layout));
+            String custom_layout = prefs.getString("custom_layout", "");
+            if (custom_layout != null && !custom_layout.equals(""))
+              l.add(LayoutsPreference.CustomLayout.parse(custom_layout));
+            LayoutsPreference.save_to_preferences(e, l);
+        }
         // Fallthrough
       case 1:
         Object numberRowPref = prefs.getAll().get("number_row");
