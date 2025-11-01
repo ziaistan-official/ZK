@@ -53,6 +53,8 @@ public final class KeyEventHandler
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
+  private String previousWord = null;
+  private long lastSpaceTime = 0;
 
   public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider,
                          LayoutBasedAutoCorrectionProvider autoCorrectionProvider,
@@ -363,7 +365,13 @@ public final class KeyEventHandler
       return;
 
     if (" ".equals(text.toString())) {
-        handleAutoCorrectionOnSpace();
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpaceTime < 500) { // Double space detected
+            _recv.showTutorial(_suggestionProvider.getTutorial());
+        } else {
+            handleAutoCorrectionOnSpace();
+        }
+        lastSpaceTime = currentTime;
         return;
     }
 
@@ -527,11 +535,11 @@ public final class KeyEventHandler
   }
 
   private void handleAutoCorrectionOnSpace() {
-    InputConnection conn = _recv.getCurrentInputConnection();
-    if (conn == null) {
-        sendTextVerbatim(" ");
-        return;
-    }
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) {
+          sendTextVerbatim(" ");
+          return;
+      }
 
     CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
     if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
@@ -562,7 +570,12 @@ public final class KeyEventHandler
     }
 
     if (_suggestionProvider.isValidWord(lowerCaseWord)) {
+        if (previousWord != null) {
+            _suggestionProvider.trackWordSequence(previousWord, lowerCaseWord);
+        }
+        previousWord = lowerCaseWord;
         sendTextVerbatim(" ");
+        _recv.showSuggestions(_suggestionProvider.getNextWordSuggestions(lowerCaseWord));
         return;
     }
 
@@ -1009,6 +1022,7 @@ public final class KeyEventHandler
     public InputConnection getCurrentInputConnection();
     public Handler getHandler();
     public android.content.Context getContext();
+    void showTutorial(String tutorial);
   }
 
   class Autocapitalisation_callback implements Autocapitalisation.Callback
