@@ -385,7 +385,7 @@ public final class KeyEventHandler
         String originalText = selectedText.toString();
 
         if ("d".equals(textStr)) {
-            learnFromTextField();
+            addSelectedTextToDictionary();
             return;
         }
 
@@ -1042,7 +1042,7 @@ public final class KeyEventHandler
     }
   }
 
-  private void learnFromTextField() {
+  public void learnFromTextField() {
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
