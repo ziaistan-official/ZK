@@ -385,7 +385,7 @@ public final class KeyEventHandler
         String originalText = selectedText.toString();
 
         if ("d".equals(textStr)) {
-            addSelectedTextToDictionary();
+            learnFromTextField();
             return;
         }
 
