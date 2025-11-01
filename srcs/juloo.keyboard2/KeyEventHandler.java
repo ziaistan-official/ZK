@@ -53,6 +53,8 @@ public final class KeyEventHandler
   private String correctedWord = null;
   private boolean justAutoCorrected = false;
   private final java.util.Set<String> revertedWords = new java.util.HashSet<>();
+  private String previousWord = null;
+  private long lastSpaceTime = 0;
 
   public KeyEventHandler(IReceiver recv, SuggestionProvider suggestionProvider,
                          LayoutBasedAutoCorrectionProvider autoCorrectionProvider,
@@ -201,6 +203,10 @@ public final class KeyEventHandler
   public void paste_from_clipboard_pane(String content)
   {
     send_text(content);
+    String[] words = content.split("\\s+");
+    for (int i = 0; i < words.length - 1; i++) {
+        _suggestionProvider.trackWordSequence(words[i], words[i+1]);
+    }
   }
 
   /** Update [_mods] to be consistent with the [mods], sending key events if
@@ -363,7 +369,13 @@ public final class KeyEventHandler
       return;
 
     if (" ".equals(text.toString())) {
-        handleAutoCorrectionOnSpace();
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSpaceTime < 500) { // Double space detected
+            _recv.showTutorial(_suggestionProvider.getTutorial());
+        } else {
+            handleAutoCorrectionOnSpace();
+        }
+        lastSpaceTime = currentTime;
         return;
     }
 
@@ -377,7 +389,7 @@ public final class KeyEventHandler
         String originalText = selectedText.toString();
 
         if ("d".equals(textStr)) {
-            addSelectedTextToDictionary();
+            learnFromTextField();
             return;
         }
 
@@ -527,11 +539,11 @@ public final class KeyEventHandler
   }
 
   private void handleAutoCorrectionOnSpace() {
-    InputConnection conn = _recv.getCurrentInputConnection();
-    if (conn == null) {
-        sendTextVerbatim(" ");
-        return;
-    }
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) {
+          sendTextVerbatim(" ");
+          return;
+      }
 
     CharSequence textBeforeCursor = conn.getTextBeforeCursor(50, 0);
     if (textBeforeCursor == null || textBeforeCursor.length() == 0) {
@@ -562,7 +574,12 @@ public final class KeyEventHandler
     }
 
     if (_suggestionProvider.isValidWord(lowerCaseWord)) {
+        if (previousWord != null) {
+            _suggestionProvider.trackWordSequence(previousWord, lowerCaseWord);
+        }
+        previousWord = lowerCaseWord;
         sendTextVerbatim(" ");
+        _recv.showSuggestions(_suggestionProvider.getNextWordSuggestions(lowerCaseWord));
         return;
     }
 
@@ -912,7 +929,11 @@ public final class KeyEventHandler
       String prefix = textBeforeCursor.subSequence(i, textBeforeCursor.length()).toString();
 
       if (prefix.isEmpty() || (i > 0 && !Character.isWhitespace(textBeforeCursor.charAt(i - 1)) && textBeforeCursor.charAt(i - 1) != '\n')) {
-          _recv.showSuggestions(java.util.Collections.emptyList());
+          if (prefix.isEmpty()) {
+              // Don't clear suggestions if there's no prefix, as we might be showing next-word suggestions.
+          } else {
+              _recv.showSuggestions(java.util.Collections.emptyList());
+          }
       } else {
           // Show prefix-based completions as the user types.
           // Auto-correction is handled separately when the spacebar is pressed.
@@ -943,6 +964,11 @@ public final class KeyEventHandler
       InputConnection conn = _recv.getCurrentInputConnection();
       if (conn == null) return;
 
+      if (previousWord != null) {
+          _suggestionProvider.trackWordSequence(previousWord, suggestion);
+      }
+      previousWord = suggestion;
+
       conn.beginBatchEdit();
       if (justAutoCorrected && correctedWord != null) {
           // An auto-correction just happened. We need to replace the auto-corrected word.
@@ -966,7 +992,7 @@ public final class KeyEventHandler
       conn.endBatchEdit();
 
       _autocap.typed(" ");
-      _recv.showSuggestions(java.util.Collections.emptyList()); // Clear suggestions after selection
+      _recv.showSuggestions(_suggestionProvider.getNextWordSuggestions(suggestion));
 
       // Reset the correction state
       justAutoCorrected = false;
@@ -1009,6 +1035,7 @@ public final class KeyEventHandler
     public InputConnection getCurrentInputConnection();
     public Handler getHandler();
     public android.content.Context getContext();
+    void showTutorial(String tutorial);
   }
 
   class Autocapitalisation_callback implements Autocapitalisation.Callback
@@ -1021,6 +1048,21 @@ public final class KeyEventHandler
       else if (should_disable)
         _recv.set_shift_state(false, false);
     }
+  }
+
+  public void learnFromTextField() {
+      InputConnection conn = _recv.getCurrentInputConnection();
+      if (conn == null) return;
+
+      ExtractedText extractedText = conn.getExtractedText(new ExtractedTextRequest(), 0);
+      if (extractedText == null || extractedText.text == null) return;
+
+      String text = extractedText.text.toString();
+      String[] words = text.split("\\s+");
+      for (int i = 0; i < words.length - 1; i++) {
+          _suggestionProvider.trackWordSequence(words[i], words[i+1]);
+      }
+      Toast.makeText(_recv.getContext(), "Learned from text field.", Toast.LENGTH_SHORT).show();
   }
 
   private void addSelectedTextToDictionaryBatch() {

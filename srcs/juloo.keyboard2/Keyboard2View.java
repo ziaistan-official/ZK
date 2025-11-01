@@ -569,4 +569,8 @@ public class Keyboard2View extends View
     float label_size = main_label ? _mainLabelSize : _subLabelSize;
     return label_size * smaller_font;
   }
+
+  public void showTutorial(String message) {
+    android.widget.Toast.makeText(getContext(), message, android.widget.Toast.LENGTH_LONG).show();
+  }
 }

@@ -31,6 +31,7 @@ public final class KeyValue implements Comparable<KeyValue>
     SET_THEME_COBALT,
     SET_THEME_EPAPER,
     EXPORT_DATA,
+    LEARN_FROM_TEXT,
   }
 
   // Must be evaluated in the reverse order of their values.
